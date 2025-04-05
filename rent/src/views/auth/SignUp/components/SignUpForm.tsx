@@ -43,7 +43,7 @@ const SignUpForm = (props: SignUpFormProps) => {
     const random = (min: number, max: number) => { 
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
-    const num = random(1, 1000);
+    // const num = random(1, 1000);
     const {
         handleSubmit,
         formState: { errors },
@@ -51,10 +51,10 @@ const SignUpForm = (props: SignUpFormProps) => {
     } = useForm<SignUpFormSchema>({
         resolver: zodResolver(validationSchema),
         defaultValues: {
-            fullName: 'Marc Luc Ruben',
-            email: 'tb'+num+'@gmail.com',
-            password: 'lolo91',
-            confirmPassword: 'lolo91',
+            fullName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
         }
     })
 
