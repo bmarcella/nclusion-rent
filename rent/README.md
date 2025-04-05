@@ -1,6 +1,6 @@
 # NCluion - Rent app
 
-This app allow us to manage our bank
+This app allow us to manage our banks
 
 Key Features:
 
