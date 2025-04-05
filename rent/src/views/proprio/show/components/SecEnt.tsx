@@ -1,0 +1,140 @@
+import { Proprio } from '@/views/Entity';
+import  { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import Button from '@/components/ui/Button'
+import { Form, FormItem } from '@/components/ui/Form'
+import {  updateDoc } from 'firebase/firestore'
+import { getLandlordDoc } from '@/services/Landlord'
+import Alert from '@/components/ui/Alert'
+import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
+import Select from '@/components/ui/Select'
+import { USER_ROLES } from '@/constants/roles.constant'
+import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBank'
+import { Regions } from '@/views/Entity/Regions'
+import { useSessionUser } from '@/store/authStore'
+import { useTranslation } from '@/utils/hooks/useTranslation'
+
+
+interface Props {
+    onChange: (payload: any) => void;
+    lord: Proprio,
+}
+
+ 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Zod Schema
+export const RoleSchema = z.object({
+  type_person: z.enum(USER_ROLES),
+  regions : z.array(z.number().optional()),
+})
+type ProprioFormValues = z.infer<typeof RoleSchema>
+
+function SecEnt( { lord , onChange} : Props) {
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useTimeOutMessage()
+  const { userId } = useSessionUser((state) => state.user);
+  const { t } = useTranslation();
+   
+  const [alert, setAlert] = useState("success") as any;
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm<ProprioFormValues>({
+    resolver: zodResolver(RoleSchema),
+    defaultValues: {
+      type_person: lord.type_person,
+      regions: lord.regions,
+    },
+  })
+
+  const onSubmit = async (data: any) => {
+    setSubmitting(true)
+    console.log('Renovation Details:', data);
+    try {
+         data.updatedBy = userId;
+         const landlordRef = getLandlordDoc(lord.id);
+         await updateDoc(landlordRef, data);
+         onChange(data);
+         setAlert("success");
+         setMessage("Entity added successfully");
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        setMessage("Error adding landlord");
+        setAlert("danger")
+    }
+    setTimeout(() => setSubmitting(false), 1000) // simulate loading
+  }
+
+  const typeOptions = convertStringToSelectOptions([...USER_ROLES], t , 'roles');
+
+
+  return (
+    <>
+
+      <div className=" flex justify-center ">
+      <div className="w-full max-w-2xl mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
+      {message && (
+                <Alert showIcon className="mb-4" type={alert}>
+                    <span className="break-all">{message}</span>
+                </Alert>
+            )}
+           
+         
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormItem label={ t('roles.label')} invalid={!!errors.type_person} errorMessage={errors.type_person?.message}>
+                 <Controller name="type_person" control={control} render={({ field }) =>
+                     <Select placeholder="Please Select" options={typeOptions} 
+                      value={typeOptions.find(option => option.value === field.value) || null}
+                      onChange={(option) => field.onChange(option?.value)} /> 
+                 } 
+                 />
+               </FormItem>
+               <FormItem label="Région" invalid={!!errors.regions} errorMessage={errors.regions?.message}>
+                  <Controller
+                    name="regions"
+                    control={control}
+                    render={({ field }) => {
+                    const selectedOptions = Regions.filter(r => field.value?.includes(Number(r.value)));
+                      
+                      return (
+                        <Select
+                          isMulti
+                          placeholder="Please Select"
+                          options={Regions}
+                          value={selectedOptions}
+                          onChange={(option) => {
+                            const values = option.map((opt: any) => opt.value);
+                            field.onChange(values);
+                          }}
+                        />
+                      );
+                    }}
+                  />
+                </FormItem>
+            </div>
+                <div className="mt-6">
+                <Button  loading={isSubmitting} type="submit" variant="solid">
+                  {isSubmitting ? 'Sauvegarde encours...' :  'Modifier' }
+                </Button>
+                </div>
+          </Form>
+
+         
+
+
+
+     
+       
+
+  
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default SecEnt

@@ -1,0 +1,212 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import  { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+import Button from '@/components/ui/Button'
+import { Form, FormItem } from '@/components/ui/Form'
+import { Input } from '@/components/ui/Input'
+import Steps from '@/components/ui/Steps'
+import { addDoc, updateDoc } from 'firebase/firestore'
+import { Landlord } from '@/services/Landlord'
+import Alert from '@/components/ui/Alert'
+import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
+import Select from '@/components/ui/Select'
+import { USER_ROLES } from '@/constants/roles.constant'
+import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBank'
+import { Regions } from '@/views/Entity/Regions'
+import ImageLandlord from '@/views/bank/add/components/ImageLandlord'
+import { useSessionUser } from '@/store/authStore'
+import EndBank from '@/views/bank/add/components/EndBank'
+import { useTranslation } from '@/utils/hooks/useTranslation'
+import { HaitiCities } from '@/services/HaitiCities'
+
+// Zod Schema
+export const personSchema = z.object({
+  id: z.string().optional(),
+  fullName: z.string().min(1, 'Full name is required'),
+  nickName: z.string().optional(),
+  city: z.string().optional(),
+  companyName: z.string().optional(),
+  nif: z.string().min(1, 'NIF is required'),
+  cin: z.string().min(1, 'CIN is required'),
+  address: z.string().min(1, 'Address is required'),
+  phone: z.string().min(1, 'Phone is required'),
+  phone_b: z.string().optional(),
+  website: z.string().optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+  documents: z.array(z.any()).optional(),
+  type_person: z.enum(USER_ROLES),
+  regions : z.array(z.number().optional()),
+})
+
+type ProprioFormValues = z.infer<typeof personSchema>
+
+function AddProprioForm() {
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [step, setStep] = useState(0);
+  const [docRef, setDocRef] = useState() as any;
+  const [lord, setLord] = useState() as any;
+  const [message, setMessage] = useTimeOutMessage()
+   const { userId } = useSessionUser((state) => state.user);
+   const { t } = useTranslation();
+   
+  const [alert, setAlert] = useState("success") as any;
+  const {
+    handleSubmit,
+    formState: { errors },
+    reset,
+    control,
+  } = useForm<ProprioFormValues>({
+    resolver: zodResolver(personSchema),
+    defaultValues: {
+      id: '',
+      fullName: '',
+      nickName: '',
+      city: '',
+      companyName: '',
+      type_person: "proprietaire",
+      nif: '',
+      cin: '',
+      address: '',
+      phone: '',
+      phone_b: '',
+      regions: [],
+    },
+  })
+
+  const onSubmit = async (data: any) => {
+    setSubmitting(true)
+    try {
+        data.createBy = userId;
+        data.uploadedAt = new Date();
+        data.active = true;
+        data.createdAt = new Date();
+        const docRef = await addDoc(Landlord, data);
+        reset();
+        setStep(1);
+        await updateDoc(docRef, {id: docRef.id});
+        data.id = docRef.id;
+        setDocRef(docRef);
+        setLord(data);
+        console.log("Document written with ID: ", docRef.id);
+        setMessage("Landlord added successfully");
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        setMessage("Error adding landlord");
+        setAlert("danger")
+    }
+    setTimeout(() => setSubmitting(false), 1000) // simulate loading
+  }
+  const typeOptions = convertStringToSelectOptions([...USER_ROLES], t, "roles");
+  const cityOptions = convertStringToSelectOptions(HaitiCities);
+  return (
+    <>
+      <Steps current={step}>
+        <Steps.Item title="Ajouter entité" />
+      </Steps>
+
+      <div className="min-h-screen flex items-center justify-center  mt-6">
+      <div className="w-full max-w-2xl mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
+      {message && (
+                <Alert showIcon className="mb-4" type={alert}>
+                    <span className="break-all">{message}</span>
+                </Alert>
+            )}
+           
+            { step === 0 && (
+             <>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <FormItem label={ t('roles.label')} invalid={!!errors.type_person} errorMessage={errors.type_person?.message}>
+                 <Controller name="type_person" control={control} render={({ field }) =>
+                     <Select placeholder="Please Select" options={typeOptions}  value={typeOptions.find(option => option.value === field.value) || null}
+                      onChange={(option) => field.onChange(option?.value)} /> 
+                 } 
+                 />
+               </FormItem>
+                <FormItem label="Région" invalid={!!errors.regions} errorMessage={errors.regions?.message}>
+                              <Controller name="regions" control={control} render={({ field }) => 
+                                <Select isMulti placeholder="Please Select" 
+                                    options={Regions}    
+                                    onChange={(option) => { 
+                                      console.log("Selected options:", option.map((opt: any) => opt.value));
+                                      field.onChange(option.map((opt: any) => opt.value));
+                                    } } /> 
+                                } />
+                </FormItem>
+               
+                <FormItem label="Nom complet" invalid={!!errors.fullName} errorMessage={errors.fullName?.message}>
+                 <Controller name="fullName" control={control} render={({ field }) => <Input placeholder="Full Name" {...field} />} />
+                </FormItem>
+                <FormItem label="Nickname" invalid={!!errors.nickName} errorMessage={errors.nickName?.message}>
+                <Controller name="nickName" control={control} render={({ field }) => <Input placeholder="Nickname" {...field} />} />
+                </FormItem>
+                <FormItem label="Entreprise" invalid={!!errors.companyName} errorMessage={errors.companyName?.message}>
+                <Controller name="companyName" control={control} render={({ field }) => <Input placeholder="Company Name" {...field} />} />
+                </FormItem>
+                <FormItem label="NIF" invalid={!!errors.nif} errorMessage={errors.nif?.message}>
+                   <Controller name="nif" control={control} render={({ field }) => <Input placeholder="NIF" {...field} />} />
+                </FormItem>
+                <FormItem label="CIN" invalid={!!errors.cin} errorMessage={errors.cin?.message}>
+                  <Controller name="cin" control={control} render={({ field }) => <Input placeholder="CIN" {...field} />} />
+                </FormItem>
+                <FormItem label="Ville" invalid={!!errors.city} errorMessage={errors.city?.message}>
+                  <Controller name="city" control={control} render={({ field }) => 
+                    <Select placeholder="Please Select" options={cityOptions}  value={cityOptions.find(option => option.value === field.value) || null}
+                        onChange={(option) => field.onChange(option?.value)} /> 
+                    } />
+                </FormItem>
+                <FormItem label="Addresse" invalid={!!errors.address} errorMessage={errors.address?.message}>
+                  <Controller name="address" control={control} render={({ field }) => <Input placeholder="Address" {...field} />} />
+                </FormItem>
+                <FormItem label="Phone" invalid={!!errors.phone} errorMessage={errors.phone?.message}>
+                  <Controller name="phone" control={control} render={({ field }) => <Input placeholder="Phone" {...field} />} />
+                </FormItem>
+                <FormItem label="Phone (Backup)" invalid={!!errors.phone_b} errorMessage={errors.phone_b?.message}>
+                  <Controller name="phone_b" control={control} render={({ field }) => <Input placeholder="Backup Phone" {...field} />} />
+                </FormItem>
+        
+            </div>
+            <div className="mt-6">
+            <Button block loading={isSubmitting} type="submit" variant="solid">
+              {isSubmitting ? 'Sauvegarde encours...' :  'Suivant' }
+            </Button>
+            </div>
+          </Form>
+
+            </>
+          )}
+
+
+
+     
+        {step === 1 && (
+            <div className="text-gray-700 dark:text-white">
+             { lord && <ImageLandlord nextStep={ () => {
+                setStep(2);
+              }} lordId={lord.id}  isEdit={true} userId={userId || ""} /> }
+            </div>
+        )}
+
+       {step === 2 && (
+            <div className="text-gray-700 dark:text-white">
+             <EndBank message={t("entity.submitSuccess")} btnText="Nouvelle entité" onRestart={(): void => {
+                setStep(0);
+                setDocRef(null);
+                reset();
+                setLord(null);
+              } } ></EndBank>
+            </div>
+        )}
+
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default AddProprioForm

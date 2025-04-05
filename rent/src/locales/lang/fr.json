@@ -1,0 +1,234 @@
+{
+    "nav": {
+        "home": "Dashboard",
+        "bankMenu": {
+            "bankMenu": "Banks",
+            "add": "Ajouter",
+            "show": "Mes banks",
+            "current": "Encours",
+            "approved": "Approuvé",
+            "ready": "Terminé",
+            "rejected": "Rejeté",
+            "approved": "Approuvé"
+        },
+        "proprioMenu": {
+            "proprio": "Entités",
+            "add": "Ajouter",
+            "show": "Voir"
+        },
+        "configMenu": {
+            "configMenu": "Configuration",
+            "profil": "Profil",
+            "password": "Mot de passe"
+        }
+    },
+    "bank" : {
+      "bankName": "Nom de la banque",
+      "id_region": "Identifiant de la région",
+      "city": "Ville",
+      "addresse": "Adresse",
+      "yearCount": "Nombre d'années",
+      "date": "Date",
+      "rentCost": "Coût du loyer",
+      "reference": "Référence",
+      "landlord": "Propriétaire",
+      "isrefSameAsLandlord": "La référence est-elle le propriétaire",
+      "createdBy": "Créé par",
+      "createdAt": "Créé à",
+      "urgency": "Urgence",
+      "internetProviders": {
+          "label": "Fournisseurs d'accès à Internet",
+          "natcom": "natcom",
+          "digicel": "digicel",
+          "none": "aucun"
+        },
+        "verifyOwners": {
+          "label": "Vérifier les propriétaires",
+          "siblings": "Freres et soeurs",
+          "neighbors": "Voisins",
+          "parents": "Parents",
+          "reference": "Réference",
+          "tenant": "Locataire",
+          "current": "Actuel",
+          "other": "Autre"
+        },
+        "whoReferreds": {
+          "label": "Qui vous a référé",
+          "owner": "Le proprietaire",
+          "lotteryPlayers": "Joueurs de loterie dans la region",
+          "vendors": "Marchands",
+          "businesses": "entreprises",
+          "formerAgent": "Ancien agent qui ont vendu à l'emplacement",
+          "competitors": "Concurents",
+          "peopleNearby": "Les gens assis autour"
+        },
+        "finalDecisionStatuses": {
+          "label": "Statut de la décision finale",
+          "take": "prendre",
+          "doNotTake": "ne_pas_prendre",
+          "needMoreResearch": "besoin_de_plus_de_recherches"
+        },
+        "paymentMethods": {
+          "label": "Méthodes de paiement",
+          "check": "chèque",
+          "cash": "espèces"
+        },
+        "previousUses": {
+          "label": "Utilisations précédentes",
+          "shop": "Boutique",
+          "lottery": "Borlette",
+          "commercial": "Commercial",
+          "moncash": "Moncash",
+          "none": "Aucun"
+        },
+        "nonRenewalReasons": {
+          "label": "Raisons de non-renouvellement",
+          "badManagement": "Mauvaise gestion de l'agent",
+          "other": "Autre"
+        },
+        "lotteryCompetitions": {
+          "label": "Concours de loterie",
+          "2": "2",
+          "5": "5",
+          "10": "10",
+          "20Plus": "20 ou plus",
+          "mobileAgents": "Agents ambulants",
+          "none": "Aucun",
+          "other": "Autre"
+        },
+        "clientVisibilities": {
+          "label": "Visibilité du client",
+          "streetView": "Directement dans la rue",
+          "simpleEntrance": "Entrée simple",
+          "wallAdSpace": " Murs pour peindre la publicité",
+          "roofAdSpace": "Espace sur le toit pour peindre le logo"
+        },
+        "buildingStabilities": {
+          "label": "Stabilité du bâtiment",
+          "stable": "Stable",
+          "unstable": "Pas stable",
+          "sometimesStable": "Parfois stable"
+        },
+        "bankEntrances": {
+          "label": "Entrées de banque",
+          "main": "Entrée principale",
+          "secondary": "Entrée de secours",
+          "none": "Pas d'entrée"
+        },
+        "populationInAreas": {
+          "label": "Population dans les zones",
+          "lessThan5k": "Moins de 5000",
+          "5k": "5000",
+          "7k": "7000",
+          "10k": "10,000",
+          "20k": "20,000",
+          "50k": "50,000",
+          "more": "Plus"
+
+        },
+        "expectedRevenue": {
+          "label": "Revenu attendu",
+          "lessThan5k": "Moins de 5000HTG",
+          "5k": "5000 HTG",
+          "7k": "7000 HTG",
+          "10k": "10000 HTG",
+          "20k": "20000 HTG",
+          "50kPlus": "50000 HTG ou plus"
+        },
+        "openHours": {
+          "label": "Heures d'ouverture",
+          "4am": "4h du matin",
+          "5am": "5h du matin",
+          "7am": "7h",
+          "8am": "8h",
+          "9amOrLater": "9h ou plus tard"
+        },
+        "closeHours": {
+          "label": "Heures de fermeture",
+          "4pm": "16h",
+          "5pm": "17h",
+          "6pm": "18h",
+          "8pmOrLater": "20h ou plus tard"
+        },
+        "currentSecurities": {
+          "label": "Sécurités actuelles",
+          "padlock": "Cadenas",
+          "concreteRoof": "Toiture en beton",
+          "metalWindow": "Fenêtre métallique/barrée",
+          "metalDoor": "Porte métallique/barrée"
+        },
+        "majorRenovations": {
+          "label": "Rénovations majeures",
+          "newMetalRoof": "Nouveau toit en tôle",
+          "newConcreteRoof": "Nouveau toit en béton",
+          "structural": "Modification structurelle",
+          "division": "Division de la  pièce",
+          "other": "Autre"
+        },
+        "minorRenovations": {
+          "label": "Rénovations mineures",
+          "padlock": "Cadenas",
+          "newDoor": "Nouvelle porte",
+          "doorRepair": "Réparation des Portes",
+          "windowRepair": "Réparation fenêtre",
+          "wallAdSpace": "Murs pour peindre la publicité",
+          "roofAdSpace": "Espace sur le toit pour peindre le logo",
+          "other": "Autre"
+        },
+        "paymentStructures": {
+          "label": "Structures de paiement",
+          "full": "total",
+          "advance": "avance",
+          "secondYear": "Deuxième Année",
+          "other": "autre"
+        },
+        "locationTypes": {
+          "label": "Types d'emplacement",
+          "lease": "bail",
+          "sublease": "sous_location",
+          "subleaseRealOwner": "sous_location_propriétaire_réel",
+          "subleaseCurrentOwner": "sous_location_propriétaire_actuel"
+        },
+        "locationAreas": {
+          "residential": "résidentiel",
+          "market": "marché",
+          "remote": "isolé",
+          "transport": "transport",
+          "other": "autre"
+        },
+        "areaStabilities": {
+          "yes": "oui",
+          "no": "non",
+          "sometimes": "parfois",
+          "crime": "criminalité",
+          "other": "autre"
+        },
+        "bankSteps": {
+          "rejected": "REJECTED",
+          "needApproval": "NEED_APPROVAL",
+          "needAprobation": "NEED_APROBATION",
+          "needContract": "NEED_CONTRACT",
+          "needRenovation": "NEED_RENEVATION",
+          "readyToUse": "READY_TO_USE",
+          "pending": "READY_TO_USE"
+        }
+    },
+    "entity": {
+      "submitSuccess": "L'entité a été soumise avec succès."
+    },
+    "roles": {
+      "label": "Rôle",
+      "vendeur": "Vendeur",
+      "proprietaire": "Propriétaire",
+      "reference": "Référence",
+      "agent_immobilier": "Agent immobilier",
+      "coordonator": "Coordinateur",
+      "assist_coordonator": "Assistant coordinateur",
+      "manager": "Manager",
+      "assist_manager": "Assistant manager",
+      "operation": "Opérations",
+      "admin": "Administrateur",
+      "fields_ops": "Opérations terrain"
+    }
+      
+}
