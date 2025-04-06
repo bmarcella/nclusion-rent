@@ -7,13 +7,17 @@ import EntEditForm from './EntEditForm';
 import ImageLandlord from '@/views/bank/add/components/ImageLandlord';
 import SecEnt from './SecEnt';
 import UserEnt from './UserEnt';
+import { useSessionUser } from '@/store/authStore';
 
 interface Props {
     onChange: (payload: any) => void;
     userId?: string,
-    lord: Proprio
+    lord: Proprio, 
+    isUser? : string,
 }
-function EditEntity( { onChange , lord, userId } : Props) {
+function EditEntity( { onChange , lord, userId, isUser = undefined } : Props) {
+  const {  authority } = useSessionUser((state) => state.user);
+   const isAdmin = authority && authority[0] == "admin" ;
   return (
     <div>
           <Tabs defaultValue="tab1">
@@ -21,7 +25,7 @@ function EditEntity( { onChange , lord, userId } : Props) {
                     <TabNav value="tab1">Informations générales</TabNav>
                     <TabNav value="tab2">Roles & Regions</TabNav>
                     <TabNav value="tab3">Documents</TabNav>
-                    <TabNav value="tab4">Securité & Utilisateurs</TabNav>
+                    { isAdmin && <TabNav value="tab4">Securité & Utilisateurs</TabNav> }
                 </TabList>
                 <div className="p-4">
                     <TabContent value="tab1">
@@ -39,9 +43,9 @@ function EditEntity( { onChange , lord, userId } : Props) {
                         </div>
       
                     </TabContent>
-                    <TabContent value="tab4">
+                    { isAdmin &&  <TabContent value="tab4">
                         <UserEnt lord={lord} onChange={onChange}></UserEnt>
-                    </TabContent>
+                    </TabContent> }
                 
                 </div>
             </Tabs>

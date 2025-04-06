@@ -7,13 +7,14 @@ import React, { useEffect, useState } from "react";
 
 
 interface ImageGalleryProps {
-  userId: string;
+  userId: string,
+  keyName? : string
 }
 
-const UserName: React.FC<ImageGalleryProps> = ({ userId }) => {
+const UserName: React.FC<ImageGalleryProps> = ({ userId, keyName = "id_user" }) => {
 const [lord, setLord] = useState() as any;
      const getLandlordByUserId = async (userId: string) => {
-        const q = query(LandlordDoc, where('id_user', '==', userId));
+        const q = query(LandlordDoc, where(keyName, '==', userId));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
           const doc = querySnapshot.docs[0];

@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import  { useState } from 'react'
+import  { use, useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,9 +14,9 @@ import { Landlord } from '@/services/Landlord'
 import Alert from '@/components/ui/Alert'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import Select from '@/components/ui/Select'
-import { USER_ROLES } from '@/constants/roles.constant'
+import { getRolesByAhth, manageAuth, USER_ROLES } from '@/constants/roles.constant'
 import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBank'
-import { Regions } from '@/views/Entity/Regions'
+import { getRegionsByValues, Regions } from '@/views/Entity/Regions'
 import ImageLandlord from '@/views/bank/add/components/ImageLandlord'
 import { useSessionUser } from '@/store/authStore'
 import EndBank from '@/views/bank/add/components/EndBank'
@@ -48,17 +48,20 @@ type ProprioFormValues = z.infer<typeof personSchema>
 function AddProprioForm() {
   const [isSubmitting, setSubmitting] = useState(false);
   const [step, setStep] = useState(0);
-  const [docRef, setDocRef] = useState() as any;
+  const [ docRef, setDocRef] = useState() as any;
   const [lord, setLord] = useState() as any;
   const [message, setMessage] = useTimeOutMessage()
-   const { userId } = useSessionUser((state) => state.user);
-   const { t } = useTranslation();
-   
+  const { userId, authority, proprio } = useSessionUser((state) => state.user);
+  const { t } = useTranslation();
+  const [ regions, setRegions] = useState([]) as any;
+  const [hideReg, setHideReg] = useState(false);
   const [alert, setAlert] = useState("success") as any;
+  const [ typeOptions, setTypeOptions] = useState([]) as any;
   const {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
     control,
   } = useForm<ProprioFormValues>({
     resolver: zodResolver(personSchema),
@@ -77,6 +80,23 @@ function AddProprioForm() {
       regions: [],
     },
   })
+
+ 
+
+  useEffect(() => {
+    if (!authority || authority.length === 0) return;
+    const auth = authority[0];
+    const manage = async () => {
+     const { regions , roles } = await manageAuth(auth, proprio, t);
+     setRegions(regions); // setRegions first
+     if (regions.length === 1) {
+       setValue("regions", [regions[0].value]); // safe to call here
+       setHideReg(true);
+     }
+     setTypeOptions(roles);
+    };
+    manage();
+  }, [authority]);
 
   const onSubmit = async (data: any) => {
     setSubmitting(true)
@@ -101,7 +121,6 @@ function AddProprioForm() {
     }
     setTimeout(() => setSubmitting(false), 1000) // simulate loading
   }
-  const typeOptions = convertStringToSelectOptions([...USER_ROLES], t, "roles");
   const cityOptions = convertStringToSelectOptions(HaitiCities);
   return (
     <>
@@ -121,23 +140,23 @@ function AddProprioForm() {
              <>
           <Form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <FormItem label={ t('roles.label')} invalid={!!errors.type_person} errorMessage={errors.type_person?.message}>
+              { typeOptions.length>0 && <FormItem label={ t('roles.label')} invalid={!!errors.type_person} errorMessage={errors.type_person?.message}>
                  <Controller name="type_person" control={control} render={({ field }) =>
                      <Select placeholder="Please Select" options={typeOptions}  value={typeOptions.find(option => option.value === field.value) || null}
                       onChange={(option) => field.onChange(option?.value)} /> 
                  } 
                  />
-               </FormItem>
-                <FormItem label="Région" invalid={!!errors.regions} errorMessage={errors.regions?.message}>
+               </FormItem> }
+                { !hideReg && <FormItem label="Région" invalid={!!errors.regions} errorMessage={errors.regions?.message}>
                               <Controller name="regions" control={control} render={({ field }) => 
                                 <Select isMulti placeholder="Please Select" 
-                                    options={Regions}    
+                                    options={regions}    
                                     onChange={(option) => { 
                                       console.log("Selected options:", option.map((opt: any) => opt.value));
                                       field.onChange(option.map((opt: any) => opt.value));
                                     } } /> 
                                 } />
-                </FormItem>
+                </FormItem> }
                
                 <FormItem label="Nom complet" invalid={!!errors.fullName} errorMessage={errors.fullName?.message}>
                  <Controller name="fullName" control={control} render={({ field }) => <Input placeholder="Full Name" {...field} />} />

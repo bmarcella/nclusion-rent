@@ -14,7 +14,7 @@ import { Landlord, LandlordDoc } from './Landlord'
 import { addDoc, CollectionReference, getDocs, query, updateDoc, where } from 'firebase/firestore'
 import { USER_ROLE } from '@/constants/roles.constant'
 import { Proprio } from '@/views/Entity'
-import { getApp } from 'firebase/app'
+import { FirebaseError, getApp } from 'firebase/app'
 import { getFunctions, httpsCallable } from 'firebase/functions';
 
 
@@ -71,8 +71,8 @@ export async function apiSignIn(data: SignInCredential) {
         const user = resp.user;
         const token = await resp.user.getIdToken();
         const proprio = await getProprioById(user.uid);
-        if (!proprio)  throw new Error('No entity for this User');
-        if (!proprio.active)  throw new Error('User is not active');
+        if (!proprio)  throw new Error('Votre compte n\'est pas actif, veuillez contacter l\'administrateur');
+        if (!proprio.active)  throw new Error('Votre compte n\'est pas actif, veuillez contacter l\'administrateur');
         const customUser: User = {
             userId: resp.user.uid,
             avatar: user.photoURL,
@@ -87,8 +87,9 @@ export async function apiSignIn(data: SignInCredential) {
             token,
             user: customUser,
         };
-    } catch (error) {
-        throw new Error('Sign in failed:' + error);
+    } catch (error: any) {
+        console.error( error);
+        throw new Error("Email ou mot de passe incorrect");
     }
 }
 

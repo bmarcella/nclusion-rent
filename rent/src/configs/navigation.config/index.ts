@@ -107,6 +107,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'proprioMenu.myEntity',
+                path: '/proprio/myEntity',
+                title: 'Mes Entités',
+                translateKey: 'nav.proprioMenu.myEntity',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
                 key: 'proprioMenu.show',
                 path: '/proprio/show',
                 title: 'Entité',

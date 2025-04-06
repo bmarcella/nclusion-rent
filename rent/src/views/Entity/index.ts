@@ -328,15 +328,15 @@ export interface Comments {
 
 export const getEmptyPartialBank = () : any => {
   return {
-    bankName: 'Test Bank',
-    id_region: undefined,
+    bankName: '',
+    id_region: '',
     city: '',
-    addresse: 'deye monn nan ',
+    addresse: ' ',
     yearCount: 1,
     date: new Date().toDateString(),
     rentCost: 12000,
-    reference: "Jean Baptiste",
-    landlord: undefined,
+    reference: '',
+    landlord: '',
     isrefSameAsLandlord: false,
     urgency: false,
   };

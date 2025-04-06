@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
+import useTranslation from '@/utils/hooks/useTranslation';
 
 const schema = z.object({
   internetService: z.array(z.enum(internetProviders)),
@@ -38,7 +39,7 @@ interface FormProps {
 
 function DemoDetails({ nextStep, defaultValues, isEdit= false }: FormProps) {
   const [isSubmitting, setSubmitting] = useState(false);
-
+  const { t } = useTranslation();
   const {
     control,
     reset,
@@ -83,162 +84,165 @@ function DemoDetails({ nextStep, defaultValues, isEdit= false }: FormProps) {
 
   return (
     <div className="w-full max-w-4xl bg-gray-50 dark:bg-gray-700 rounded p-6 shadow">
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <FormItem label="Service Internet" invalid={!!errors.internetService} errorMessage={errors.internetService?.message}>
-            <Controller
-              name="internetService"
-              control={control}
-              render={({ field }) => (
-                <Checkbox.Group vertical value={field.value ?? [] }  onChange={(value) => field.onChange(value)} >
-                  {internetProviders.map((obj, key) => (
-                    <Checkbox key={key} value={obj}>
-                      {obj}
-                    </Checkbox>
-                  ))}
-                </Checkbox.Group>
-              )}
-            />
-          </FormItem>
-
-          <FormItem label="Utilisation précédente" invalid={!!errors.previousUse} errorMessage={errors.previousUse?.message}>
-            <Controller
-              name="previousUse"
-              control={control}
-              render={({ field }) => (
-                <Checkbox.Group vertical value={field.value} onChange={(value) => field.onChange(value)}  >
-                  {previousUses.map((obj, key) => (
-                    <Checkbox key={key} value={obj}>
-                      {obj}
-                    </Checkbox>
-                  ))}
-                </Checkbox.Group>
-              )}
-            />
-          </FormItem>
-
-          <FormItem label="Raisons de non-renouvellement" invalid={!!errors.nonRenewalReason} errorMessage={errors.nonRenewalReason?.message}>
-            <Controller
-              name="nonRenewalReason"
-              control={control}
-              render={({ field }) => (
-                <Radio.Group vertical value={field.value ?? undefined} onChange={(value) => field.onChange(value)}  >
-                  {nonRenewalReasons.map((obj, key) => (
-                    <Radio key={key} value={obj}>
-                      {obj}
-                    </Radio>
-                  ))}
-                </Radio.Group>
-              )}
-            />
-          </FormItem>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
-          <FormItem label="Concurrence (Loterie)" invalid={!!errors.lotteryCompetition} errorMessage={errors.lotteryCompetition?.message}>
-            <Controller
-              name="lotteryCompetition"
-              control={control}
-              render={({ field }) => (
-                <Radio.Group vertical  value={field.value} onChange={(value) => field.onChange(value)}  >
-                  {lotteryCompetitions.map((obj, key) => (
-                    <Radio key={key} value={obj}>
-                      {obj}
-                    </Radio>
-                  ))}
-                </Radio.Group>
-              )}
-            />
-          </FormItem>
-
-          <FormItem label="Visibilité du client" invalid={!!errors.clientVisibility} errorMessage={errors.clientVisibility?.message}>
-            <Controller
-              name="clientVisibility"
-              control={control}
-              render={({ field }) => (
-                <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}  >
-                  {clientVisibilities.map((obj, key) => (
-                    <Checkbox key={key} value={obj}>
-                      {obj}
-                    </Checkbox>
-                  ))}
-                </Checkbox.Group>
-              )}
-            />
-          </FormItem>
-          <FormItem label="Entrée à la banque" invalid={!!errors.bankEntrance} errorMessage={errors.bankEntrance?.message}>
-            <Controller
-              name="bankEntrance"
-              control={control}
-              render={({ field }) => (
-                <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
-                  {bankEntrances.map((obj, key) => (
-                    <Checkbox key={key} value={obj}>
-                      {obj}
-                    </Checkbox>
-                  ))}
-                </Checkbox.Group>
-              )}
-            />
-          </FormItem>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
-          <FormItem label="Population dans la zone" invalid={!!errors.populationInArea} errorMessage={errors.populationInArea?.message}>
-            <Controller
-              name="populationInArea"
-              control={control}
-              render={({ field }) => (
-                <Radio.Group vertical value={field.value || undefined} onChange={(value) => field.onChange(value)}  >
+    <Form onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+        <FormItem label={t('bank.internetProviders.label')} invalid={!!errors.internetService} errorMessage={errors.internetService?.message}>
+          <Controller
+            name="internetService"
+            control={control}
+            render={({ field }) => (
+              <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
+                {internetProviders.map((obj, key) => (
+                  <Checkbox key={key} value={obj}>
+                    {t(`bank.${obj}`)}
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
+            )}
+          />
+        </FormItem>
+  
+        <FormItem label={t('bank.previousUses.label')} invalid={!!errors.previousUse} errorMessage={errors.previousUse?.message}>
+          <Controller
+            name="previousUse"
+            control={control}
+            render={({ field }) => (
+              <Checkbox.Group vertical value={field.value} onChange={(value) => field.onChange(value)}>
+                {previousUses.map((obj, key) => (
+                  <Checkbox key={key} value={obj}>
+                    {t(`bank.${obj}`)}
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
+            )}
+          />
+        </FormItem>
+  
+        <FormItem label={t('bank.nonRenewalReasons.label')} invalid={!!errors.nonRenewalReason} errorMessage={errors.nonRenewalReason?.message}>
+          <Controller
+            name="nonRenewalReason"
+            control={control}
+            render={({ field }) => (
+              <Radio.Group vertical value={field.value ?? undefined} onChange={(value) => field.onChange(value)}>
+                {nonRenewalReasons.map((obj, key) => (
+                  <Radio key={key} value={obj}>
+                    {t(`bank.${obj}`)}
+                  </Radio>
+                ))}
+              </Radio.Group>
+            )}
+          />
+        </FormItem>
+      </div>
+  
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
+        <FormItem label={t('bank.lotteryCompetitions.label')} invalid={!!errors.lotteryCompetition} errorMessage={errors.lotteryCompetition?.message}>
+          <Controller
+            name="lotteryCompetition"
+            control={control}
+            render={({ field }) => (
+              <Radio.Group vertical value={field.value} onChange={(value) => field.onChange(value)}>
+                {lotteryCompetitions.map((obj, key) => (
+                  <Radio key={key} value={obj}>
+                    {t(`bank.${obj}`)}
+                  </Radio>
+                ))}
+              </Radio.Group>
+            )}
+          />
+        </FormItem>
+  
+        <FormItem label={t('bank.clientVisibilities.label')} invalid={!!errors.clientVisibility} errorMessage={errors.clientVisibility?.message}>
+          <Controller
+            name="clientVisibility"
+            control={control}
+            render={({ field }) => (
+              <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
+                {clientVisibilities.map((obj, key) => (
+                  <Checkbox key={key} value={obj}>
+                    {t(`bank.${obj}`)}
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
+            )}
+          />
+        </FormItem>
+  
+        <FormItem label={t('bank.bankEntrances.label')} invalid={!!errors.bankEntrance} errorMessage={errors.bankEntrance?.message}>
+          <Controller
+            name="bankEntrance"
+            control={control}
+            render={({ field }) => (
+              <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
+                {bankEntrances.map((obj, key) => (
+                  <Checkbox key={key} value={obj}>
+                    {t(`bank.${obj}`)}
+                  </Checkbox>
+                ))}
+              </Checkbox.Group>
+            )}
+          />
+        </FormItem>
+      </div>
+  
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
+        <FormItem label={t('bank.populationInAreas.label')} invalid={!!errors.populationInArea} errorMessage={errors.populationInArea?.message}>
+          <Controller
+            name="populationInArea"
+            control={control}
+            render={({ field }) => (
+              <Radio.Group vertical value={field.value || undefined} onChange={(value) => field.onChange(value)}>
                 {populationInAreas.map((obj, key) => (
                   <Radio key={key} value={obj}>
-                    {obj}
+                    {t(`bank.${obj}`)}
                   </Radio>
                 ))}
               </Radio.Group>
-              )}
-            />
-          </FormItem>
-          <FormItem label="Revenue attendu" invalid={!!errors.expectedRevenue} errorMessage={errors.expectedRevenue?.message}>
-            <Controller
-              name="expectedRevenue"
-              control={control}
-              render={({ field }) => (
-                <Radio.Group vertical value={field.value || undefined} onChange={(value) => field.onChange(value)}  >
+            )}
+          />
+        </FormItem>
+  
+        <FormItem label={t('bank.expectedRevenue.label')} invalid={!!errors.expectedRevenue} errorMessage={errors.expectedRevenue?.message}>
+          <Controller
+            name="expectedRevenue"
+            control={control}
+            render={({ field }) => (
+              <Radio.Group vertical value={field.value || undefined} onChange={(value) => field.onChange(value)}>
                 {expectedRevenue.map((obj, key) => (
                   <Radio key={key} value={obj}>
-                    {obj}
+                    {t(`bank.${obj}`)}
                   </Radio>
                 ))}
               </Radio.Group>
-              )}
-            />
-          </FormItem>
-
-          <FormItem label="Stabilité du bâtiment" invalid={!!errors.buildingStability} errorMessage={errors.buildingStability?.message}>
-            <Controller
-              name="buildingStability"
-              control={control}
-              render={({ field }) => (
-                <Radio.Group vertical value={field.value || undefined} onChange={(value) => field.onChange(value)}>
-                  {buildingStabilities.map((obj, key) => (
-                    <Radio key={key} value={obj}>
-                      {obj}
-                    </Radio>
-                  ))}
-                </Radio.Group>
-              )}
-            />
-          </FormItem>
-        </div>
-
-        <div className="mt-6">
-          <Button type="submit" variant="solid" loading={isSubmitting}>
-             { isEdit? "Modifier" : 'Suivant' }
-          </Button>
-        </div>
-      </Form>
-    </div>
+            )}
+          />
+        </FormItem>
+  
+        <FormItem label={t('bank.buildingStabilities.label')} invalid={!!errors.buildingStability} errorMessage={errors.buildingStability?.message}>
+          <Controller
+            name="buildingStability"
+            control={control}
+            render={({ field }) => (
+              <Radio.Group vertical value={field.value || undefined} onChange={(value) => field.onChange(value)}>
+                {buildingStabilities.map((obj, key) => (
+                  <Radio key={key} value={obj}>
+                    {t(`bank.${obj}`)}
+                  </Radio>
+                ))}
+              </Radio.Group>
+            )}
+          />
+        </FormItem>
+      </div>
+  
+      <div className="mt-6">
+        <Button type="submit" variant="solid" loading={isSubmitting}>
+          {isEdit ? t('common.update') : t('common.next')}
+        </Button>
+      </div>
+    </Form>
+  </div>
+  
   );
 }
 

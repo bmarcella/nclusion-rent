@@ -48,6 +48,12 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/proprio/show')),
         authority: [],
     },
+    {
+        key: 'proprioMenu.myEntity',
+        path: '/proprio/myEntity',
+        component: lazy(() => import('@/views/proprio/show/MyProprio')),
+        authority: [],
+    },
 
     ...othersRoute,
 ]

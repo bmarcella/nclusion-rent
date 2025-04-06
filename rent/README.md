@@ -1,6 +1,6 @@
 # NCluion - Rent app
 
-This app allow us to manage our banks
+This app allow us to manage our banks.
 
 Key Features:
 
@@ -11,4 +11,4 @@ Key Features:
 
 ### Demo
 
-Check out the [Live Demo](https://xxx.net/) to explore the app in action.
+Check out the [Live Demo](https://www. =.net/) to explore the app in action.
