@@ -246,4 +246,9 @@ export type RegionType = {
   export const getRegionsByValues = (values: number[]): RegionType[] => {
     return Regions.filter((region: RegionType)  => values.includes(Number(region.value)));
   };
+  export const getRegionIds = (): number[] => {
+    return Regions.map(region => region.id);
+  };
+
+
   

@@ -20,7 +20,7 @@ const BankInfo: React.FC<BankInfoProps> = ({ bank }) => {
         <div>
           <p><strong>{t("bank.city")}: </strong>{bank.city}</p>
           <p><strong>{t("bank.addresse")}: </strong>{bank.addresse}</p>
-          <p><strong>{t("bank.landlord")}: </strong><UserName userId={bank.landlord} keyName="id"/> {bank.landlord} </p>
+          <p><strong>{t("bank.landlord")}: </strong><UserName userId={bank.landlord} keyName="id"/>  </p>
           <p><strong>{t("bank.reference")}: </strong>{bank.reference || t("none")}</p>
         </div>
 

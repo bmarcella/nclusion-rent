@@ -14,9 +14,8 @@ import { Landlord } from '@/services/Landlord'
 import Alert from '@/components/ui/Alert'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import Select from '@/components/ui/Select'
-import { getRolesByAhth, manageAuth, USER_ROLES } from '@/constants/roles.constant'
+import { manageAuth, USER_ROLES } from '@/constants/roles.constant'
 import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBank'
-import { getRegionsByValues, Regions } from '@/views/Entity/Regions'
 import ImageLandlord from '@/views/bank/add/components/ImageLandlord'
 import { useSessionUser } from '@/store/authStore'
 import EndBank from '@/views/bank/add/components/EndBank'
@@ -51,7 +50,7 @@ function AddProprioForm() {
   const [ docRef, setDocRef] = useState() as any;
   const [lord, setLord] = useState() as any;
   const [message, setMessage] = useTimeOutMessage()
-  const { userId, authority, proprio } = useSessionUser((state) => state.user);
+
   const { t } = useTranslation();
   
   
@@ -59,6 +58,7 @@ function AddProprioForm() {
   const [ typeOptions, setTypeOptions] = useState([]) as any;
   const [ regions, setRegions] = useState([]) as any;
   const [hideReg, setHideReg] = useState(false);
+  const { userId, authority, proprio } = useSessionUser((state) => state.user);
   const {
     handleSubmit,
     formState: { errors },

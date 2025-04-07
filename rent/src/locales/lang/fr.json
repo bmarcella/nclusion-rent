@@ -2,10 +2,10 @@
     "nav": {
         "home": "Dashboard",
         "bankMenu": {
-            "bankMenu": "Banks",
+            "bankMenu": "Gestion Bank",
             "add": "Ajouter",
             "show": "Mes banks",
-            "current": "Validation",
+            "current": "Banks",
             "approved": "Approbation",
             "ready": "Disponible",
             "rejected": "Rejetées",
@@ -223,6 +223,7 @@
           "needApproval": "Besoins de validations",
           "needApprobation": "Besoins d'approbations",
           "needContract": "Besoins de contrat",
+          "notProceeded": "Non traité",
           "needRenovation": "Besoins de rénovations",
           "readyToUse": "Prêt à ouvert",
           "pending": "En consideration"
@@ -276,7 +277,7 @@
       "thankyou": "Merci"
      },
      "upload": {
-    "maxSize": "Taille maximale : 2 Mo",
+    "maxSize": "Taille maximale : 15 Mo",
     "dropHere": "Déposez votre image ici, ou",
     "browse": "parcourir",
     "supportedFormats": "Formats supportés : jpeg, png, gif"
