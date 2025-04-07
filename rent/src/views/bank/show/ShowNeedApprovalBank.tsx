@@ -11,51 +11,59 @@ export const ShowNeedApprovalBankBase= () => {
   const bankSteps = [
     {
       key: "bankSteps.needApproval",
-      label: "Besoin de validations",
+      label: "Validation",
       title: "Validation requise",
-      description: "La banque nécessite une validation avant de passer à l'étape suivante."
+      description: "La banque nécessite une validation avant de passer à l'étape suivante.",
+      authority : []
     },
     {
       key: "bankSteps.needApprobation",
-      label: "Besoin d'approbations",
+      label: "Approbation",
       title: "Approbation requise",
-      description: "La banque attend une approbation officielle."
+      description: "La banque attend une approbation officielle.",
+      authority : []
     },
     {
       key: "bankSteps.needContract",
-      label: "Besoin de contrat",
+      label: "Contrat",
       title: "Contrat requis",
-      description: "La banque a besoin de signer un contrat pour continuer le processus."
+      description: "La banque a besoin de signer un contrat pour continuer le processus.",
+      authority : []
     },
     {
       key: "bankSteps.needRenovation",
-      label: "Besoin de rénovation",
+      label: "Rénovation",
       title: "Rénovation requise",
-      description: "La banque nécessite des rénovations avant d’être opérationnelle."
+      description: "La banque nécessite des rénovations avant d’être opérationnelle.",
+      authority : []
     },
     {
       key: "bankSteps.readyToUse",
-      label: "Prêt à l'emploi",
+      label: "Disponible",
       title: "Banque prête",
-      description: "La banque est prête à être utilisée."
+      description: "La banque est prête à être utilisée.",
+
     },
     {
       key: "bankSteps.rejected",
       label: "Rejeté",
       title: "Banque rejetée",
-      description: "La banque a été rejetée et nécessite une approbation."
+      description: "La banque a été rejetée et nécessite une approbation.",
+      authority : []
     },
     {
       key: "bankSteps.pending",
-      label: "En attente",
+      label: "Considération",
       title: "Banque en attente",
-      description: "La banque est en attente d'approbation."
+      description: "La banque est en attente d'approbation.",
+      authority : []
     },
     {
       key: "bankSteps.notProceeded",
       label: "Non traité",
       title: "Banque non traitée",
-      description: "La banque n'a pas encore été traitée dans le système."
+      description: "La banque n'a pas encore été traitée dans le système.",
+      authority : []
     }
   ];
   
