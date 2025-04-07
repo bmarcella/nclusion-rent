@@ -11,6 +11,7 @@ import { bankPicturesDoc, getBankPictureRef } from '@/services/Landlord'
 import {  useEffect, useState } from 'react';
 import ImageGallery, { BankImage } from '../../show/components/ImageGallery';
 import { deleteImageFromStorage, getBankImages, uploadImageToStorage } from '@/services/firebase/BankService';
+import useTranslation from '@/utils/hooks/useTranslation';
 
 interface Props {
   nextStep: (step: number, data: any) => void;
@@ -24,7 +25,7 @@ const UploadImgBank = ( { bankId, isEdit = false, nextStep, userId } : Props) =>
     const [docFiles, setDocFiles] = useState<any[]>([])
     const [loading, setLoading] = useState(false);
     const [images, setImages] = useState<any[]>([]);
-
+    const { t } = useTranslation();
     const handleFileChange = (newFiles: File[], previousFiles: File[]) => {
       setUploadedFiles(newFiles);
     }
@@ -100,44 +101,48 @@ const UploadImgBank = ( { bankId, isEdit = false, nextStep, userId } : Props) =>
 
     return (
         <div>
-        
-            <div>
-                <Upload 
-                multiple
-                draggable
-                fileList={uploadedFiles}
-                beforeUpload={validateBeforeUpload}
-                accept=".png,.jpg,.jpeg"
-                tip={<p className="text-xs text-gray-500 mt-2">Max file size: 2MB</p>}
-    
-                uploadLimit={5}
-                onChange={handleFileChange}
-                onFileRemove={handleFileRemove}>
-                    <div className="my-16 text-center">
-                        <div className="text-6xl mb-4 flex justify-center">
-                            <FcImageFile />
-                        </div>
-                        <p className="font-semibold">
-                            <span className="text-gray-800 dark:text-white">
-                                Drop your image here, or{' '}
-                            </span>
-                            <span className="text-blue-500">browse</span>
-                        </p>
-                        <p className="mt-1 opacity-60 dark:text-white">
-                            Support: jpeg, png, gif
-                        </p>
-                    </div>
-                </Upload>
+        <div>
+          <Upload 
+            multiple
+            draggable
+            fileList={uploadedFiles}
+            beforeUpload={validateBeforeUpload}
+            accept=".png,.jpg,.jpeg"
+            tip={<p className="text-xs text-gray-500 mt-2">{t('upload.maxSize')}</p>}
+            uploadLimit={5}
+            onChange={handleFileChange}
+            onFileRemove={handleFileRemove}
+          >
+            <div className="my-16 text-center">
+              <div className="text-6xl mb-4 flex justify-center">
+                <FcImageFile />
+              </div>
+              <p className="font-semibold">
+                <span className="text-gray-800 dark:text-white">
+                  {t('upload.dropHere')}{' '}
+                </span>
+                <span className="text-blue-500">{t('upload.browse')}</span>
+              </p>
+              <p className="mt-1 opacity-60 dark:text-white">
+                {t('upload.supportedFormats')}
+              </p>
             </div>
-           
-           { uploadedFiles.length>0 &&  (<div className="mt-6">
-                `<Button  variant="solid" loading={loading} icon={<HiOutlineInboxIn />}  onClick={upload} >
-                        { isEdit? "Ajouter" : 'Suivant' }
-                </Button>`
-            </div>) }
-
-            { isEdit && images.length> 0 &&  ( <ImageGallery images={images} userId={userId || ''} onDelete={OnDeleteImg} />  )}
+          </Upload>
         </div>
+      
+        {uploadedFiles.length > 0 && (
+          <div className="mt-6">
+            <Button variant="solid" loading={loading} icon={<HiOutlineInboxIn />} onClick={upload}>
+              {isEdit ? t('common.add') : t('common.next')}
+            </Button>
+          </div>
+        )}
+      
+        {isEdit && images.length > 0 && (
+          <ImageGallery images={images} userId={userId || ''} onDelete={OnDeleteImg} />
+        )}
+      </div>
+      
     )
 }
 

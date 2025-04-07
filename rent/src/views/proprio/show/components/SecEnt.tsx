@@ -1,5 +1,5 @@
 import { Proprio } from '@/views/Entity';
-import  { useState } from 'react'
+import  { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,7 +10,7 @@ import { getLandlordDoc } from '@/services/Landlord'
 import Alert from '@/components/ui/Alert'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import Select from '@/components/ui/Select'
-import { USER_ROLES } from '@/constants/roles.constant'
+import { manageAuth, USER_ROLES } from '@/constants/roles.constant'
 import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBank'
 import { Regions } from '@/views/Entity/Regions'
 import { useSessionUser } from '@/store/authStore'
@@ -34,13 +34,17 @@ type ProprioFormValues = z.infer<typeof RoleSchema>
 function SecEnt( { lord , onChange} : Props) {
   const [isSubmitting, setSubmitting] = useState(false);
   const [message, setMessage] = useTimeOutMessage()
-  const { userId } = useSessionUser((state) => state.user);
+  const { userId, authority, proprio } = useSessionUser((state) => state.user);
   const { t } = useTranslation();
+  const [ typeOptions, setTypeOptions] = useState([]) as any;
+  const [ regions, setRegions] = useState([]) as any;
+  const [hideReg, setHideReg] = useState(false);
    
   const [alert, setAlert] = useState("success") as any;
   const {
     handleSubmit,
     formState: { errors },
+    setValue,
     control,
   } = useForm<ProprioFormValues>({
     resolver: zodResolver(RoleSchema),
@@ -68,7 +72,20 @@ function SecEnt( { lord , onChange} : Props) {
     setTimeout(() => setSubmitting(false), 1000) // simulate loading
   }
 
-  const typeOptions = convertStringToSelectOptions([...USER_ROLES], t , 'roles');
+   useEffect(() => {
+      if (!authority || authority.length === 0) return;
+      const auth = authority[0];
+      const manage = async () => {
+       const { regions , roles } = await manageAuth(auth, proprio, t);
+       setRegions(regions); // setRegions first
+       if (regions.length === 1) {
+         setValue("regions", [regions[0].value]); // safe to call here
+         setHideReg(true);
+       }
+       setTypeOptions(roles);
+      };
+      manage();
+    }, [authority]);
 
 
   return (
@@ -98,13 +115,13 @@ function SecEnt( { lord , onChange} : Props) {
                     name="regions"
                     control={control}
                     render={({ field }) => {
-                    const selectedOptions = Regions.filter(r => field.value?.includes(Number(r.value)));
+                    const selectedOptions = regions.filter(r => field.value?.includes(Number(r.value)));
                       
                       return (
                         <Select
                           isMulti
                           placeholder="Please Select"
-                          options={Regions}
+                          options={regions}
                           value={selectedOptions}
                           onChange={(option) => {
                             const values = option.map((opt: any) => opt.value);

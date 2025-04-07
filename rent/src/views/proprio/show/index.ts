@@ -1,5 +1,5 @@
-import ShowProprio from "./ShowProprio";
+import Proprio from "./Proprio";
 
-export { ShowProprioBase }  from "./ShowProprio";
+export { ProprioBase }  from "./Proprio";
 
-export default ShowProprio;
+export default Proprio;

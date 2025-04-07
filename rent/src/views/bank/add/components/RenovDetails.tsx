@@ -9,6 +9,7 @@ import {
   minorRenovations,
 } from '@/views/Entity';
 import { useEffect, useState } from 'react';
+import { useTranslation } from '@/utils/hooks/useTranslation';
 
 const schema = z.object({
   neededSecurity: z.array(z.enum(currentSecurities)),
@@ -25,7 +26,8 @@ interface Props {
 }
 
 const RenovationDetails = ({ nextStep, defaultValues, isEdit }: Props) => {
-   const [isSubmitting, setSubmitting] = useState(false)
+  const [isSubmitting, setSubmitting] = useState(false);
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -58,78 +60,79 @@ const RenovationDetails = ({ nextStep, defaultValues, isEdit }: Props) => {
 
   return (
     <div className="w-full max-w-4xl bg-gray-50 dark:bg-gray-700 rounded p-6 shadow">
-      <Form onSubmit={handleSubmit(onSubmit)}>
+  <Form onSubmit={handleSubmit(onSubmit)}>
 
-        <FormItem
-          label="Sécurité à installer"
-          invalid={!!errors.neededSecurity}
-          errorMessage={errors.neededSecurity?.message}
-          className="mb-6"
-        >
-          <Controller
-            name="neededSecurity"
-            control={control}
-            render={({ field }) => (
-              <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
-                {currentSecurities.map((option, key) => (
-                  <Checkbox key={key} value={option}>
-                    {option}
-                  </Checkbox>
-                ))}
-              </Checkbox.Group>
-            )}
-          />
-        </FormItem>
+    <FormItem
+      label={t('bank.currentSecurities.label')}
+      invalid={!!errors.neededSecurity}
+      errorMessage={errors.neededSecurity?.message}
+      className="mb-6"
+    >
+      <Controller
+        name="neededSecurity"
+        control={control}
+        render={({ field }) => (
+          <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
+            {currentSecurities.map((option, key) => (
+              <Checkbox key={key} value={option}>
+                {t(`bank.${option}`)}
+              </Checkbox>
+            ))}
+          </Checkbox.Group>
+        )}
+      />
+    </FormItem>
 
-        <FormItem
-          label="Rénovations majeures"
-          invalid={!!errors.majorRenovation}
-          errorMessage={errors.majorRenovation?.message}
-          className="mb-6"
-        >
-          <Controller
-            name="majorRenovation"
-            control={control}
-            render={({ field }) => (
-              <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
-                {majorRenovations.map((option, key) => (
-                  <Checkbox key={key} value={option}>
-                    {option}
-                  </Checkbox>
-                ))}
-              </Checkbox.Group>
-            )}
-          />
-        </FormItem>
+    <FormItem
+      label={t('bank.majorRenovations.label')}
+      invalid={!!errors.majorRenovation}
+      errorMessage={errors.majorRenovation?.message}
+      className="mb-6"
+    >
+      <Controller
+        name="majorRenovation"
+        control={control}
+        render={({ field }) => (
+          <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
+            {majorRenovations.map((option, key) => (
+              <Checkbox key={key} value={option}>
+                {t(`bank.${option}`)}
+              </Checkbox>
+            ))}
+          </Checkbox.Group>
+        )}
+      />
+    </FormItem>
 
-        <FormItem
-          label="Rénovations mineures"
-          invalid={!!errors.minorRenovation}
-          errorMessage={errors.minorRenovation?.message}
-          className="mb-6"
-        >
-          <Controller
-            name="minorRenovation"
-            control={control}
-            render={({ field }) => (
-              <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
-                {minorRenovations.map((option, key) => (
-                  <Checkbox key={key} value={option}>
-                    {option}
-                  </Checkbox>
-                ))}
-              </Checkbox.Group>
-            )}
-          />
-        </FormItem>
+    <FormItem
+      label={t('bank.minorRenovations.label')}
+      invalid={!!errors.minorRenovation}
+      errorMessage={errors.minorRenovation?.message}
+      className="mb-6"
+    >
+      <Controller
+        name="minorRenovation"
+        control={control}
+        render={({ field }) => (
+          <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
+            {minorRenovations.map((option, key) => (
+              <Checkbox key={key} value={option}>
+                {t(`bank.${option}`)}
+              </Checkbox>
+            ))}
+          </Checkbox.Group>
+        )}
+      />
+    </FormItem>
 
-        <div className="mt-6">
-          <Button type="submit" variant="solid">
-            { isEdit? "Modifier" : 'Suivant' }
-          </Button>
-        </div>
-      </Form>
+    <div className="mt-6">
+      <Button type="submit" variant="solid">
+        {isEdit ? t('common.update') : t('common.next')}
+      </Button>
     </div>
+  </Form>
+</div>
+
   );
 };
 

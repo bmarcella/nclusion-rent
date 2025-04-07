@@ -213,7 +213,7 @@ export const bankSteps = [
   "bankSteps.rejected",
   "bankSteps.needApproval",
   "bankSteps.pending",
-  "bankSteps.needAprobation",
+  "bankSteps.needApprobation",
   "bankSteps.needContract",
   "bankSteps.needRenovation",
   "bankSteps.readyToUse"
@@ -328,15 +328,15 @@ export interface Comments {
 
 export const getEmptyPartialBank = () : any => {
   return {
-    bankName: 'Test Bank',
-    id_region: undefined,
+    bankName: '',
+    id_region: '',
     city: '',
-    addresse: 'deye monn nan ',
+    addresse: ' ',
     yearCount: 1,
     date: new Date().toDateString(),
     rentCost: 12000,
-    reference: "Jean Baptiste",
-    landlord: undefined,
+    reference: '',
+    landlord: '',
     isrefSameAsLandlord: false,
     urgency: false,
   };
@@ -345,7 +345,7 @@ export const getEmptyPartialBank = () : any => {
 export const getBlankBank  = (data: any, uuid: string, location: any): Bank => {
     return {
         id: '',
-        step: 'NEED_APPROVAL' as BankStep,
+        step: 'bankSteps.needApproval' as BankStep,
         reject: false,
         pending: false,
         approve: false,

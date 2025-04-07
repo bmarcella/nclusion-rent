@@ -10,6 +10,7 @@ import {
   currentSecurities
 } from '@/views/Entity';
 import { useEffect, useState } from 'react';
+import useTranslation from '@/utils/hooks/useTranslation';
 
 const schema = z.object({
   areaStability: z.enum(areaStabilities),
@@ -28,6 +29,7 @@ interface Props {
 
 const SecurityDetails = ({ nextStep, defaultValues, isEdit=false }: Props) => {
   const [isSubmitting, setSubmitting] = useState(false)
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -62,98 +64,99 @@ const SecurityDetails = ({ nextStep, defaultValues, isEdit=false }: Props) => {
 
   return (
     <div className="w-full max-w-4xl bg-gray-50 dark:bg-gray-700 rounded p-6 shadow">
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <FormItem
-          label="Stabilité de la zone"
-          invalid={!!errors.areaStability}
-          errorMessage={errors.areaStability?.message}
-          className="mb-6"
-        >
-          <Controller
-            name="areaStability"
-            control={control}
-            render={({ field }) => (
-              <Radio.Group vertical value={field.value} onChange={(value) => field.onChange(value)} >
-                {areaStabilities.map((option, key) => (
-                  <Radio key={key} value={option}>
-                    {option}
-                  </Radio>
-                ))}
-              </Radio.Group>
-            )}
-          />
-        </FormItem>
+  <Form onSubmit={handleSubmit(onSubmit)}>
+    <FormItem
+      label={t('bank.areaStabilities.label')}
+      invalid={!!errors.areaStability}
+      errorMessage={errors.areaStability?.message}
+      className="mb-6"
+    >
+      <Controller
+        name="areaStability"
+        control={control}
+        render={({ field }) => (
+          <Radio.Group vertical value={field.value} onChange={(value) => field.onChange(value)}>
+            {areaStabilities.map((option, key) => (
+              <Radio key={key} value={option}>
+                {t(`bank.${option}`)}
+              </Radio>
+            ))}
+          </Radio.Group>
+        )}
+      />
+    </FormItem>
 
-        <FormItem
-          label="Heure d'ouverture"
-          invalid={!!errors.openHour}
-          errorMessage={errors.openHour?.message}
-          className="mb-6"
-        >
-          <Controller
-            name="openHour"
-            control={control}
-            render={({ field }) => (
-              <Radio.Group vertical value={field.value} onChange={(value) => field.onChange(value)}>
-                {openHours.map((option, key) => (
-                  <Radio key={key} value={option}>
-                    {option}
-                  </Radio>
-                ))}
-              </Radio.Group>
-            )}
-          />
-        </FormItem>
+    <FormItem
+      label={t('bank.openHours.label')}
+      invalid={!!errors.openHour}
+      errorMessage={errors.openHour?.message}
+      className="mb-6"
+    >
+      <Controller
+        name="openHour"
+        control={control}
+        render={({ field }) => (
+          <Radio.Group vertical value={field.value} onChange={(value) => field.onChange(value)}>
+            {openHours.map((option, key) => (
+              <Radio key={key} value={option}>
+                {t(`bank.${option}`)}
+              </Radio>
+            ))}
+          </Radio.Group>
+        )}
+      />
+    </FormItem>
 
-        <FormItem
-          label="Heure de fermeture"
-          invalid={!!errors.closeHour}
-          errorMessage={errors.closeHour?.message}
-          className="mb-6"
-        >
-          <Controller
-            name="closeHour"
-            control={control}
-            render={({ field }) => (
-              <Radio.Group vertical value={field.value} onChange={(value) => field.onChange(value)}>
-                {closeHours.map((option, key) => (
-                  <Radio key={key} value={option}>
-                    {option}
-                  </Radio>
-                ))}
-              </Radio.Group>
-            )}
-          />
-        </FormItem>
+    <FormItem
+      label={t('bank.closeHours.label')}
+      invalid={!!errors.closeHour}
+      errorMessage={errors.closeHour?.message}
+      className="mb-6"
+    >
+      <Controller
+        name="closeHour"
+        control={control}
+        render={({ field }) => (
+          <Radio.Group vertical value={field.value} onChange={(value) => field.onChange(value)}>
+            {closeHours.map((option, key) => (
+              <Radio key={key} value={option}>
+                {t(`bank.${option}`)}
+              </Radio>
+            ))}
+          </Radio.Group>
+        )}
+      />
+    </FormItem>
 
-        <FormItem
-          label="Sécurité actuelle"
-          invalid={!!errors.currentSecurity}
-          errorMessage={errors.currentSecurity?.message}
-          className="mb-6"
-        >
-          <Controller
-            name="currentSecurity"
-            control={control}
-            render={({ field }) => (
-              <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)} >
-                {currentSecurities.map((option, key) => (
-                  <Checkbox key={key} value={option}>
-                    {option}
-                  </Checkbox>
-                ))}
-              </Checkbox.Group>
-            )}
-          />
-        </FormItem>
+    <FormItem
+      label={t('bank.currentSecurities.label')}
+      invalid={!!errors.currentSecurity}
+      errorMessage={errors.currentSecurity?.message}
+      className="mb-6"
+    >
+      <Controller
+        name="currentSecurity"
+        control={control}
+        render={({ field }) => (
+          <Checkbox.Group vertical value={field.value ?? []} onChange={(value) => field.onChange(value)}>
+            {currentSecurities.map((option, key) => (
+              <Checkbox key={key} value={option}>
+                {t(`bank.${option}`)}
+              </Checkbox>
+            ))}
+          </Checkbox.Group>
+        )}
+      />
+    </FormItem>
 
-        <div className="mt-6">
-          <Button type="submit" variant="solid">
-            { isEdit ? "Modifier" : 'Suivant' }
-          </Button>
-        </div>
-      </Form>
+    <div className="mt-6">
+      <Button type="submit" variant="solid">
+        {isEdit ? t('common.update') : t('common.next')}
+      </Button>
     </div>
+  </Form>
+</div>
+
   );
 };
 
