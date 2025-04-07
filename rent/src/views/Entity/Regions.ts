@@ -30,9 +30,24 @@ export type RegionType = {
       label: "Gonaives",
       value: 1,
       cities: [
-        "Gonaïves", "Saint-Marc", "Dessalines", "Gros-Morne", "Anse-Rouge",
-        "Ennery", "Marmelade", "Verrettes", "L'Estère", "Petite Rivière de l'Artibonite",
-        "Saint Michel de l'Attalaye", "La Chapelle"
+        "Dessalines",
+        "Desdunes",
+        "Grande-Saline",
+        "Petite Rivière de l'Artibonite",
+        "Gonaïves",
+        "Ennery",
+        "L'Estère",
+        "Gros-Morne",
+        "Anse-Rouge",
+        "Terre-Neuve",
+        "Marmelade",
+        "Saint-Michel-de-l'Atalaye",
+        "Saint-Marc",
+        "Les Arcadins",
+        "La Chapelle",
+        "Liancourt",
+        "Verrettes",
+        "Montrouis"
       ]
     },
     {
@@ -41,9 +56,20 @@ export type RegionType = {
       capital: "Hinche",
       label: "Hinche",
       value: 2,
-      cities: [
-        "Hinche", "Mirebalais", "Boucan-Carré", "Lascahobas", "Cerca-la-Source",
-        "Cerca-Cavajal", "Thomonde", "Maïssade", "Belladère", "Saut-d’Eau"
+      cities:  [
+        "Cerca-la-Source",
+        "Thomassique",
+        "Hinche",
+        "Cerca-Carvajal",
+        "Maïssade",
+        "Thomonde",
+        "Lascahobas",
+        "Baptiste",
+        "Belladère",
+        "Savanette",
+        "Mirebalais",
+        "Boucan-Carré",
+        "Saut-d'Eau"
       ]
     },
     {
@@ -53,8 +79,19 @@ export type RegionType = {
       label: "Jeremie",
       value: 3,
       cities: [
-        "Jérémie", "Anse d’Hainault", "Chambellan", "Dame-Marie", "Pestel",
-        "Abricots", "Bonbon", "Moron", "Roseaux", "Beaumont"
+        "Anse-d'Hainault",
+        "Dame-Marie",
+        "Les Irois",
+        "Beaumont",
+        "Corail",
+        "Pestel",
+        "Roseaux",
+        "Jérémie",
+        "Abricots",
+        "Bonbon",
+        "Chambellan",
+        "Marfranc",
+        "Moron"
       ]
     },
     {
@@ -63,10 +100,26 @@ export type RegionType = {
       capital: "Cap-Haïtien",
       label: "Cap-Haïtien",
       value: 4,
-      cities: [
-        "Cap-Haïtien", "Limonade", "Milot", "Plaine-du-Nord", "Quartier-Morin",
-        "Bahon", "Dondon", "Grande-Rivière-du-Nord", "Pilate", "Plaisance",
-        "Acul-du-Nord", "Borgne"
+      cities:[
+        "Acul-du-Nord",
+        "Milot",
+        "Plaine-du-Nord",
+        "Borgne",
+        "Port-Margot",
+        "Cap-Haïtien",
+        "Limonade",
+        "Quartier-Morin",
+        "Grande-Rivière-du-Nord",
+        "Bahon",
+        "Limbé",
+        "Bas-Limbé",
+        "Plaisance",
+        "Pilate",
+        "Saint-Raphaël",
+        "Dondon",
+        "La Victoire",
+        "Pignon",
+        "Ranquitte"
       ]
     },
     {
@@ -76,8 +129,20 @@ export type RegionType = {
       label: "Ouanaminthe",
       value: 5,
       cities: [
-        "Ouanaminthe", "Fort-Liberté", "Trou-du-Nord", "Caracol", "Ferrier",
-        "Perches", "Mont-Organisé", "Terrier-Rouge", "Capotille"
+        "Fort-Liberté",
+        "Perches",
+        "Ferrier",
+        "Ouanaminthe",
+        "Capotille",
+        "Mont-Organisé",
+        "Trou-du-Nord",
+        "Caracol",
+        "Sainte-Suzanne",
+        "Grand-Bassin",
+        "Terrier-Rouge",
+        "Vallières",
+        "Carice",
+        "Mombin-Crochu"
       ]
     },
     {
@@ -87,8 +152,17 @@ export type RegionType = {
       label: "Port-de-Paix",
       value: 6,
       cities: [
-        "Port-de-Paix", "Saint-Louis-du-Nord", "Jean-Rabel", "Bombardopolis",
-        "Môle Saint-Nicolas", "Chansolme", "Bassin-Bleu", "La Tortue", "Baie-de-Henne"
+        "Môle-Saint-Nicolas",
+        "Baie-de-Henne",
+        "Bombardopolis",
+        "Jean-Rabel",
+        "Port-de-Paix",
+        "Bassin-Bleu",
+        "Chansolme",
+        "Lapointe",
+        "La Tortue",
+        "Saint-Louis-du-Nord",
+        "Anse-à-Foleur"
       ]
     },
     {
@@ -98,9 +172,26 @@ export type RegionType = {
       label: "Port-au-Prince",
       value: 7,
       cities: [
-        "Port-au-Prince", "Carrefour", "Delmas", "Pétion-Ville", "Tabarre", "Cité Soleil",
-        "Croix-des-Bouquets", "Kenscoff", "Léogâne", "Gressier", "Arcahaie", "Cabaret",
-        "Ganthier", "Thomazeau"
+        "Arcahaie",
+        "Cabaret",
+        "Croix-des-Bouquets",
+        "Cornillon",
+        "Fonds-Verrettes",
+        "Ganthier",
+        "Thomazeau",
+        "Anse-à-Galets",
+        "Pointe-à-Raquette",
+        "Léogâne",
+        "Grand-Goâve",
+        "Petit-Goâve",
+        "Port-au-Prince",
+        "Carrefour",
+        "Cité Soleil",
+        "Delmas",
+        "Gressier",
+        "Kenscoff",
+        "Pétion-Ville",
+        "Tabarre"
       ]
     },
     {
@@ -110,8 +201,25 @@ export type RegionType = {
       label: "Les Cayes",
       value: 8,
       cities: [
-        "Les Cayes", "Port-Salut", "Camp-Perrin", "Torbeck", "Chantal", "Cavaillon",
-        "Aquin", "Côteaux", "Roche-à-Bateau", "Saint-Jean-du-Sud", "Ile-à-Vache"
+        "Aquin",
+        "Cavaillon",
+        "Saint-Louis-du-Sud",
+        "Fond des Blancs",
+        "Les Cayes",
+        "Camp-Perrin",
+        "Chantal",
+        "Île-à-Vache",
+        "Maniche",
+        "Torbeck",
+        "Chardonnières",
+        "Les Anglais",
+        "Tiburon",
+        "Côteaux",
+        "Port-à-Piment",
+        "Roche-à-Bateaux",
+        "Port-Salut",
+        "Arniquet",
+        "Saint-Jean-du-Sud"
       ]
     },
     {
@@ -121,8 +229,16 @@ export type RegionType = {
       label: "Jacmel",
       value: 9,
       cities: [
-        "Jacmel", "Marigot", "La Vallée-de-Jacmel", "Cayes-Jacmel", "Bainet",
-        "Belle-Anse", "Anse-à-Pitres", "Grand-Gosier"
+        "Bainet",
+        "Côtes-de-Fer",
+        "Belle-Anse",
+        "Anse-à-Pitres",
+        "Grand-Gosier",
+        "Thiotte",
+        "Jacmel",
+        "Cayes-Jacmel",
+        "La Vallée",
+        "Marigot"
       ]
     }
   ];

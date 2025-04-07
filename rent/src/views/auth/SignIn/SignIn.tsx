@@ -70,7 +70,7 @@ export const SignInBase = ({
                     setMessage={setMessage}
                 />
             </div>
-            <div>
+            {/* <div>
                 <div className="mt-6 text-center">
                     <span>{`Don't have an account yet?`} </span>
                     <ActionLink
@@ -81,7 +81,7 @@ export const SignInBase = ({
                         Sign up
                     </ActionLink>
                 </div>
-            </div>
+            </div> */}
         </>
     )
 }
