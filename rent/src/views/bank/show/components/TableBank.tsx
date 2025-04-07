@@ -34,6 +34,7 @@ import ImageLandlord from '../../add/components/ImageLandlord';
 import { useTranslation } from 'react-i18next';
 import BankStepBadge from './BankStep';
 import UserName from './UserName';
+import { getRegionIds } from '@/views/Entity/Regions';
 
 const { Tr, Th, Td, THead, TBody } = Table
   const PAGE_SIZE = 0;
@@ -50,15 +51,16 @@ const { Tr, Th, Td, THead, TBody } = Table
     }
     interface Props {
         step?: BankStep;
+        isAgent?:boolean;
    }
-  export function TableBank( { step  }: Props) { 
+  export function TableBank ( { step , isAgent = false  }: Props) { 
     const [page, setPage] = useState(1);
     const [hasNext, setHasNext] = useState(true);
     const [banks, setBanks] = useState<Bank[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageDocs, setPageDocs] = useState<DocumentSnapshot[]>([]);
     const fetchedRef = useRef(false);
-    const { userId } = useSessionUser((state) => state.user);
+    const { userId, proprio , authority } = useSessionUser((state) => state.user);
     const [totalData, setTotalData] = useState(1);
     const [dialogIsOpen, setIsOpen] = useState(false)
     const [cbank, setCBank] = useState<Bank>();
@@ -141,7 +143,7 @@ const { Tr, Th, Td, THead, TBody } = Table
                 header: 'Etape',
                 cell: ({ row }) => (
                     <div className="min-w-auto">
-                       <BankStepBadge step={row.original.step} />
+                       <BankStepBadge step={row.original.step} finaldec={row.original.finalDecision} isAgent={isAgent}/>
                      </div>
                     ),
             },
@@ -171,7 +173,9 @@ const { Tr, Th, Td, THead, TBody } = Table
         if (!step){
            q = query(BankDoc, orderBy("createdAt", "desc"), where("createdBy", "==", userId), limit(pageSizeOption[0].value));
         } else {
-           q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step), limit(pageSizeOption[0].value));
+           const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
+           console.log("Regions: ", ids);
+           q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step),  where("id_region", "in", ids),  limit(pageSizeOption[0].value));
         }
       
         // If we're not on the first page, we need to start after a document

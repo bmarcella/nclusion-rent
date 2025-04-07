@@ -4,7 +4,7 @@ export const ShowBankBase= () => {
   return (
     <div>
        <h4>Mes Banks</h4>
-       <TableBank />
+       <TableBank  isAgent={true} />
     </div>
   );
 }

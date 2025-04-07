@@ -28,7 +28,7 @@ export const protectedRoutes: Routes = [
         key: 'bankMenu.needApproval',
         path: '/bank/approval',
         component: lazy(() => import('@/views/bank/show/NeedApproval')),
-        authority: [],
+        authority: ["coordonator", "assist_coordonator", "admin"],
     },
     {
         key: 'bankMenu.approved',
