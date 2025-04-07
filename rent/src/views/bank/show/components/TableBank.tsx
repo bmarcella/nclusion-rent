@@ -33,6 +33,7 @@ import { useNavigate } from 'react-router-dom';
 import ImageLandlord from '../../add/components/ImageLandlord';
 import { useTranslation } from 'react-i18next';
 import BankStepBadge from './BankStep';
+import UserName from './UserName';
 
 const { Tr, Th, Td, THead, TBody } = Table
   const PAGE_SIZE = 0;
@@ -105,6 +106,14 @@ const { Tr, Th, Td, THead, TBody } = Table
                  <div className="min-w-[160px]">
                     <div className="font-medium">  { ( row.original?.landlord) ? row.original?.landlord?.fullName : "" } </div>
                     <div className="text-sm text-gray-500">{ ( row.original?.landlord) ? row.original?.landlord?.phone : "" }</div>
+                  </div>
+                 ),
+            },
+            {
+                header: 'Agent',
+                cell: ({ row }) => (
+                 <div className="min-w-[160px]">
+                    <div className="font-medium">  { ( row.original?.createdBy) ? <UserName userId={row.original.createdBy} /> : "" } </div>
                   </div>
                  ),
             },
