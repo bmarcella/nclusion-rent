@@ -35,6 +35,8 @@ import { useTranslation } from 'react-i18next';
 import BankStepBadge from './BankStep';
 import UserName from './UserName';
 import { getRegionIds } from '@/views/Entity/Regions';
+import classNames from 'classnames';
+import { HiHome } from 'react-icons/hi';
 
 const { Tr, Th, Td, THead, TBody } = Table
   const PAGE_SIZE = 0;
@@ -191,7 +193,6 @@ const { Tr, Th, Td, THead, TBody } = Table
             const data = docSnap.data();
             const landlordId = data.landlord;
             let landlord = null;
-      
             if (landlordId) {
               const landlordSnap = await getDoc(getLandlordDoc(landlordId));
               landlord = landlordSnap.exists() ? landlordSnap.data() : null;
@@ -199,7 +200,6 @@ const { Tr, Th, Td, THead, TBody } = Table
             return { id: docSnap.id, ...data, landlord };
           })
         );
-        console.log("Banks with landlords: ", banksWithLandlords);
         // Update state
         setBanks(banksWithLandlords as any);
         setCurrentPage(pageNum);
@@ -286,6 +286,23 @@ const { Tr, Th, Td, THead, TBody } = Table
     return (
 
       <div>
+         <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
+            <div className={classNames( 'rounded-2xl p-4 flex flex-col justify-center','bg-green-100' )} >
+                <div className="flex justify-between items-center relative">
+                    <div>
+                        <div className="mb-4 text-gray-900 font-bold">{'Total banks'}</div>
+                        <h1 className="mb-1 text-gray-900">{totalData}</h1>
+                    </div>
+                    <div
+                        className={
+                            'flex items-center justify-center min-h-12 min-w-12 max-h-12 max-w-12 bg-gray-900 text-white rounded-full text-2xl'
+                        }
+                    >
+                    <HiHome />
+                    </div>
+                </div>
+            </div>
+          </div>
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
            <Table>
                 <THead>

@@ -1,3 +1,6 @@
+import { BankDoc } from "@/services/Landlord";
+import { getDocs } from "firebase/firestore";
+
  
 export type RegionType = {
     id: number;
@@ -6,6 +9,7 @@ export type RegionType = {
     label: string;
     value: number | string;
     cities: string[];
+    isTest?: boolean;
   };
   export type DocType = Partial<RegionType>;
   export const DocTypeValues: DocType[] = [
@@ -240,6 +244,21 @@ export type RegionType = {
         "La Vallée",
         "Marigot"
       ]
+    },
+    {
+      id: 10,
+      name: "Test",
+      capital: "For-test",
+      label: "Test",
+      value: 10,
+      isTest: true,
+      cities: [
+        "Ville 1",
+        "Ville 2",
+        "Ville 3",
+        "Ville 4",
+        "Ville 5",
+      ]
     }
   ];
 
@@ -249,6 +268,31 @@ export type RegionType = {
   export const getRegionIds = (): number[] => {
     return Regions.map(region => region.id);
   };
+
+  export async function getBankCountsByRegion() {
+    const snapshot = await getDocs(BankDoc);
+    const counts: Record<string, number> = {};
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const id_region = data.id_region;
+      if (id_region) {
+        counts[id_region] = (counts[id_region] || 0) + 1;
+      }
+    });
+
+  const regions: string[] = [];
+  const values: number[] = [];
+
+  for (const [id, count] of Object.entries(counts)) {
+    const match = Regions.find(r => r.value == id);
+    if (match) {
+      regions.push(match.label);
+      values.push(count);
+    }
+  }
+
+  return { regions, values };
+  }
 
 
   

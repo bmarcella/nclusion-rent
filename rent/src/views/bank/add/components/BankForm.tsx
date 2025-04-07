@@ -143,24 +143,20 @@ const nextStep = async (step: number, data: any ) => {
 
 return (
     <>
-<div ref={topRef} className="grid grid-flow-row auto-rows-max gap-4">
+<div ref={topRef} className="grid grid-flow-row gap-4 rounded ">
   {/* Steps Header */}
-  <div className="w-full flex ">
-    <div className="w-full max-w-4xl">
-
-     <h5 title={t(`steps.${stepKey[step]}`)}> {t(`common.addBank`)} - {t(`steps.stepName`)} {step+1} - {t(`steps.${stepKey[step]}`)} </h5>
-  
+  <div className="w-full flex items-center p-6">
+     <h5 className='text-center' title={t(`steps.${stepKey[step]}`)}> {t(`common.addBank`)} - {t(`steps.stepName`)} {step+1} - {t(`steps.${stepKey[step]}`)} </h5>
       {message && (
         <Alert showIcon className="mt-6" type={alert}>
           <span className="break-all">{message}</span>
         </Alert>
       )}
-    </div>
   </div>
 
   {/* Main Content */}
-  <div className="flex-1 flex px-4 py-10 bg-white dark:bg-gray-900 justify-center">
-    <div className="w-full max-w-4xl items-start justify-center">
+
+    <div className="flex pr-4 pl-4">
       {step === 0 && (
         <InfoBank
           nextStep={nextStep}
@@ -209,7 +205,7 @@ return (
       )}
       {step === 7 && docRef.id && <EndBank onRestart={onRestart} />}
     </div>
-  </div>
+
 </div>
 
 

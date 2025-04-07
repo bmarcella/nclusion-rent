@@ -16,6 +16,8 @@ type DropdownList = {
 const dropdownItemList: DropdownList[] = []
 
 const _UserDropdown = () => {
+    const {  authority } = useSessionUser((state) => state.user);
+    const role = (authority) ? authority[0]  : "user"; 
     const { avatar, userName, email } = useSessionUser((state) => state.user)
     const { signOut } = useAuth()
     const handleSignOut = () => {
@@ -47,6 +49,11 @@ const _UserDropdown = () => {
                         <div className="text-xs">
                             {email || 'No email available'}
                         </div>
+                        <div className="text-xs uppercase text-gray-500 dark:text-gray-400 mt-2">
+                            {role || 'No role available'}
+                        </div>
+                        
+
                     </div>
                 </div>
             </Dropdown.Item>
@@ -65,6 +72,7 @@ const _UserDropdown = () => {
                     </Link>
                 </Dropdown.Item>
             ))}
+            
             <Dropdown.Item
                 eventKey="Sign Out"
                 className="gap-2"
@@ -73,7 +81,7 @@ const _UserDropdown = () => {
                 <span className="text-xl">
                     <PiSignOutDuotone />
                 </span>
-                <span>Sign Out</span>
+                <span>Déconnexion</span>
             </Dropdown.Item>
         </Dropdown>
     )
