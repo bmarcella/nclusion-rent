@@ -143,12 +143,12 @@ const nextStep = async (step: number, data: any ) => {
 
 return (
     <>
-<div ref={topRef} className="grid grid-flow-row gap-4 rounded ">
+<div ref={topRef} className="  justify-center rounded p-4">
   {/* Steps Header */}
-  <div className="w-full flex items-center p-6">
-     <h5 className='text-center' title={t(`steps.${stepKey[step]}`)}> {t(`common.addBank`)} - {t(`steps.stepName`)} {step+1} - {t(`steps.${stepKey[step]}`)} </h5>
+  <div className="grid grid-flow-row auto-rows-max gap-4 mb-2 pl-4 pb-2 pr-4">
+     <h5 className='w-full' title={t(`steps.${stepKey[step]}`)}> {t(`common.addBank`)} - {t(`steps.stepName`)} {step+1} - {t(`steps.${stepKey[step]}`)} </h5>
       {message && (
-        <Alert showIcon className="mt-6" type={alert}>
+        <Alert showIcon className="mt-6 w-full block" type={alert}>
           <span className="break-all">{message}</span>
         </Alert>
       )}
@@ -156,7 +156,7 @@ return (
 
   {/* Main Content */}
 
-    <div className="flex pr-4 pl-4">
+    <div className="pr-4 pl-4">
       {step === 0 && (
         <InfoBank
           nextStep={nextStep}
