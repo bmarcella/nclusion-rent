@@ -57,7 +57,7 @@ export const SignInBase = ({
                     </div>
                 }
             />
-            <div className="mt-8">
+            {/* <div className="mt-8">
                 <div className="flex items-center gap-2 mb-6">
                     <div className="border-t border-gray-200 dark:border-gray-800 flex-1 mt-[1px]" />
                     <p className="font-semibold heading-text">
@@ -69,8 +69,8 @@ export const SignInBase = ({
                     disableSubmit={disableSubmit}
                     setMessage={setMessage}
                 />
-            </div>
-            {/* <div>
+            </div> */ }
+             <div>
                 <div className="mt-6 text-center">
                     <span>{`Don't have an account yet?`} </span>
                     <ActionLink
@@ -81,7 +81,7 @@ export const SignInBase = ({
                         Sign up
                     </ActionLink>
                 </div>
-            </div> */}
+            </div> *
         </>
     )
 }
