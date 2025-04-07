@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormItem, Select, DatePicker, Form, Input, Button, Checkbox } from '@/components/ui';
+import { manageAuth } from '@/constants/roles.constant';
 import { BankDoc, Landlord } from '@/services/Landlord';
+import { useSessionUser } from '@/store/authStore';
 import { useTranslation } from '@/utils/hooks/useTranslation';
 import {  Bank, getBlankBank, Proprio } from '@/views/Entity';
 import { Regions } from '@/views/Entity/Regions';
@@ -56,6 +58,10 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
     const [isSubmitting, setSubmitting] = useState(false);
     const [loading, setLoading] = useState(false)
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [ regions, setRegions] = useState([]) as any;
+    const [hideReg, setHideReg] = useState(false);
+    const {  authority, proprio } = useSessionUser((state) => state.user);
+
     const { t } = useTranslation();
       const fetchLandlords = async () => {
         try {
@@ -103,6 +109,21 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           }
         }
       } , []);
+
+          useEffect(() => {
+            if (!authority || authority.length === 0) return;
+            const auth = authority[0];
+            const manage = async () => {
+            const { regions  } = await manageAuth(auth, proprio, t);
+            setRegions(regions); // setRegions first
+            if (regions.length === 1) {
+              setValue("id_region", regions[0].value); // safe to call here
+              setTypeOptions(convertStringToSelectOptions(regions[0].cities || []));
+              setHideReg(true);
+            }
+            };
+            manage();
+          }, [authority]);
       
     const {
         control,
@@ -186,16 +207,16 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
         } />
       </FormItem>
 
-      <FormItem label={t('bank.id_region')} invalid={!!errors.id_region} errorMessage={errors.id_region?.message}>
+      { !hideReg && <FormItem label={t('bank.id_region')} invalid={!!errors.id_region} errorMessage={errors.id_region?.message}>
         <Controller name="id_region" control={control} render={({ field }) =>
-          <Select placeholder="Please Select" options={Regions}
-            value={Regions.find(option => Number(option.value) === Number(field.value)) || null}
+          <Select placeholder="Please Select" options={regions}
+            value={regions.find(option => Number(option.value) === Number(field.value)) || null}
             onChange={(option) => {
               setTypeOptions(convertStringToSelectOptions(option?.cities || []));
               field.onChange(Number(option?.value));
             }} />
         } />
-      </FormItem>
+      </FormItem> }
 
       {selectedRegion && (
         <FormItem label={t('bank.city')} invalid={!!errors.city} errorMessage={errors.city?.message}>
