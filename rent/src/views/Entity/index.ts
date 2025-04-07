@@ -216,7 +216,8 @@ export const bankSteps = [
   "bankSteps.needApprobation",
   "bankSteps.needContract",
   "bankSteps.needRenovation",
-  "bankSteps.readyToUse"
+  "bankSteps.readyToUse",
+  "bankSteps.notProceeded"
 ] as const;
 export type WhoReferred = typeof whoReferreds[number];
 export type InternetProvider = typeof internetProviders[number];
