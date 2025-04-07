@@ -70,7 +70,7 @@ const ImageLordComp : React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)
         }}
         src={image.imageUrl}
         alt={image.fileName}
-        className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
+        className={ !showPic ? "w-full h-64 object-cover hover:scale-105 transition-transform duration-300": "card-image"}
       />
     )}
 
@@ -122,7 +122,7 @@ const ImageLordComp : React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)
                     <img
                       src={image.imageUrl}
                       alt={image.fileName}
-                      className="w-auto h-auto max-w-full max-h-screen rounded"
+                      className="card-image rounded"
                     />
                   )}
                 </div>

@@ -8,6 +8,8 @@ import {
     QueryDocumentSnapshot,
     DocumentData,
     CollectionReference,
+    where,
+    Query,
   } from 'firebase/firestore';
   import React, { useEffect, useMemo, useRef, useState } from 'react';
   import { Proprio } from '@/views/Entity';
@@ -15,7 +17,7 @@ import {
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import Table from '@/components/ui/Table';
 import { Button, Dialog, Pagination, Select, Tag } from '@/components/ui';
-import { PiCheck, PiEyeLight } from 'react-icons/pi';
+import {  PiEyeLight } from 'react-icons/pi';
 import EditEntity from './components/EditEntity';
 import { useSessionUser } from '@/store/authStore';
 import { useWindowSize } from '@/utils/hooks/useWindowSize';
@@ -39,8 +41,14 @@ type Option = {
     value: number
     label: string
 }
+
+interface Props {
+  name?: string,
+  isUser?: string,
+}
+
   
-  export function ShowProprioBase() {
+  function ShowProprio( { name = "Entités", isUser = undefined}: Props) {
     const [data, setData] = useState<Proprio [] >([]);
     const [totalData, setTotalData] = useState(1);
     const [page, setPage] = useState(1);
@@ -166,7 +174,7 @@ type Option = {
           ];
       
           // ✅ Conditionally push a new column
-          if (hasAuthority(authority, 'admin')) {
+          if (hasAuthority(authority, 'admin') || isUser) {
               baseColumns.push({
                 header: 'Action',
                 cell: ({ row }) => (
@@ -191,10 +199,15 @@ type Option = {
         setLoading(true);
     
         try {
-          let q;
-          const baseQuery = Landlord as CollectionReference<DocumentData>;
+          let q:  Query<DocumentData> ;
+          let baseQuery : Query<DocumentData> = Landlord as CollectionReference<DocumentData>;
+          if (isUser!=undefined) {
+             baseQuery = query(baseQuery, where('createBy', '==', isUser));
+             console.log("isUser: ", isUser);
+          }
+
           if (pageNumber === 1) {
-            q = query(baseQuery, orderBy('fullName'), limit(pageSizeOption[PAGE_SIZE].value));
+            q = query( baseQuery , orderBy('fullName'), limit(pageSizeOption[PAGE_SIZE].value));
           } else {
             const prevCursor = pageCursors[pageNumber - 2]; // page 2 uses index 0
             if (!prevCursor) return;
@@ -284,7 +297,7 @@ type Option = {
     return (
 
       <div>
-         <h4>Entités</h4>
+         <h4>{name} - {data.length}</h4>
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
        
         <Table>
@@ -351,14 +364,14 @@ type Option = {
 
         <Dialog
                 isOpen={dialogIsOpen}
-                width={width*0.6}
-                height={height*0.8}
+                width={width*0.9}
+                height={height*0.9}
                 onClose={onDialogClose}
                 onRequestClose={onDialogClose}
             >
                 <div className="flex flex-col h-full overflow-y-auto">
                     <h5 className="mb-4">{ cEnt?.fullName } - { t(`roles.${cEnt?.type_person}`)  }</h5>
-                    { cEnt && <EditEntity userId={userId || ''} lord={cEnt} onChange={onChange}></EditEntity>}
+                    { cEnt && <EditEntity userId={userId || ''} lord={cEnt} onChange={onChange} isUser={isUser} ></EditEntity>}
                     <div className="text-right mt-6">
                         <Button
                             className="ltr:mr-2 rtl:ml-2"
@@ -377,9 +390,6 @@ type Option = {
     );
   }
   
-  const ShowProprio = () => {
-    return <ShowProprioBase />;
-  };
   
   export default ShowProprio;
   

@@ -59,7 +59,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=>
             }}
               src={image.imageUrl}
               alt={image.fileName}
-              className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
+              className={ !showPic ? 'w-full h-64 object-cover hover:scale-105 transition-transform duration-300' : 'card-image'}
             />
             <div className="p-3 flex-1 flex flex-col justify-between">
               <div className="mb-2">

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/utils/hooks/useTranslation";
 
 interface Props {
   onRestart: () => void;
@@ -5,6 +6,7 @@ interface Props {
   btnText?: string;
 }
 const EndBank: React.FC<Props> = ({ onRestart, message = "Your form has been successfully submitted.", btnText = "Start a New Form" }) => {
+   const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4">
       {/* Green Checkmark */}
@@ -21,7 +23,7 @@ const EndBank: React.FC<Props> = ({ onRestart, message = "Your form has been suc
       </div>
 
       {/* Thank You Message */}
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">Thank you!</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-2">{ t('common.thankyou') }</h1>
       <p className="text-gray-600 mb-6 text-center">
         { message } <br />
       </p>

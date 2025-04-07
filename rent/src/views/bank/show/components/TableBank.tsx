@@ -31,6 +31,8 @@ import { fr } from 'date-fns/locale';
 import GoogleMapApp from '../Map';
 import { useNavigate } from 'react-router-dom';
 import ImageLandlord from '../../add/components/ImageLandlord';
+import { useTranslation } from 'react-i18next';
+import BankStepBadge from './BankStep';
 
 const { Tr, Th, Td, THead, TBody } = Table
   const PAGE_SIZE = 0;
@@ -60,9 +62,9 @@ const { Tr, Th, Td, THead, TBody } = Table
     const [dialogIsOpen, setIsOpen] = useState(false)
     const [cbank, setCBank] = useState<Bank>();
     const { width, height } = useWindowSize();
-    console.log("Width: ", width, " Height: ", height);
     const [message, setMessage] = useTimeOutMessage();
     const [alert, setAlert] = useState("success") as any;
+    const { t } = useTranslation();
     const navigate = useNavigate()
     const openDialog = (bank: Bank) => {
         setCBank(bank);
@@ -129,8 +131,8 @@ const { Tr, Th, Td, THead, TBody } = Table
             {
                 header: 'Etape',
                 cell: ({ row }) => (
-                    <div className="min-w-[160px]">
-                       <Badge content={row.original.step} />
+                    <div className="min-w-auto">
+                       <BankStepBadge step={row.original.step} />
                      </div>
                     ),
             },

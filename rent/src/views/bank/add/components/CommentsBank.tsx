@@ -16,6 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Input from '@/components/ui/Input';
 import CommentList, { BankComment } from '../../show/components/CommentList';
 import AddComment from './AddComment';
+import { useTranslation } from '@/utils/hooks/useTranslation';
 
 const schema = z.object({
   comment: z.string().optional(),
@@ -28,12 +29,13 @@ interface Props {
   isEdit?: boolean,
   bankId: string,
   userId: string,
+  only?: boolean
 }
 
-const CommentsBank = ( { bankId, isEdit = false, nextStep, userId } : Props) => {
+const CommentsBank = ( { bankId, isEdit = false, nextStep, userId, only=false } : Props) => {
    const [comments, setComments] = useState<any[]>([]);
-
-    const [loading, setLoading] = useState(false);
+   const { t } = useTranslation
+   const [loading, setLoading] = useState(false);
 
     const {
         control,
@@ -87,7 +89,7 @@ const CommentsBank = ( { bankId, isEdit = false, nextStep, userId } : Props) => 
         }, [bankId]);
     return (
         <div>
-          <AddComment onSubmitAfter={onSubmit} bankId={bankId} userId={userId} /> 
+          { !only && <AddComment onSubmitAfter={onSubmit} bankId={bankId} userId={userId} /> }
             <div className="mt-6">
                <CommentList  userId={userId} comments={comments} />
             </div>
