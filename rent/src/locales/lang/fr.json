@@ -276,7 +276,7 @@
       "thankyou": "Merci"
      },
      "upload": {
-    "maxSize": "Taille maximale : 2 Mo",
+    "maxSize": "Taille maximale : 15 Mo",
     "dropHere": "Déposez votre image ici, ou",
     "browse": "parcourir",
     "supportedFormats": "Formats supportés : jpeg, png, gif"

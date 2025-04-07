@@ -43,7 +43,7 @@ const ImageLandlord = ( { lordId, isEdit = false, nextStep, userId } : Props) =>
     }
   
     const validateBeforeUpload = (fileList: FileList | null, current: File[]) => {
-      if (fileList && fileList[0].size > 2 * 1024 * 1024) {
+      if (fileList && fileList[0].size > 15 * 1024 * 1024) {
         return 'File too large (max 2MB)'
       }
       return true
