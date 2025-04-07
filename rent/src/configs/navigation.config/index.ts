@@ -52,7 +52,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.current',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "coordonator", "assist_coordonator",],
+                authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager"],
                 subMenu: [],
             }
         ],

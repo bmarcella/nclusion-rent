@@ -66,7 +66,7 @@ function RentDetails({ nextStep, defaultValues, isEdit= false } : FormProps) {
            }    
   return (
     <>
-      <div className="w-full max-w-4xl bg-gray-50 dark:bg-gray-700 rounded p-6 shadow">
+      <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
   <Form onSubmit={handleSubmit(onSubmit)}>
     <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
       <FormItem

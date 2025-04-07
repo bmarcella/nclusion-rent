@@ -198,7 +198,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
     const selectedRegion = watch('id_region'); 
   return (
     <>
- <div className="w-full max-w-4xl bg-gray-50 dark:bg-gray-700 rounded p-2 shadow">
+ <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
   <Form onSubmit={handleSubmit(onSubmitInfo)}>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <FormItem label={t('bank.bankName')} invalid={!!errors.bankName} errorMessage={errors.bankName?.message}>

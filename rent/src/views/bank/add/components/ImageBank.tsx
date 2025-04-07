@@ -101,7 +101,7 @@ const UploadImgBank = ( { bankId, isEdit = false, nextStep, userId } : Props) =>
 
     return (
         <div>
-        <div>
+        <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
           <Upload 
             multiple
             draggable

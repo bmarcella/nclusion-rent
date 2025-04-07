@@ -89,10 +89,14 @@ const CommentsBank = ( { bankId, isEdit = false, nextStep, userId, only=false } 
         }, [bankId]);
     return (
         <div>
+          <div className='w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow'>
+
           { !only && <AddComment onSubmitAfter={onSubmit} bankId={bankId} userId={userId} /> }
             <div className="mt-6">
                <CommentList  userId={userId} comments={comments} />
             </div>
+          </div>
+        
         </div>
     )
 }

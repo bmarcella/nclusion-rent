@@ -117,7 +117,7 @@ const ImageLandlord = ( { lordId, isEdit = false, nextStep, userId } : Props) =>
     return (
         <div>
         
-            <div>
+            <div  className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow" >
             <FormItem label="Type document" invalid={!!error.is} errorMessage={error.message}>
             <Select placeholder="Please Select" options={DocTypeValues} 
                     onChange={(option) => { 
