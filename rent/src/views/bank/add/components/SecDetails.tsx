@@ -63,7 +63,7 @@ const SecurityDetails = ({ nextStep, defaultValues, isEdit=false }: Props) => {
   };
 
   return (
-    <div className="w-full max-w-4xl bg-gray-50 dark:bg-gray-700 rounded p-6 shadow">
+    <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
   <Form onSubmit={handleSubmit(onSubmit)}>
     <FormItem
       label={t('bank.areaStabilities.label')}
