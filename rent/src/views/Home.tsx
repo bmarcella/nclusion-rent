@@ -7,7 +7,7 @@ const Home = () => {
     return <>
     <div className="flex flex-col justify-center items-center h-screen text-center px-4">
         <h1 className="text-4xl font-bold">Bienvenue sur la plateforme de gestion immobilière</h1>
-        <p className="mt-4 text-lg">Connectez-vous pour accéder à votre tableau de bord.</p>
+        <p className="mt-4 text-lg">Utilisez le bouton en haut à droite pour ouvrir le menu.</p>
 
         {userId && is_ai && (
             <div className="mt-8 flex flex-col gap-4 items-center w-full max-w-sm">

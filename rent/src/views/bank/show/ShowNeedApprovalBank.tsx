@@ -4,8 +4,8 @@ import TableBank from "./components/TableBank";
 export const ShowNeedApprovalBankBase= () => {
   return (
     <div>
-       <h4>{"Banks besoin d'approbations"}</h4>
-       <TableBank step={ 'NEED_APPROVAL' as BankStep}/>
+       <h4>{"Banks besoin de validations "}</h4>
+       <TableBank step={ 'bankSteps.needApproval' as BankStep}/>
     </div>
   );
 }

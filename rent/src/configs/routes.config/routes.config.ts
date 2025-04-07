@@ -25,11 +25,18 @@ export const protectedRoutes: Routes = [
         authority: [],
     },
     {
-        key: 'bankMenu.neeedApproval',
-        path: '/bank/neeedApproval',
+        key: 'bankMenu.needApproval',
+        path: '/bank/approval',
         component: lazy(() => import('@/views/bank/show/NeedApproval')),
         authority: [],
     },
+    {
+        key: 'bankMenu.approved',
+        path: '/bank/BankByStep/:step',
+        component: lazy(() => import('@/views/bank/show/pages/BankByStep')),
+        authority: [],
+    },
+  
     {
         key: 'bankMenu.bankDetails',
         path: '/bank/:bankId',
@@ -46,7 +53,7 @@ export const protectedRoutes: Routes = [
         key: 'proprioMenu.show',
         path: '/proprio/show',
         component: lazy(() => import('@/views/proprio/show')),
-        authority: [],
+        authority: ["admin"],
     },
     {
         key: 'proprioMenu.myEntity',

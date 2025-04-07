@@ -17,7 +17,7 @@ interface Props {
 }
 function EditEntity( { onChange , lord, userId, isUser = undefined } : Props) {
   const {  authority } = useSessionUser((state) => state.user);
-   const isAdmin = authority && authority[0] == "admin" ;
+  const isAdmin = authority && authority[0] == "admin" ;
   return (
     <div>
           <Tabs defaultValue="tab1">

@@ -53,10 +53,12 @@ function AddProprioForm() {
   const [message, setMessage] = useTimeOutMessage()
   const { userId, authority, proprio } = useSessionUser((state) => state.user);
   const { t } = useTranslation();
-  const [ regions, setRegions] = useState([]) as any;
-  const [hideReg, setHideReg] = useState(false);
+  
+  
   const [alert, setAlert] = useState("success") as any;
   const [ typeOptions, setTypeOptions] = useState([]) as any;
+  const [ regions, setRegions] = useState([]) as any;
+  const [hideReg, setHideReg] = useState(false);
   const {
     handleSubmit,
     formState: { errors },

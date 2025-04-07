@@ -82,17 +82,26 @@ export const ShowBankDetailsBase= () => {
        reject: false,
        approve: true,
        pending: false,
-       step : "bankSteps.needAprobation" as BankStep,
+       step : "bankSteps.needApprobation" as BankStep,
        finalDecision: dec
     };
     SaveHistory(reject, dec);
   }
 
-  const SaveHistory = async (reject: any, dec : HistoricDecision  ) => {
+  const onPermitOk = async () => {
+    const reject = {
+       step : "bankSteps.needContract" as BankStep,
+    };
+    SaveHistory(reject);
+  }
+
+  const SaveHistory = async (reject: any, dec? : HistoricDecision  ) => {
     if (bankId) await updateBankById(bankId, reject).then(async () => {
-      dec.bankId = bankId;
-      console.log(dec);
-      await addDecisionHistory(dec);
+      if(dec) { 
+        dec.bankId = bankId;
+        console.log(dec);
+        await addDecisionHistory(dec);
+      }
       setBank((prevBank: Bank | null) => (prevBank ? { ...prevBank, ...reject } : reject));
       setIsOpen(false)
       setModalContent(null);
@@ -107,7 +116,7 @@ export const ShowBankDetailsBase= () => {
   { !bankId && <Navigate to="/" /> }
   return (
     <div>
-      { bankId && <SubmissionReview bankId={bankId} onApproveOk = {onApproveOk} onChangeState={ (comp, name) => { openDialog(comp, name) } } onRejectOk={onRejectOk} bank={bank}  userId={userId} onPendingOk={onPendingOk}/> }
+      { bankId && <SubmissionReview bankId={bankId} onPermitOk={onPermitOk} onApproveOk = {onApproveOk} onChangeState={ (comp, name) => { openDialog(comp, name) } } onRejectOk={onRejectOk} bank={bank}  userId={userId} onPendingOk={onPendingOk}/> }
         <Dialog
                 isOpen={dialogIsOpen}
                 onClose={onDialogClose}

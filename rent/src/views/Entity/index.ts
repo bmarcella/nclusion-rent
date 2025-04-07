@@ -213,7 +213,7 @@ export const bankSteps = [
   "bankSteps.rejected",
   "bankSteps.needApproval",
   "bankSteps.pending",
-  "bankSteps.needAprobation",
+  "bankSteps.needApprobation",
   "bankSteps.needContract",
   "bankSteps.needRenovation",
   "bankSteps.readyToUse"
@@ -345,7 +345,7 @@ export const getEmptyPartialBank = () : any => {
 export const getBlankBank  = (data: any, uuid: string, location: any): Bank => {
     return {
         id: '',
-        step: 'NEED_APPROVAL' as BankStep,
+        step: 'bankSteps.needApproval' as BankStep,
         reject: false,
         pending: false,
         approve: false,

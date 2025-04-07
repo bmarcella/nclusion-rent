@@ -18,17 +18,19 @@ import { PdfOps } from "./pdfOps";
 import { useReactToPrint } from "react-to-print";
 import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
+import { useSessionUser } from "@/store/authStore";
 
 interface Props {
     bankId: string;
     onRejectOk?: (data: any) => void
-    onApproveOk: (data: any) => void 
+    onApproveOk: (data: any) => void ,
+    onPermitOk: () => void 
     onChangeState: (component: React.ReactNode, name?: string) => void;
     onPendingOk: (data: any) => void
     bank?: Bank;
     userId: string
 }
-const SubmissionReview = ( { bankId,  onChangeState, onRejectOk, onPendingOk, onApproveOk, bank, userId } : Props) => {
+const SubmissionReview = ( { bankId,  onChangeState, onRejectOk, onPendingOk, onApproveOk, onPermitOk, bank, userId } : Props) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const reactToPrintFn = useReactToPrint({ contentRef });
     const [images, setImages] = useState<BankImage[]>([])
@@ -37,6 +39,8 @@ const SubmissionReview = ( { bankId,  onChangeState, onRejectOk, onPendingOk, on
     const [h, setH] = useState(0);
     const [h2, setH2] = useState(0);
     const [pConfig, setPConfig] = useState(false);
+    const {  authority } = useSessionUser((state) => state.user);
+    console.log("Bank ID: ", bank);
        useEffect(() => {
              getBankImages(bankId).then((imgs: BankImage[]) => {
                  console.log("Bank Images: ", imgs);
@@ -71,6 +75,21 @@ const SubmissionReview = ( { bankId,  onChangeState, onRejectOk, onPendingOk, on
        setPdf(false);
       }, 2000);
     }
+
+    const  canApprove = () => {
+      try {
+        const role = authority?.[0] || null;
+        if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="admin" || role =="manager" || role =="asssit_manager") ) {
+            return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Error checking approval:", error);
+        return false;
+     }
+    }
+
+ 
   return (
     <>
     <div className="flex gap-2 pt-6 pl-6 space-y-6"  >
@@ -150,9 +169,14 @@ const SubmissionReview = ( { bankId,  onChangeState, onRejectOk, onPendingOk, on
         {  !bank?.approve &&  !pdf && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ (data) => { onApproveOk(data) }} />, "Approbation")}
         >
-          <PiCheckFatFill /> APPROVED
+          <PiCheckFatFill /> Validé
         </Button> }
-      {  !bank?.reject &&  !pdf &&<Button className="bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1" 
+        {  canApprove() &&  !pdf && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
+         onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onPermitOk() }} />, "Approbation")}
+        >
+          <PiCheckFatFill /> Approbation
+        </Button> }
+       {  !bank?.reject &&  !pdf &&<Button className="bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1" 
           onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={onRejectOk} />)}
           >
           <PiThumbsDownFill/> REJECTED

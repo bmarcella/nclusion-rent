@@ -111,8 +111,9 @@ const SignInForm = (props: SignInFormProps) => {
                         )}
                     />
                 </FormItem>
-                {passwordHint}
+                {/* {passwordHint} */}
                 <Button
+                    className='mt-4'
                     block
                     loading={isSubmitting}
                     variant="solid"

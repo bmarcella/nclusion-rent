@@ -5,11 +5,14 @@
             "bankMenu": "Banks",
             "add": "Ajouter",
             "show": "Mes banks",
-            "current": "Encours",
-            "approved": "Approuvé",
-            "ready": "Terminé",
-            "rejected": "Rejeté",
-            "approved": "Approuvé"
+            "current": "Validation",
+            "approved": "Approbation",
+            "ready": "Disponible",
+            "rejected": "Rejetées",
+            "contrat": "Paiement & Contrats",
+            "renovation": "Rénovation",
+            "pending": "Considération"
+
         },
         "proprioMenu": {
             "proprio": "Entités",
@@ -37,6 +40,7 @@
       "createdBy": "Créé par",
       "createdAt": "Créé à",
       "urgency": "Urgence",
+      "reason_why": "Raison pour laquelle",
       "internetProviders": {
           "label": "Fournisseurs d'accès à Internet",
           "natcom": "natcom",
@@ -215,13 +219,13 @@
           "other": "autre"
         },
         "bankSteps": {
-          "rejected": "REJECTED",
-          "needApproval": "NEED_APPROVAL",
-          "needAprobation": "NEED_APROBATION",
-          "needContract": "NEED_CONTRACT",
-          "needRenovation": "NEED_RENEVATION",
-          "readyToUse": "READY_TO_USE",
-          "pending": "READY_TO_USE"
+          "rejected": "Rejetées",
+          "needApproval": "Besoins de validations",
+          "needApprobation": "Besoins d'approbations",
+          "needContract": "Besoins de contrat",
+          "needRenovation": "Besoins de rénovations",
+          "readyToUse": "Prêt à ouvert",
+          "pending": "En consideration"
         }
     },
     "entity": {
