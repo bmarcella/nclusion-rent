@@ -18,14 +18,16 @@ interface Props {
 function EditEntity( { onChange , lord, userId, isUser = undefined } : Props) {
   const {  authority } = useSessionUser((state) => state.user);
   const isAdmin = authority && authority[0] == "admin" ;
+
+
   return (
     <div>
           <Tabs defaultValue="tab1">
                 <TabList>
                     <TabNav value="tab1">Informations générales</TabNav>
-                    <TabNav value="tab2">Roles & Regions</TabNav>
+                    { (isAdmin || (userId==lord.createBy && userId != lord.id_user)) && <TabNav value="tab2">Roles & Regions</TabNav> }
                     <TabNav value="tab3">Documents</TabNav>
-                    { isAdmin && <TabNav value="tab4">Securité & Utilisateurs</TabNav> }
+                    { (isAdmin || (userId==lord.createBy)) && <TabNav value="tab4">Securité & Utilisateurs</TabNav> }
                 </TabList>
                 <div className="p-4">
                     <TabContent value="tab1">
@@ -43,7 +45,7 @@ function EditEntity( { onChange , lord, userId, isUser = undefined } : Props) {
                         </div>
       
                     </TabContent>
-                    { isAdmin &&  <TabContent value="tab4">
+                    { (isAdmin || (userId==lord.createBy)) && <TabContent value="tab4">
                         <UserEnt lord={lord} onChange={onChange}></UserEnt>
                     </TabContent> }
                 

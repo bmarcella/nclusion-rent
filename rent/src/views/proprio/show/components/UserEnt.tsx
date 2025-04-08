@@ -45,7 +45,8 @@ function UserEnt( { onChange , lord } : Props) {
   const [active, setActive] = useState(lord.active);
   const [message, setMessage] = useTimeOutMessage()
   const { t } = useTranslation();
-  const { userId } = useSessionUser((state) => state.user);
+  const { userId, authority } = useSessionUser((state) => state.user);
+  const isAdmin = authority && authority[0] == "admin" ;
   const [alert, setAlert] = useState("success") as any;
   const {
     handleSubmit,
@@ -105,7 +106,7 @@ function UserEnt( { onChange , lord } : Props) {
                 </Alert>
         )}
 
-    <div className="rounded-sm pt-6 ">
+   { (isAdmin || (lord.id_user != userId && lord.createBy == userId)) && <div className="rounded-sm pt-6 ">
             <h6 className='mb-4'>Compte activation</h6>
             <div className="mb-4">
                       <Switcher defaultChecked={lord.active} switcherClass={ active ? "bg-green-500" : "bg-red-500" } onChange={(e)=> {
@@ -113,8 +114,8 @@ function UserEnt( { onChange , lord } : Props) {
                         toggleActive({  active: e })
                       }} />
             </div> 
-      </div>
-     { lord.id_user && <>
+      </div> }
+     { lord.id_user &&  <>
           <h6 className='mb-4'>Mot de passe</h6>
           <Form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
