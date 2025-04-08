@@ -170,6 +170,7 @@ const { Tr, Th, Td, THead, TBody } = Table
         ],
         [],
     )
+    
     const fetchBanks = async (pageNum: number) => {
         let q = null;
         if (!step){
