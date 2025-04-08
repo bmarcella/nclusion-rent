@@ -116,15 +116,14 @@ const ImageLandlord = ( { lordId, isEdit = false, nextStep, userId } : Props) =>
 
     return (
         <div>
-        
             <div  className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow" >
-            <FormItem label="Type document" invalid={!!error.is} errorMessage={error.message}>
-            <Select placeholder="Please Select" options={DocTypeValues} 
-                    onChange={(option) => { 
-                      setError({ is: false, message: '' });
-                      setTypeDoc(option?.value);
-                    } } /> 
-            </FormItem>
+                <FormItem label="Type document" invalid={!!error.is} errorMessage={error.message}>
+                    <Select placeholder="Please Select" options={DocTypeValues} 
+                        onChange={(option) => { 
+                        setError({ is: false, message: '' });
+                        setTypeDoc(option?.value);
+                        } } /> 
+                </FormItem>
                 <Upload 
                 draggable
                 fileList={uploadedFiles}
@@ -151,13 +150,11 @@ const ImageLandlord = ( { lordId, isEdit = false, nextStep, userId } : Props) =>
                     </div>
                 </Upload>
             </div>
-           
            { uploadedFiles.length>0 &&  (<div className="mt-6">
                 `<Button  variant="solid" loading={loading} icon={<HiOutlineInboxIn />}  onClick={upload} >
                         { isEdit? "Ajouter" : 'Suivant' }
                 </Button>`
             </div>) }
-
             { isEdit && images.length> 0 &&  ( <ImageLordComp images={images} userId={userId || ''} onDelete={OnDeleteImg} />  )}
         </div>
     )

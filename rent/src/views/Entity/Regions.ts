@@ -1,5 +1,6 @@
 import { BankDoc } from "@/services/Landlord";
-import { getDocs } from "firebase/firestore";
+import { getDocs, orderBy, query, where } from "firebase/firestore";
+import { ListBankSteps } from ".";
 
  
 export type RegionType = {
@@ -294,5 +295,51 @@ export type RegionType = {
   return { regions, values };
   }
 
+
+  interface ReportItem {
+    name: string;
+    steps: string[];
+    values: number[];
+  }
+
+  export const fetchReportPerReport = async () => {
+      
+      
+const report: ReportItem[] = (
+  await Promise.all(
+    Regions.map(async (region) => {
+      const steps: string[] = [];
+      const values: number[] = [];
+
+      await Promise.all(
+        ListBankSteps.map(async (step) => {
+          const q = query(
+            BankDoc,
+            orderBy("createdAt", "desc"),
+            where("step", "==", step.key),
+            where("id_region", "==", region.id)
+          );
+
+          const snapshot = await getDocs(q);
+
+          steps.push(step.label);
+          values.push(snapshot.size);
+        })
+      );
+
+      // Skip region if all values are 0
+      if (values.every((v) => v === 0)) return null;
+
+      return {
+        name: region.label,
+        steps,
+        values,
+      };
+    })
+  )
+).filter((item): item is ReportItem => item !== null); // Remove nulls and narrow the type
+          return    report;
+        
+        };
 
   
