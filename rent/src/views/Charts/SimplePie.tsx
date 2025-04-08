@@ -23,7 +23,7 @@ const SimplePie = ({ labels, series , height = 300, ptype="pie"}: Props) => {
                                 width: 200,
                             },
                             legend: {
-                                position: 'bottom',
+                                position: 'center',
                             },
                         },
                     },
