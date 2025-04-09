@@ -293,7 +293,8 @@
       "assist_manager": "Assistant manager",
       "operation": "Opérations",
       "admin": "Administrateur",
-      "fields_ops": "Opérations terrain"
+      "fields_ops": "Opérations terrain",
+      "vendor_management" : "Géstion des vendeurs"
     },
     "steps": {
       "stepName": "Etape",

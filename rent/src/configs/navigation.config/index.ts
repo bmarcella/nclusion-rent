@@ -54,6 +54,16 @@ const navigationConfig: NavigationTree[] = [
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager"],
                 subMenu: [],
+            },
+            {
+                key: 'bankMenu.vendor',
+                path: '/bank/approval',
+                title: 'Vendor Manament',
+                translateKey: 'nav.bankMenu.vendor',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager"],
+                subMenu: [],
             }
         ],
     },

@@ -27,13 +27,14 @@ import { fr } from 'date-fns/locale';
 import useTranslation from '@/utils/hooks/useTranslation';
 import { getRegionsByValues } from '@/views/Entity/Regions';
 import { hasAuthority } from '@/utils/RoleChecker';
+import { CgClose } from 'react-icons/cg';
 
 const { Tr, Th, Td, THead, TBody } = Table
   const PAGE_SIZE = 0;
   const pageSizeOption = [
-    { value: 20, label: '20 / page' },
-    { value: 30, label: '30 / page' },
-    { value: 40, label: '40 / page' },
+    { value: 50, label: '50 / page' },
+    { value: 100, label:'100 / page' },
+    { value: 200, label: '40 / page' },
     { value: 50, label: '50 / page' },
 ]
 
@@ -183,6 +184,10 @@ interface Props {
                             <Button variant="solid" size="sm" onClick={() => openDialog(row.original)}>
                                 <PiEyeLight />
                             </Button>
+                            <Button size="sm" className="m-2 hover:text-red-800 dark:hover:bg-red-600 border-0 hover:ring-0" onClick={() => openDialog(row.original)}>
+                              <CgClose />
+                            </Button>
+                           
                         </div> }
                     </div>
                 ),
