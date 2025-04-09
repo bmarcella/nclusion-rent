@@ -5,7 +5,7 @@ import Dialog from '@/components/ui/Dialog'
 import { useState } from 'react';
 import { CgClose } from 'react-icons/cg'
 
-function YesOrNoPopup( { id,  Ok , title= "Voules-vous vraiment suprimer ceci ?", desc=""}: any) {
+function YesOrNoPopup( { id,  Ok , title= "Voulez-vous vraiment supprimer ceci ?", desc=""}: any) {
     const [ynOpen, setYnOpen] = useState(false); 
             const openDialogYON = () => { 
                 setYnOpen(true);
