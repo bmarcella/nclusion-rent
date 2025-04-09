@@ -37,12 +37,14 @@ export interface Proprio extends Person {
   tasks?: Tasks[]; 
   banks?: Bank[]; 
 }
-
+export type TaskState = 'pending' | 'in-progress' | 'completed';
 interface Tasks {
     id: string;
-    Bank: string;
-    date_debut: Date;
-    date_fin: Date;
+    taskName: string;
+    assignee: string;
+    startDate: string;
+    endDate: string;
+    state: TaskState;
     montant_total: number;
     description: string;
     montant_initial: number;
@@ -50,6 +52,22 @@ interface Tasks {
     createdAt: Date;
 }
 export const internetProviders = ["internetProviders.natcom", "internetProviders.digicel", "internetProviders.none"] as const;
+export const roofTypes = [
+  "roof.sheetMetal",       // Tôle
+  "roof.concrete",         // Béton
+  "roof.tile",             // Tuile
+  "roof.thatch",           // Chaume
+  "roof.metalTiles",       // Tuiles métalliques
+  // "roof.fibrocement",      // Fibrociment
+  // "roof.zinc",             // Zinc
+  "roof.wood",             // Bois
+  "roof.plastic",          // Plastique
+  "roof.galvanizedSteel",  // Tôle galvanisée
+  "roof.corrugatedSteel",  // Tôle ondulée
+  "roof.asphalt",          // Asphalte / Bitume
+  "roof.elastomer",        // Membrane élastomère
+  "roof.slate"             // Ardoise
+] as const;
 export const verifyOwners = [
   "verifyOwners.siblings",
   "verifyOwners.neighbors",
@@ -243,7 +261,25 @@ export type BuildingStability = typeof buildingStabilities[number];
 export type ClientVisibility = typeof clientVisibilities[number];
 export type LotteryCompetition = typeof lotteryCompetitions[number];
 export type NonRenewalReason = typeof nonRenewalReasons[number];
-
+export type RoofType = typeof roofTypes[number];
+export type StepDecision = {
+  id?: string;
+  bankId?: string;
+  createdBy?: string;
+  createdAt?: Date;
+  step?: BankStep;
+};
+export type BankLease  = {
+  id?: string;
+  bankId?: string;
+  date_debut?: Date;
+  date_fin?: Date;
+  montant_total?: number;
+  createdBy?: string;
+  createdAt?: Date;
+  structure_payment?: PaymentStructureType;
+  payment_method?: PaymentMethod[];
+};
 export type HistoricDecision = {
   id?: string;
   bankId?: string;
@@ -253,7 +289,10 @@ export type HistoricDecision = {
   status?: FinalDecisionStatus;
   reason_why?: string
 };
-
+export const FrenchNumber = ({ number }: { number: number }) => {
+  const formatted = new Intl.NumberFormat('fr-FR').format(number);
+  return formatted;
+};
 export interface Bank {
     id?: string;
     bankName: string;
@@ -262,6 +301,8 @@ export interface Bank {
     yearCount: number | string;
     date:  string;
     rentCost: number | string;
+    superficie?: number | string;
+    nombre_chambre?: number | string;
     addresse : string;
     landlord: string | any;
     reference?:  string;
@@ -293,7 +334,6 @@ export interface Bank {
         whoReferred?: WhoReferred[];
         locationArea?: LocationArea;
     }
-   
     demoDetails? : {
         internetService?: InternetProvider []; //done
         previousUse?: PreviousUse [];
@@ -303,7 +343,11 @@ export interface Bank {
         clientVisibility?: ClientVisibility[]; 
         populationInArea?: PopulationInArea; // d
         expectedRevenue?: ExpectedRevenue; // d
-        buildingStability?: BuildingStability; // d
+        buildingStability?: BuildingStability; 
+        toilet?: boolean ;
+        water?: boolean;
+        electricity?: boolean;
+        airConditioning?: boolean;// d
     }
    
     securityDetails? : {
@@ -311,6 +355,7 @@ export interface Bank {
         openHour?: OpenHour;
         closeHour?: CloseHour;
         currentSecurity?: CurrentSecurity[];
+        roof?:RoofType;
     }
 
     renovationDetails? : {
@@ -320,12 +365,6 @@ export interface Bank {
     }
 }
 
-export interface Comments {
-  bank: Bank
-  createdBy?: string;
-  createdAt?: Date;
-  text?: string;
-};
 
 export const getEmptyPartialBank = () : any => {
   return {
@@ -333,6 +372,8 @@ export const getEmptyPartialBank = () : any => {
     id_region: '',
     city: '',
     addresse: ' ',
+    superficie: '',
+    nombre_chambre: '',
     yearCount: '',
     date: new Date().toDateString(),
     rentCost: '',
@@ -379,13 +420,18 @@ export const getBlankBank  = (data: any, uuid: string, location: any): Bank => {
           populationInArea: '',
           expectedRevenue: '',
           buildingStability: '',
-          bankEntrance: []
+          bankEntrance: [],
+          toilet: false,
+          water: false,
+          electricity: false,
+          airConditioning: false,
         },
         securityDetails: {
           AreaStability: '',
           openHour: '',
           closeHour: '',
           currentSecurity: [],
+          roof:''
         },
         renovationDetails: {
           neededSecurity: [],
@@ -435,17 +481,17 @@ export const ListBankSteps = [
 
   },
   {
-    key: "bankSteps.rejected",
-    label: "Rejeté",
-    title: "Banque rejetée",
-    description: "La banque a été rejetée et nécessite une approbation.",
-    authority : []
-  },
-  {
     key: "bankSteps.pending",
     label: "Considération",
     title: "Banque en attente",
     description: "La banque est en attente d'approbation.",
+    authority : []
+  },
+  {
+    key: "bankSteps.rejected",
+    label: "Rejeté",
+    title: "Banque rejetée",
+    description: "La banque a été rejetée et nécessite une approbation.",
     authority : []
   },
   {
@@ -456,3 +502,48 @@ export const ListBankSteps = [
     authority : []
   }
 ];
+
+
+export const ListBankStepsDetails= [
+  {
+    key: "bankSteps.needApproval",
+    label: "Validation",
+    title: "Validation requise",
+    description: "La banque nécessite une validation avant de passer à l'étape suivante.",
+    authority : []
+  },
+  {
+    key: "bankSteps.needApprobation",
+    label: "Approbation",
+    title: "Approbation requise",
+    description: "La banque attend une approbation officielle.",
+    authority : []
+  },
+  {
+    key: "bankSteps.needContract",
+    label: "Contrat",
+    title: "Contrat requis",
+    description: "La banque a besoin de signer un contrat pour continuer le processus.",
+    authority : []
+  },
+  {
+    key: "bankSteps.needRenovation",
+    label: "Rénovation",
+    title: "Rénovation requise",
+    description: "La banque nécessite des rénovations avant d’être opérationnelle.",
+    authority : []
+  },
+  {
+    key: "bankSteps.readyToUse",
+    label: "Disponible",
+    title: "Banque prête",
+    description: "La banque est prête à être utilisée.",
+
+  }
+];
+
+export const getEndDateYear = (date: string, y : any ) => {
+  const newDate = new Date(date);
+  newDate.setFullYear(newDate.getFullYear() + y);
+  return newDate as Date;
+}

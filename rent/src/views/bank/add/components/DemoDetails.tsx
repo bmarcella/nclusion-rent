@@ -27,6 +27,10 @@ const schema = z.object({
   expectedRevenue: z.string(),
   buildingStability: z.enum(buildingStabilities),
   bankEntrance: z.array(z.enum(bankEntrances)), // bankEntrance
+  // toilet: z.boolean().optional(),
+  // water: z.boolean().optional(),
+  // electricity: z.boolean().optional(),
+  // airConditioning: z.boolean().optional(),
 });
 
 export type FormValuesInfo = z.infer<typeof schema>;

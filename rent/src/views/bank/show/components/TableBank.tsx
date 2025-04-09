@@ -170,7 +170,7 @@ const { Tr, Th, Td, THead, TBody } = Table
         ],
         [],
     )
-    
+
     const fetchBanks = async (pageNum: number) => {
         let q = null;
         if (!step){
@@ -370,7 +370,7 @@ const { Tr, Th, Td, THead, TBody } = Table
 
              <Dialog
                 isOpen={dialogIsOpen}
-                width={ width * 0.4 }
+                width={ width * 0.9 }
                 height={height * 0.9}
                 onClose={onDialogClose}
                 >

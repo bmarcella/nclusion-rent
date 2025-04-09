@@ -7,7 +7,8 @@ import {
   areaStabilities,
   openHours,
   closeHours,
-  currentSecurities
+  currentSecurities,
+  roofTypes
 } from '@/views/Entity';
 import { useEffect, useState } from 'react';
 import useTranslation from '@/utils/hooks/useTranslation';
@@ -17,6 +18,7 @@ const schema = z.object({
   openHour: z.enum(openHours),
   closeHour: z.enum(closeHours),
   currentSecurity: z.array(z.enum(currentSecurities)),
+  roof: z.enum(roofTypes),
 });
 
 export type SecurityFormValues = z.infer<typeof schema>;
@@ -42,6 +44,7 @@ const SecurityDetails = ({ nextStep, defaultValues, isEdit=false }: Props) => {
       openHour: defaultValues?.openHour,
       closeHour: defaultValues?.closeHour,
       currentSecurity: defaultValues?.currentSecurity,
+      roof: defaultValues?.roof,
     },
   });
 
@@ -51,6 +54,7 @@ const SecurityDetails = ({ nextStep, defaultValues, isEdit=false }: Props) => {
             openHour: defaultValues?.openHour,
             closeHour: defaultValues?.closeHour,
             currentSecurity: defaultValues?.currentSecurity ,
+            roof: defaultValues?.roof,
           });
   }, [defaultValues, reset]);
 
@@ -145,6 +149,28 @@ const SecurityDetails = ({ nextStep, defaultValues, isEdit=false }: Props) => {
               </Checkbox>
             ))}
           </Checkbox.Group>
+        )}
+      />
+    </FormItem>
+
+    
+    <FormItem
+      label={t('bank.roof.label')}
+      invalid={!!errors.roof}
+      errorMessage={errors.roof?.message}
+      className="mb-6"
+    >
+      <Controller
+        name="roof"
+        control={control}
+        render={({ field }) => (
+          <Radio.Group vertical value={field.value} onChange={(value) => field.onChange(value)}>
+            {roofTypes.map((option, key) => (
+              <Radio key={key} value={option}>
+                {t(`bank.${option}`)}
+              </Radio>
+            ))}
+          </Radio.Group>
         )}
       />
     </FormItem>

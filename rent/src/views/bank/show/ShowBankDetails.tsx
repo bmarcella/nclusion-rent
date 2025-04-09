@@ -4,15 +4,15 @@ import SubmissionReview from "./SubmissionReview";
 import Dialog from "@/components/ui/Dialog";
 import Button from "@/components/ui/Button";
 import { useEffect, useState } from "react";
-import { addDecisionHistory, getBankById, updateBankById } from "@/services/firebase/BankService";
-import {  Bank, BankStep, finalDecisionStatuses, HistoricDecision } from "@/views/Entity";
+import { addBankLease, addDecisionHistory, addStepsHistory, getBankById, updateBankById } from "@/services/firebase/BankService";
+import {  Bank, BankLease, BankStep, finalDecisionStatuses, getEndDateYear, HistoricDecision, StepDecision } from "@/views/Entity";
 import { useSessionUser } from "@/store/authStore";
 
 export const ShowBankDetailsBase= () => {
   const { bankId } = useParams();
   const [dialogIsOpen, setIsOpen] = useState(false)
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
-  const [bank, setBank] = useState<any>(null);
+  const [bank, setBank] = useState<Bank>();
   const [loading, setLoading] = useState(true);
   const { userId } = useSessionUser((state) => state.user);
   const [nameDialog, setDialogName] = useState<any>(null);
@@ -78,6 +78,11 @@ export const ShowBankDetailsBase= () => {
       status: finalDecisionStatuses[0],
       reason_why:  (data.text) ? data.text : 'Aucune raison fournie',
     } as HistoricDecision;
+    const step = {
+      createdBy: userId,
+      createdAt: new Date(),
+      step: "bankSteps.needApproval" as BankStep,
+    } as StepDecision;
     const reject = {
        reject: false,
        approve: true,
@@ -86,16 +91,70 @@ export const ShowBankDetailsBase= () => {
        finalDecision: dec
     };
     SaveHistory(reject, dec);
+    SaveSteps (step);
   }
 
-  const onPermitOk = async () => {
+  const onPermitOk = async () => {  
+    const step = {
+      createdBy: userId,
+      createdAt: new Date(),
+      step: "bankSteps.needApprobation" as BankStep,
+    } as StepDecision;
     const reject = {
        step : "bankSteps.needContract" as BankStep,
     };
     SaveHistory(reject);
+    SaveSteps (step);
+  }
+  const onContratOk = async () => {
+    const step = {
+      createdBy: userId,
+      createdAt: new Date(),
+      step:  "bankSteps.needContract" as BankStep,
+    } as StepDecision;
+    const reject = {
+      step : "bankSteps.needRenovation" as BankStep,
+    };
+    const lease : BankLease = {
+      createdBy: userId || '',
+      createdAt: new Date(),
+      date_debut : (bank?.date) ? new Date(bank.date) : new Date(),
+      date_fin : (bank) ? getEndDateYear(bank?.date, Number(bank.yearCount)) : new Date(),
+      montant_total: Number(bank?.rentCost),
+      bankId: bankId,
+      structure_payment: bank?.rentDetails?.paymentStructure,
+      payment_method: bank?.rentDetails?.paymentMethod,
+    };
+    SaveLease(lease);
+    SaveHistory(reject);
+    SaveSteps (step);
   }
 
-  const SaveHistory = async (reject: any, dec? : HistoricDecision  ) => {
+  const onRenovOk = async () => {
+    const step = {
+      createdBy: userId,
+      createdAt: new Date(),
+      step: "bankSteps.needRenovation"  as BankStep,
+    } as StepDecision;
+    const reject = {
+       step : "bankSteps.readyToUse" as BankStep,
+    };
+    SaveHistory(reject);
+    SaveSteps (step);
+  }
+
+  const SaveLease = async (l: any  ) => {
+        l.bankId = bankId;
+        await addBankLease(l);
+  }
+  const SaveSteps = async (step: StepDecision  ) => {
+    if(step) { 
+      step.bankId = bankId;
+      await addStepsHistory(step);
+    }
+}
+
+  const SaveHistory = async (reject: any, dec? : HistoricDecision   ) => {
     if (bankId) await updateBankById(bankId, reject).then(async () => {
       if(dec) { 
         dec.bankId = bankId;
@@ -116,7 +175,15 @@ export const ShowBankDetailsBase= () => {
   { !bankId && <Navigate to="/" /> }
   return (
     <div>
-      { bankId && <SubmissionReview bankId={bankId} onPermitOk={onPermitOk} onApproveOk = {onApproveOk} onChangeState={ (comp, name) => { openDialog(comp, name) } } onRejectOk={onRejectOk} bank={bank}  userId={userId} onPendingOk={onPendingOk}/> }
+      { bankId && <SubmissionReview bankId={bankId} 
+      onPermitOk={onPermitOk} 
+      onApproveOk = {onApproveOk} 
+      onPendingOk={onPendingOk}
+      onRejectOk={onRejectOk}
+      onContratOk={onContratOk}
+      onRenovOk={onRenovOk}
+      onChangeState={ (comp, name) => { openDialog(comp, name) } } 
+       bank={bank}  userId={userId} /> }
         <Dialog
                 isOpen={dialogIsOpen}
                 onClose={onDialogClose}

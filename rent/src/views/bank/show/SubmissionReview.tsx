@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 
@@ -12,34 +13,45 @@ import ImageGallery, { BankImage } from "./components/ImageGallery";
 import ImageLordComp, { LordImage } from "./components/ImageLord";
 import BankInfo from "./components/BankInfo";
 import Rejected from "./reject/Rejected";
-import { Bank } from "@/views/Entity";
+import { Bank, ListBankStepsDetails } from "@/views/Entity";
 import generatePDF from 'react-to-pdf';
 import { PdfOps } from "./pdfOps";
 import { useReactToPrint } from "react-to-print";
 import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
 import { useSessionUser } from "@/store/authStore";
+import LeaseContractForm from "./components/LeaseContractForm";
+import { Steps } from "@/components/ui/Steps";
+import { useTranslation } from "@/utils/hooks/useTranslation";
+import { BiPrinter } from "react-icons/bi";
+import TaskManager from "./components/TaskManager";
 
 interface Props {
     bankId: string;
     onRejectOk?: (data: any) => void
     onApproveOk: (data: any) => void ,
+    onContratOk: () => void ,
     onPermitOk: () => void 
+    onRenovOk: () => void,
     onChangeState: (component: React.ReactNode, name?: string) => void;
     onPendingOk: (data: any) => void
     bank?: Bank;
     userId: string
 }
-const SubmissionReview = ( { bankId,  onChangeState, onRejectOk, onPendingOk, onApproveOk, onPermitOk, bank, userId } : Props) => {
+
+const SubmissionReview = ( { bankId,  onChangeState, onRenovOk, onRejectOk, onPendingOk, onApproveOk, onPermitOk, onContratOk, bank, userId } : Props) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const reactToPrintFn = useReactToPrint({ contentRef });
     const [images, setImages] = useState<BankImage[]>([])
     const [lImages, setLImages] = useState<LordImage[]>([])
     const [pdf, setPdf] = useState(false);
-    const [h, setH] = useState(0);
-    const [h2, setH2] = useState(0);
+    const [contrat, setContrat] = useState(false);
+    const [h, setH] = useState(null);
+    const [h2, setH2] = useState(null);
+    const [h3, setH3] = useState(null);
     const [pConfig, setPConfig] = useState(false);
-    const {  authority } = useSessionUser((state) => state.user);
+    const { authority } = useSessionUser((state) => state.user);
+    const { t } = useTranslation();
     console.log("Bank ID: ", bank);
        useEffect(() => {
              getBankImages(bankId).then((imgs: BankImage[]) => {
@@ -92,34 +104,64 @@ const SubmissionReview = ( { bankId,  onChangeState, onRejectOk, onPendingOk, on
  
   return (
     <>
-    <div className="flex gap-2 pt-6 pl-6 space-y-6"  >
+    <div className="flex gap-2 pt-6  space-y-6 rounded bg-white pl-1 mb-4 pr-1"  >
     <div className="w-full"  >
-    <Button loading={pdf} variant="solid" onClick={() => {
+    {/* <Button loading={pdf} variant="solid" onClick={() => {
         pdfExport()
-     }}>Download PDF</Button>
-      <Button loading={pdf} variant="solid"  className=" ml-4" onClick={() => {
+     }}>Download PDF</Button> */}
+      <Button loading={pdf} variant="solid"  className=" ml-4" icon={<BiPrinter/>} onClick={() => {
         print()
-     }}>Print </Button>
+     }}> </Button>
      </div>
         <div>
             <Checkbox defaultChecked={false} onChange={(e)=>{
               setPConfig(e);
             }}>
-                Print setthing
+               Outils
             </Checkbox>
         </div>
-       { pConfig &&  <div className="grid grid-cols-1 md:grid-cols-1 gap-4  rounded bg-white p-2">
-        <Input  type="number" value={h} placeholder="Margin details" onChange={ (v: any)=> { 
+        <div>
+            { bank && bank.step!='bankSteps.needContract' && <Checkbox defaultChecked={false} onChange={(e)=>{
+              setContrat(e);
+            }}>
+               Contrat
+            </Checkbox>} 
+        </div>
+       { pConfig && 
+       
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4  rounded bg-white p-2 mb-6">
+        <Input  type="number" value={h3} placeholder="Margin Contrats" onChange={ (v: any)=> { 
+           setH3(v.target.value);
+        }} />
+        <Input  type="number" value={h} placeholder="Margin Pictures" onChange={ (v: any)=> { 
         setH(v.target.value);
         }} />
-         <Input  type="number" value={h2} placeholder="Margin comments" onChange={ (v: any)=> { 
+         <Input  type="number" value={h2} placeholder="Margin Details" onChange={ (v: any)=> { 
           setH2(v.target.value);
         }} />
         </div>} 
      
     </div>
+
+    { (ListBankStepsDetails.findIndex(step => step.key == bank?.step)!=-1) && 
+    <div className="w-full overflow-x-auto  rounded-lg bg-white dark:bg-gray-800 mb-6 p-1 pt-6">  
+        <Steps
+            current={ListBankStepsDetails.findIndex(step => step.key == bank?.step)}
+            className="w-full mb-6"
+          >
+            {ListBankStepsDetails.map((step, index) => (
+              <Steps.Item key={index} title={t('bank.' + step.key)} />
+            ))}
+          </Steps>
+        </div> } 
  
      <div className="p-6 space-y-6"  ref={contentRef}>
+
+     { bank && bank.step=='bankSteps.needRenovation' && <TaskManager bank={bank} /> }
+
+      { bank && (contrat || bank.step=='bankSteps.needContract') && <LeaseContractForm bank={bank} ></LeaseContractForm> }
+
+      {  (pdf || pConfig) && <div className={ (pConfig && !pdf ) ? "w-full border" : "w-full" } style={{ height: h3+'px' }}></div> }
      <h2 className="text-2xl font-bold mb-2 text-pink-600">Bank Location</h2>
       {/* Map section */}
       <div className="w-full h-100 mb-6 rounded-lg shadow-lg overflow-hidden">
@@ -165,28 +207,39 @@ const SubmissionReview = ( { bankId,  onChangeState, onRejectOk, onPendingOk, on
       </div> 
 
       {/* Action buttons */}
-        <div className="flex justify-around items-center pt-6">
-        {  !bank?.approve &&  !pdf && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
+      { !pdf &&  
+      <div className="flex justify-around items-center pt-6">
+         { (bank &&  bank.step=='bankSteps.needRenovation')  && bank?.approve && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
+         onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onContratOk() }} />, "Approbation")}
+        >
+          <PiCheckFatFill /> Rénovation terminée
+        </Button> }
+        { (bank &&  bank.step=='bankSteps.needContract')  && bank?.approve && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
+         onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onContratOk() }} />, "Approbation")}
+        >
+          <PiCheckFatFill /> Contrat Signé
+        </Button> }
+        {  !bank?.approve  && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ (data) => { onApproveOk(data) }} />, "Approbation")}
         >
           <PiCheckFatFill /> Validé
         </Button> }
-        {  canApprove() &&  !pdf && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
+        {  canApprove() && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onPermitOk() }} />, "Approbation")}
         >
-          <PiCheckFatFill /> Approbation
+          <PiCheckFatFill /> Approuvé
         </Button> }
-       {  !bank?.reject &&  !pdf &&<Button className="bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1" 
+       {  !bank?.reject  &&<Button className="bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1" 
           onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={onRejectOk} />)}
           >
-          <PiThumbsDownFill/> REJECTED
+          <PiThumbsDownFill/> Rejeté
         </Button> }
-        {  !bank?.pending &&   !pdf && <Button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full" 
+        {  !bank?.pending &&  <Button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full" 
           onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ (data) => { onPendingOk(data) }} />, "Consideration")}
           >
-          Pending
+          Attente
         </Button> }
-      </div> 
+      </div> }
     </div>
     </>
   
