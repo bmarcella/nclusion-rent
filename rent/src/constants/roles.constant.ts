@@ -17,7 +17,7 @@ export const VENDOR = 'vendeur'
 export const PROPRIETARY = 'proprietaire'
 export const REFERENCE = 'reference'
 
-export const USER_ROLES = ["vendeur", "proprietaire", "reference", "agent_immobilier", "coordonator", "assist_coordonator", "manager", "assist_manager", "operation", "admin", "fields_ops"] as const;
+export const USER_ROLES = ["vendeur", "proprietaire", 'vendor_management',  "reference", "agent_immobilier", "coordonator", "assist_coordonator", "manager", "assist_manager", "operation", "admin", "fields_ops"] as const;
 export type  USER_ROLE = typeof USER_ROLES[number];
 
  export const manageAuth = async (auth : string, proprio: any, t : any )=> {
