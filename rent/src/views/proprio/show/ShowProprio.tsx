@@ -27,7 +27,6 @@ import { fr } from 'date-fns/locale';
 import useTranslation from '@/utils/hooks/useTranslation';
 import { getRegionsByValues } from '@/views/Entity/Regions';
 import { hasAuthority } from '@/utils/RoleChecker';
-import { CgClose } from 'react-icons/cg';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
 import { deleteLord } from '@/services/firebase/BankService';
 
@@ -189,7 +188,7 @@ interface Props {
                 cell: ({ row }) => (
                     <div className="flex items-center">
                         { row.original.type_person!="admin" && <div>
-                            <Button variant="solid" size="sm" onClick={() => openDialog(row.original)}>
+                            <Button variant="solid" size="sm" onClick={() => openDialog(row?.original)}>
                                 <PiEyeLight />
                             </Button>
                            { !row.original.email && <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}

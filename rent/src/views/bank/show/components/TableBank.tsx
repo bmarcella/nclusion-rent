@@ -38,7 +38,7 @@ import UserName from './UserName';
 import { getRegionIds } from '@/views/Entity/Regions';
 import classNames from 'classnames';
 import { HiHome } from 'react-icons/hi';
-import YesOrNoPopup from '@/views/vendor/YesOrNoPopup';
+import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
 import { deleteBank } from '@/services/firebase/BankService';
 
 const { Tr, Th, Td, THead, TBody } = Table
