@@ -33,12 +33,15 @@ const schema: ZodType<Partial<Bank>>  = z.object({
   yearCount: z.number().min(1, "Required").max(10, "Max 10 years"),
   date: z.string(),
   rentCost: z.number(),
+  superficie: z.number().optional(),
+  nombre_chambre: z.number().optional(),
   addresse: z.string().optional(),
   id_region: z.number().min(1, "Required"),
   reference: z.string().optional(),
   landlord: z.string(),
   isrefSameAsLandlord: z.boolean(),
   urgency: z.boolean(),
+
 })
 export type FormValuesInfo = z.infer<typeof schema>;
 
@@ -137,6 +140,8 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
         defaultValues: {
           bankName: defaultValues?.bankName,
           city: defaultValues?.city,
+          superficie: defaultValues?.superficie,
+          nombre_chambre: defaultValues?.nombre_chambre,
           yearCount: defaultValues?.yearCount,
           date: defaultValues?.date,
           rentCost: defaultValues?.rentCost,
@@ -184,6 +189,8 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           bankName: defaultValues?.bankName,
           city: defaultValues?.city,
           yearCount: defaultValues?.yearCount,
+          superficie: defaultValues?.superficie,
+          nombre_chambre: defaultValues?.nombre_chambre,
           date: defaultValues?.date,
           rentCost: defaultValues?.rentCost,
           addresse: defaultValues?.addresse,
@@ -250,6 +257,20 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
 
       <FormItem label={t('bank.yearCount')} invalid={!!errors.yearCount} errorMessage={errors.yearCount?.message}>
         <Controller name="yearCount" control={control} render={({ field }) =>
+          <Input type="number" {...field}
+            onChange={(e) => field.onChange(Number(e.target.value))}
+          />
+        } />
+      </FormItem>
+      <FormItem label={t('bank.superficie')} invalid={!!errors.superficie} errorMessage={errors.superficie?.message}>
+        <Controller name="superficie" control={control} render={({ field }) =>
+          <Input type="number" {...field}
+            onChange={(e) => field.onChange(Number(e.target.value))}
+          />
+        } />
+      </FormItem>
+      <FormItem label={t('bank.nombre_chambre')} invalid={!!errors.nombre_chambre} errorMessage={errors.nombre_chambre?.message}>
+        <Controller name="nombre_chambre" control={control} render={({ field }) =>
           <Input type="number" {...field}
             onChange={(e) => field.onChange(Number(e.target.value))}
           />

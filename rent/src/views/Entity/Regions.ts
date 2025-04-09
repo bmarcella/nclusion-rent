@@ -263,6 +263,10 @@ export type RegionType = {
     }
   ];
 
+  export const getRegionsById = (values: number): RegionType => {
+    return Regions.find((region: RegionType)  => values == Number(region.value)) as RegionType;
+  };
+
   export const getRegionsByValues = (values: number[]): RegionType[] => {
     return Regions.filter((region: RegionType)  => values.includes(Number(region.value)));
   };
@@ -303,8 +307,7 @@ export type RegionType = {
   }
 
   export const fetchReportPerReport = async () => {
-      
-      
+    
 const report: ReportItem[] = (
   await Promise.all(
     Regions.map(async (region) => {

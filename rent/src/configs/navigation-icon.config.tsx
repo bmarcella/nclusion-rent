@@ -7,7 +7,6 @@ import {
     PiBagSimpleDuotone,
     PiBankDuotone,
     PiUsers,
-    PiToolbox,
 } from 'react-icons/pi'
 import type { JSX } from 'react'
 import { BiCog } from 'react-icons/bi'

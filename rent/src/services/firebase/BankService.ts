@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { addDoc, CollectionReference, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
-import { bankPicturesDoc, getBankDoc, hdDoc, LandlordPicturesDoc } from "../Landlord";
+import { BankLeaseDoc, bankPicturesDoc, getBankDoc, hdDoc, hStepsDoc, LandlordPicturesDoc } from "../Landlord";
 import { BankImage } from "@/views/bank/show/components/ImageGallery";
 import { ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 import { storage } from "./FirebaseStorage";
@@ -27,13 +27,36 @@ export const getBankById = async (bankId: string) => {
     }
   };
 
+  export const addStepsHistory = async ( data: any) => {
+    try {
+         const docRef = await addDoc(hStepsDoc, data);
+        return docRef.id;
+      } catch (error) {
+       console.error("Error adding document: ", error);
+       throw new Error("Error adding document: " + error);
+       return false;
+    }
+  };
+
+
   export const addDecisionHistory = async ( data: any) => {
     try {
          const docRef = await addDoc(hdDoc, data);
         return docRef.id;
       } catch (error) {
-       console.error("Error updating document: ", error);
-       throw new Error("Error updating document: " + error);
+       console.error("Error adding document: ", error);
+       throw new Error("Error adding document: " + error);
+       return false;
+    }
+  };
+
+  export const addBankLease= async ( data: any) => {
+    try {
+         const docRef = await addDoc(BankLeaseDoc, data);
+        return docRef.id;
+      } catch (error) {
+       console.error("Error adding document: ", error);
+       throw new Error("Error adding document: " + error);
        return false;
     }
   };
