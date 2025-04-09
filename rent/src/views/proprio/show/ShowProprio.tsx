@@ -27,14 +27,17 @@ import { fr } from 'date-fns/locale';
 import useTranslation from '@/utils/hooks/useTranslation';
 import { getRegionsByValues } from '@/views/Entity/Regions';
 import { hasAuthority } from '@/utils/RoleChecker';
+import { CgClose } from 'react-icons/cg';
+import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
+import { deleteLord } from '@/services/firebase/BankService';
 
 const { Tr, Th, Td, THead, TBody } = Table
   const PAGE_SIZE = 0;
   const pageSizeOption = [
-    { value: 20, label: '20 / page' },
-    { value: 30, label: '30 / page' },
-    { value: 40, label: '40 / page' },
     { value: 50, label: '50 / page' },
+    { value: 100, label:'100 / page' },
+    { value: 200, label: '200 / page' },
+    { value: 500, label: '500 / page' },
 ]
 
 type Option = {
@@ -61,15 +64,21 @@ interface Props {
     const { userId, authority } = useSessionUser((state) => state.user);
     const { t } = useTranslation();
     const { width, height } = useWindowSize();
-
-        const openDialog = (e: Proprio) => {
+    
+        const openDialog = (e: string) => {
             setEnt(e);
             setIsOpen(true)
+        }
+        const yes  = async  (idToDel: string) => {
+            await deleteLord(idToDel || '');
+            setData(prev => prev.filter(item => item.id !== idToDel));
         }
     
         const onDialogClose = () => {
             setIsOpen(false)
         }
+
+      
    
 
         const columns = useMemo<ColumnDef<Proprio>[]>(() => {
@@ -183,6 +192,8 @@ interface Props {
                             <Button variant="solid" size="sm" onClick={() => openDialog(row.original)}>
                                 <PiEyeLight />
                             </Button>
+                           { !row.original.email && <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
+                           
                         </div> }
                     </div>
                 ),
@@ -362,6 +373,8 @@ interface Props {
           </div>
         </div>
 
+      
+
         <Dialog
                 isOpen={dialogIsOpen}
                 width={width*0.9}
@@ -383,7 +396,7 @@ interface Props {
                     
                     </div>
                 </div>
-          </Dialog>
+        </Dialog>
        
        
       </div>
