@@ -37,14 +37,13 @@ import UserName from './UserName';
 import { getRegionIds } from '@/views/Entity/Regions';
 import classNames from 'classnames';
 import { HiHome } from 'react-icons/hi';
+import YesOrNoPopup from '@/views/vendor/YesOrNoPopup';
+import { deleteBank } from '@/services/firebase/BankService';
 
 const { Tr, Th, Td, THead, TBody } = Table
-  const PAGE_SIZE = 0;
-  const pageSizeOption = [
-    { value: 100, label: '20 / page' },
-    { value: 200, label: '30 / page' },
-    { value: 400, label: '40 / page' },
-    { value: 500, label: '50 / page' },
+const pageSizeOption = [
+    { value: 100, label: '100 / page' },
+    { value: 200, label: '200 / page' },
 ]
 
    type Option = {
@@ -79,6 +78,10 @@ const { Tr, Th, Td, THead, TBody } = Table
     const onDialogClose = () => {
         setIsOpen(false)
     }
+      const yes  = async  (idToDel: string) => {
+                await deleteBank(idToDel || '');
+                setBanks(prev => prev.filter(item => item.id !== idToDel));
+      }
 
     const columns = useMemo<ColumnDef<any>[]>(
         () => [
@@ -158,12 +161,14 @@ const { Tr, Th, Td, THead, TBody } = Table
                         <Button variant="solid"  size="sm" onClick={() => openDialog(row.original)}>
                             <PiEyeLight />
                          </Button>
+                         {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
                     </div>);
                  else return (
-                    <div className="min-w-[160px]">
+                    <div>
                          <Button variant="solid"  size="sm" className="ml-2" onClick={() => navigate("/bank/"+row.original.id) }>
                             <PiCheck />
                          </Button>
+                         {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
                     </div>);
                 } 
             },
