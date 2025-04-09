@@ -32,6 +32,8 @@
       "city": "Ville",
       "addresse": "Adresse",
       "yearCount": "Nombre d'années",
+      "superficie": "Superficie (m2)",
+      "nombre_chambre": "Nombre de chambres",
       "date": "Date",
       "rentCost": "Coût du loyer",
       "reference": "Référence",
@@ -41,6 +43,23 @@
       "createdAt": "Créé à",
       "urgency": "Urgence",
       "reason_why": "Raison pour laquelle",
+      "roof": {
+        "label": "Type de toiture",
+        "sheetMetal": "Tôle",
+        "concrete": "Béton",
+        "tile": "Tuile",
+        "thatch": "Chaume",
+        "metalTiles": "Tuiles métalliques",
+        "fibrocement": "Fibrociment",
+        "zinc": "Zinc",
+        "wood": "Bois",
+        "plastic": "Plastique",
+        "galvanizedSteel": "Tôle galvanisée",
+        "corrugatedSteel": "Tôle ondulée",
+        "asphalt": "Asphalte / Bitume",
+        "elastomer": "Membrane élastomère",
+        "slate": "Ardoise"
+      },
       "internetProviders": {
           "label": "Fournisseurs d'accès à Internet",
           "natcom": "natcom",
@@ -227,6 +246,36 @@
           "needRenovation": "Besoins de rénovations",
           "readyToUse": "Prêt à ouvert",
           "pending": "En consideration"
+        },
+        "toilet": {
+          "label": "Toilettes",
+          "yes": "Oui",
+          "no": "Non"
+        },
+        "water": {
+          "label": "Eau",
+          "yes": "Oui",
+          "no": "Non"
+        },
+        "electricity": {
+          "label": "Electricité",
+          "yes": "Oui",
+          "no": "Non"
+        },
+        "internet": {
+          "label": "Internet",
+          "yes": "Oui",
+          "no": "Non"
+        },
+        "parking": {
+          "label": "Parking",
+          "yes": "Oui",
+          "no": "Non"
+        },
+        "airConditioning": {
+          "label": "Air Conditionée",
+          "yes": "Oui",
+          "no": "Non"
         }
     },
     "entity": {
