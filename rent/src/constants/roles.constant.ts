@@ -2,6 +2,7 @@
 
 import { convertStringToSelectOptions } from "@/views/bank/add/components/InfoBank"
 import { getRegionsByValues, Regions } from "@/views/Entity/Regions"
+import { USER_ROLES } from "@/views/shared/schema"
 
 export const ADMIN = 'admin'
 export const AGENT_IMMOBILLIER= 'agent_immobilier'
@@ -17,8 +18,7 @@ export const VENDOR = 'vendeur'
 export const PROPRIETARY = 'proprietaire'
 export const REFERENCE = 'reference'
 
-export const USER_ROLES = ["vendeur", "proprietaire", 'vendor_management',  "reference", "agent_immobilier", "coordonator", "assist_coordonator", "manager", "assist_manager", "operation", "admin", "fields_ops"] as const;
-export type  USER_ROLE = typeof USER_ROLES[number];
+
 
  export const manageAuth = async (auth : string, proprio: any, t : any )=> {
     let regions : any[] = Regions;

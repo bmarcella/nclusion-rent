@@ -1,10 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import  { use, useEffect, useState } from 'react'
+import  { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-
 import Button from '@/components/ui/Button'
 import { Form, FormItem } from '@/components/ui/Form'
 import { Input } from '@/components/ui/Input'
@@ -14,37 +13,22 @@ import { Landlord } from '@/services/Landlord'
 import Alert from '@/components/ui/Alert'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import Select from '@/components/ui/Select'
-import { manageAuth, USER_ROLES } from '@/constants/roles.constant'
+import { manageAuth } from '@/constants/roles.constant'
 import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBank'
 import ImageLandlord from '@/views/bank/add/components/ImageLandlord'
 import { useSessionUser } from '@/store/authStore'
 import EndBank from '@/views/bank/add/components/EndBank'
 import { useTranslation } from '@/utils/hooks/useTranslation'
 import { HaitiCities } from '@/services/HaitiCities'
-
+import { ProprioSchema } from '@/views/shared/schema'
 // Zod Schema
-export const personSchema = z.object({
-  id: z.string().optional(),
-  fullName: z.string().min(1, 'Full name is required'),
-  nickName: z.string().optional(),
-  city: z.string().optional(),
-  companyName: z.string().optional(),
-  nif: z.string().min(1, 'NIF is required'),
-  cin: z.string().min(1, 'CIN is required'),
-  address: z.string().min(1, 'Address is required'),
-  phone: z.string().min(1, 'Phone is required'),
-  phone_b: z.string().optional(),
-  website: z.string().optional(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-  documents: z.array(z.any()).optional(),
-  type_person: z.enum(USER_ROLES),
-  regions : z.array(z.number().optional()),
-})
 
-type ProprioFormValues = z.infer<typeof personSchema>
 
-function AddProprioForm() {
+type ProprioFormValues = z.infer<typeof ProprioSchema>
+interface Props {
+   done?: (data: any) => void;
+}
+function AddProprioForm( { done } : Props) {
   const [isSubmitting, setSubmitting] = useState(false);
   const [step, setStep] = useState(0);
   const [ docRef, setDocRef] = useState() as any;
@@ -66,7 +50,7 @@ function AddProprioForm() {
     setValue,
     control,
   } = useForm<ProprioFormValues>({
-    resolver: zodResolver(personSchema),
+    resolver: zodResolver(ProprioSchema),
     defaultValues: {
       id: '',
       fullName: '',
@@ -114,6 +98,7 @@ function AddProprioForm() {
         data.id = docRef.id;
         setDocRef(docRef);
         setLord(data);
+        if(done) done(data);
         console.log("Document written with ID: ", docRef.id);
         setMessage("Landlord added successfully");
       } catch (error) {
@@ -127,11 +112,11 @@ function AddProprioForm() {
   return (
     <>
       <Steps current={step}>
-        <Steps.Item title="Ajouter entité" />
+        <Steps.Item title={"Ajouter "+ ( !done? "entité" : "proprietaire")} />
       </Steps>
 
-      <div className="min-h-screen flex items-center justify-center  mt-6">
-      <div className="w-full max-w-2xl mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
+      <div className="flex w-full justify-center ">
+      <div className="bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
       {message && (
                 <Alert showIcon className="mb-4" type={alert}>
                     <span className="break-all">{message}</span>
@@ -142,7 +127,7 @@ function AddProprioForm() {
              <>
           <Form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              { typeOptions.length>0 && <FormItem label={ t('roles.label')} invalid={!!errors.type_person} errorMessage={errors.type_person?.message}>
+              { !done && typeOptions.length > 0 && <FormItem label={ t('roles.label')} invalid={!!errors.type_person} errorMessage={errors.type_person?.message}>
                  <Controller name="type_person" control={control} render={({ field }) =>
                      <Select placeholder="Please Select" options={typeOptions}  value={typeOptions.find(option => option.value === field.value) || null}
                       onChange={(option) => field.onChange(option?.value)} /> 
@@ -201,14 +186,14 @@ function AddProprioForm() {
 
             </>
           )}
-
-
-
-     
         {step === 1 && (
             <div className="text-gray-700 dark:text-white">
              { lord && <ImageLandlord nextStep={ () => {
-                setStep(2);
+              
+                 if(!done) {
+                   setStep(2);
+                  }
+                  
               }} lordId={lord.id}  isEdit={true} userId={userId || ""} /> }
             </div>
         )}

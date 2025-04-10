@@ -7,6 +7,7 @@ import { useSessionUser } from '@/store/authStore';
 import { useTranslation } from '@/utils/hooks/useTranslation';
 import {  Bank, getBlankBank, Proprio } from '@/views/Entity';
 import { Regions } from '@/views/Entity/Regions';
+import AddProprioPopup from '@/views/proprio/add/AddProprioPopup';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { query, where, getDocs, addDoc, getDoc, updateDoc } from 'firebase/firestore';
 import {  useEffect, useState } from 'react';
@@ -63,11 +64,14 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [ regions, setRegions] = useState([]) as any;
     const [hideReg, setHideReg] = useState(false);
-    const {  authority, proprio } = useSessionUser((state) => state.user);
-
+    const { authority, proprio } = useSessionUser((state) => state.user);
+    const [ploading, setPloading] = useState(false);
     const { t } = useTranslation();
-      const fetchLandlords = async () => {
+       const fetchLandlords = async () => {
+        
         try {
+          setPloading(true);
+          setLoading(true);
           const q = query(
             Landlord,
             where("type_person", "==", "proprietaire")
@@ -85,12 +89,18 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           setRefsOptions(persons);
           setData(landlords);
           setLoading(false);
+          setPloading(false);
         } catch (err) {
           console.error("Error fetching landlords:", err);
+          setLoading(false);
+          setPloading(false);
         }
       };
   
-  
+      const addNewProprio = async (new_data: Proprio) => {
+          await fetchLandlords();
+          setValue("landlord", new_data.id);
+      }
       useEffect(() => {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
@@ -103,7 +113,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           }
         );
         if (landlordsOptions.length === 0) {
-          fetchLandlords();
+           fetchLandlords();
         }
         if (isEdit){
           const region = Regions.find(option => Number(option.value) === Number(defaultValues?.id_region)) || null;
@@ -241,13 +251,38 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
         } />
       </FormItem>
 
-      <FormItem label={t('bank.landlord')} invalid={!!errors.landlord} errorMessage={errors.landlord?.message as string}>
-        <Controller name="landlord" control={control} render={({ field }) =>
-          <Select placeholder="Please Select" options={landlordsOptions}
+<FormItem
+  className="w-full"
+  label={t('bank.landlord')}
+  invalid={!!errors.landlord}
+  errorMessage={errors.landlord?.message as string}
+>
+  <Controller
+    name="landlord"
+    control={control}
+    render={({ field }) => {
+      return (
+        <div className="flex items-center gap-2">
+          <Select
+            isLoading={ploading}
+            className='w-full'
+            placeholder="Please Select"
+            options={landlordsOptions}
             value={refsOptions.find(option => option.value == field.value) || null}
-            onChange={(option) => field.onChange(option?.value)} />
-        } />
-      </FormItem>
+            onChange={(option) => field.onChange(option?.value)}
+          />
+          <AddProprioPopup done={addNewProprio} />
+        </div>
+      );
+    }}
+  />
+</FormItem>
+
+           
+ 
+
+     
+
 
       <FormItem label={t('bank.reference')} invalid={!!errors.reference} errorMessage={errors.reference?.message}>
         <Controller name="reference" control={control} render={({ field }) =>

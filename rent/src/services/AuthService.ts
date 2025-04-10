@@ -9,13 +9,13 @@ import type {
     User,
 } from '@/@types/auth'
 import FirebaseAuth from './firebase/FirebaseAuth'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, updateProfile } from 'firebase/auth'
 import { Landlord, LandlordDoc } from './Landlord'
 import { addDoc, CollectionReference, getDocs, query, updateDoc, where } from 'firebase/firestore'
-import { USER_ROLE } from '@/constants/roles.constant'
 import { Proprio } from '@/views/Entity'
-import { FirebaseError, getApp } from 'firebase/app'
+import {  getApp } from 'firebase/app'
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { USER_ROLE } from '@/views/shared/schema'
 
 
 export async function apiSignOut() {

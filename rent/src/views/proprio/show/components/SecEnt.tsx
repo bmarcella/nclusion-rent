@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Proprio } from '@/views/Entity';
 import  { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -10,11 +11,10 @@ import { getLandlordDoc } from '@/services/Landlord'
 import Alert from '@/components/ui/Alert'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import Select from '@/components/ui/Select'
-import { manageAuth, USER_ROLES } from '@/constants/roles.constant'
-import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBank'
-import { Regions } from '@/views/Entity/Regions'
+import { manageAuth } from '@/constants/roles.constant'
 import { useSessionUser } from '@/store/authStore'
 import { useTranslation } from '@/utils/hooks/useTranslation'
+import { RoleSchema } from '@/views/shared/schema';
 
 
 interface Props {
@@ -25,10 +25,7 @@ interface Props {
  
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Zod Schema
-export const RoleSchema = z.object({
-  type_person: z.enum(USER_ROLES),
-  regions : z.array(z.number().optional()),
-})
+
 type ProprioFormValues = z.infer<typeof RoleSchema>
 
 function SecEnt( { lord , onChange} : Props) {
