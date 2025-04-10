@@ -157,7 +157,7 @@ const SubmissionReview = ( { bankId,  onChangeState, onRenovOk, onRejectOk, onPe
  
      <div className="p-6 space-y-6"  ref={contentRef}>
 
-     { bank && bank.step=='bankSteps.needRenovation' && <TaskManager bank={bank} /> }
+     {/* { bank && bank.step=='bankSteps.needRenovation' && <TaskManager bank={bank} /> } */}
 
       { bank && (contrat || bank.step=='bankSteps.needContract') && <LeaseContractForm bank={bank} ></LeaseContractForm> }
 

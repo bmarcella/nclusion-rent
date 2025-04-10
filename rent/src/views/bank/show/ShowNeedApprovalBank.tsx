@@ -6,6 +6,7 @@ import Tabs from "@/components/ui/Tabs";
 import TabList from "@/components/ui/Tabs/TabList";
 import TabContent from "@/components/ui/Tabs/TabContent";
 import TabNav from "@/components/ui/Tabs/TabNav";
+import TaskManager from "./components/TaskManager";
 
 export const ShowNeedApprovalBankBase= () => {
  
@@ -16,10 +17,10 @@ export const ShowNeedApprovalBankBase= () => {
                 <TabList>
                    { ListBankSteps.map((step)=>(<TabNav value={step.key}>{step.label}</TabNav>) )  }
                 </TabList>
-                { ListBankSteps.map((step)=>( 
+                { ListBankSteps.map((step, index)=>( 
                   <div >
-                 
                     <TabContent value={step.key}>
+                       { step.key === "bankSteps.needRenovation" && <TaskManager key={index+'_'+step.key as BankStep} /> }
                        <TableBank step={ step.key as BankStep} key={step.key} />
                     </TabContent>
                 </div>)) }

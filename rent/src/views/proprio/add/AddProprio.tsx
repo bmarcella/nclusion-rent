@@ -1,11 +1,10 @@
-import React from 'react'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AddProprioForm from './components/AddProprioForm'
 
 export function AddProprioBase() {
   return (
     <div>
-
-        <AddProprioForm />
+        <AddProprioForm/>
     </div>
   )
 }
