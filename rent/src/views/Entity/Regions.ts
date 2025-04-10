@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Regions } from '@/views/Entity/Regions';
 import { BankDoc } from "@/services/Landlord";
 import { getDocs, orderBy, query, where } from "firebase/firestore";
 import { ListBankSteps } from ".";
@@ -272,6 +274,14 @@ export type RegionType = {
   };
   export const getRegionIds = (): number[] => {
     return Regions.map(region => region.id);
+  };
+
+  export const getRegionsIds = (Regions: RegionType[]): number[] => {
+    return Regions.map(region => region.id);
+  };
+
+  export const getRegionsLabelvalue = (Regions: any): number[] => {
+    return Regions.map(region => region.value);
   };
 
   export async function getBankCountsByRegion() {
