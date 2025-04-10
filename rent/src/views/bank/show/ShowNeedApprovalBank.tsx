@@ -15,10 +15,10 @@ export const ShowNeedApprovalBankBase= () => {
     <div>
        <Tabs defaultValue={ListBankSteps[0].key} className="w-full">
                 <TabList>
-                   { ListBankSteps.map((step)=>(<TabNav value={step.key}>{step.label}</TabNav>) )  }
+                   { ListBankSteps.map((step, index)=>(<TabNav key={index} value={step.key}>{step.label}</TabNav>) )  }
                 </TabList>
                 { ListBankSteps.map((step, index)=>( 
-                  <div >
+                  <div key={index}>
                     <TabContent value={step.key}>
                        { step.key === "bankSteps.needRenovation" && <TaskManager key={index+'_'+step.key as BankStep} /> }
                        <TableBank step={ step.key as BankStep} key={step.key} />

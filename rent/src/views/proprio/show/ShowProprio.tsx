@@ -29,6 +29,7 @@ import { getRegionsByValues } from '@/views/Entity/Regions';
 import { hasAuthority } from '@/utils/RoleChecker';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
 import { deleteLord } from '@/services/firebase/BankService';
+import FilterProprio from './components/FilterProprio';
 
 const { Tr, Th, Td, THead, TBody } = Table
   const PAGE_SIZE = 0;
@@ -60,11 +61,13 @@ interface Props {
     const fetchedRef = useRef(false);
     const [cEnt, setEnt] = useState<Proprio>();
     const [dialogIsOpen, setIsOpen] = useState(false);
-    const { userId, authority } = useSessionUser((state) => state.user);
+    const { userId, authority, proprio } = useSessionUser((state) => state.user);
     const { t } = useTranslation();
     const { width, height } = useWindowSize();
-    
-        const openDialog = (e: string) => {
+    const [ regions, setRegions] = useState<number []>([]);
+    const [roles, setRoles] = useState<string>();
+
+     const openDialog = (e: string) => {
             setEnt(e);
             setIsOpen(true)
         }
@@ -203,53 +206,77 @@ interface Props {
       }, [/* dependencies if any */]);
       
 
-    
+    useEffect(() => {
+        if (fetchedRef.current) return;
+        fetchPage(1); // load first page
+    }, [roles, regions]);
 
-    const fetchPage = async (pageNumber: number) => {
-        setLoading(true);
-    
-        try {
-          let q:  Query<DocumentData> ;
-          let baseQuery : Query<DocumentData> = Landlord as CollectionReference<DocumentData>;
-          if (isUser!=undefined) {
-             baseQuery = query(baseQuery, where('createBy', '==', isUser));
-             console.log("isUser: ", isUser);
-          }
-
-          if (pageNumber === 1) {
-            q = query( baseQuery , orderBy('fullName'), limit(pageSizeOption[PAGE_SIZE].value));
-          } else {
-            const prevCursor = pageCursors[pageNumber - 2]; // page 2 uses index 0
-            if (!prevCursor) return;
-            q = query(baseQuery, orderBy('fullName'), startAfter(prevCursor), limit(pageSizeOption[PAGE_SIZE].value));
-          }
-    
-          const snapshot = await getDocs(q);
-    
-          const landlords: Proprio[] = [];
-          snapshot.forEach((doc) => {
-            landlords.push({ id: doc.id, ...doc.data() } as Proprio);
-          });
-         //  console.log(snapshot.size);
-          setTotalData(snapshot.size);
-          // Save this page's last doc to the cursor list if it's a new page
-          if (snapshot.docs.length > 0 && !pageCursors[pageNumber - 1]) {
-              setPageCursors((prev) => {
-              const copy = [...prev];
-              copy[pageNumber - 1] = snapshot.docs[snapshot.docs.length - 1];
-              return copy;
-            });
-          }
-    
-          setData(landlords);
-          setPage(pageNumber);
-          setHasNext(snapshot.docs.length === PAGE_SIZE);
-        } catch (error) {
-          console.error('Error fetching page:', error);
+   
+const fetchPage = async (pageNumber: number) => {
+    setLoading(true);
+    try {
+      let q: Query<DocumentData>;
+      let baseQuery: Query<DocumentData> = Landlord as CollectionReference<DocumentData>;
+  
+      // Build conditional filters
+      if (isUser !== undefined) {
+        baseQuery = query(baseQuery, where('createBy', '==', isUser));
+        console.log('isUser:', isUser);
+      }
+  
+      if (roles && regions.length === 0 ) {
+        baseQuery = query(baseQuery, where('type_person', '==', roles));
+        console.log('roles:', roles);
+      } else if (regions.length > 0 && !roles)  {
+           baseQuery = query(baseQuery, where('regions', 'array-contains-any', regions));
+           console.log('regions:', regions);
+      } else if (roles && regions.length > 0 )  {
+        baseQuery = query(baseQuery, where('type_person', '==', roles), where('regions', 'array-contains-any', regions));
+      }
+  
+      const pageSize = pageSizeOption[PAGE_SIZE].value;
+  
+      // First page
+      if (pageNumber === 1) {
+        q = query(baseQuery, orderBy('fullName'), limit(pageSize));
+      } else {
+        const prevCursor = pageCursors[pageNumber - 2]; // e.g. page 2 → index 0
+        if (!prevCursor) {
+          console.warn(`Missing cursor for page ${pageNumber - 1}`);
+          setLoading(false);
+          return;
         }
-    
-        setLoading(false);
-      };
+  
+        q = query(baseQuery, orderBy('fullName'), startAfter(prevCursor), limit(pageSize));
+      }
+  
+      const snapshot = await getDocs(q);
+  
+      const landlords: Proprio[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Proprio[];
+  
+      setTotalData(snapshot.size);
+  
+      // Store cursor if not already stored
+      if (snapshot.docs.length > 0 && !pageCursors[pageNumber - 1]) {
+        setPageCursors((prev) => {
+          const updated = [...prev];
+          updated[pageNumber - 1] = snapshot.docs[snapshot.docs.length - 1];
+          return updated;
+        });
+      }
+  
+      setData(landlords);
+      setPage(pageNumber);
+      setHasNext(snapshot.docs.length === pageSize);
+    } catch (error) {
+      console.error('Error fetching page:', error);
+    }
+  
+    setLoading(false);
+  };
     
   
   
@@ -303,11 +330,22 @@ interface Props {
     const onSelectChange = (value = 0) => {
         table.setPageSize(Number(value))
     }
+
+    const onChangeRegion = async (ids: any[]) => {
+        console.log("onChangeRegion: ", ids);
+        setRegions(ids);
+    }
+
+    const  onChangeRole = async (role: string) =>{
+        console.log("onChangeRegion: ", role);
+       setRoles(role);
+   }
   
     return (
 
       <div>
          <h4>{name} - {data.length}</h4>
+         <FilterProprio authority={authority || []} proprio={proprio} t={t} onChangeRegion={onChangeRegion} onChangeRole={onChangeRole} ></FilterProprio>
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
        
         <Table>
