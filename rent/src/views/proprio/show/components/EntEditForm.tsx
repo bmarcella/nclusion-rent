@@ -22,9 +22,6 @@ interface Props {
     lord: Proprio,
 }
 
-/* eslint-disable react-refresh/only-export-components */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// Zod Schema
 export const personSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   nickName: z.string().optional(),
