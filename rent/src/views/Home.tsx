@@ -29,7 +29,8 @@ const Home = () => {
         <div className="mb-4">
             <SimplePie labels={regions} series={values}        ></SimplePie>
         </div>
-        <div className="grid grid-flow-col auto-cols-max gap-4" >
+        <div className={classNames("overflow-x-auto", { "hidden": is_ai })} >
+        { !is_ai && <div className="grid grid-flow-col auto-cols-max gap-4" >
             {report.map((item, index) => (
                 <div key={index} className="rounded bg-white m-1" >
                     <h6 className="text-center text-lg font-bold text-gray-400">
@@ -40,7 +41,9 @@ const Home = () => {
                     </div>
                 </div>
             ))}
+        </div> }
         </div>
+   
           
     
         {userId && is_ai && (

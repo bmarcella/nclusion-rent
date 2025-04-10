@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/Input'
 import {  updateDoc } from 'firebase/firestore'
 import Alert from '@/components/ui/Alert'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
-import { USER_ROLES } from '@/constants/roles.constant'
 import { useSessionUser } from '@/store/authStore'
 import { useTranslation } from '@/utils/hooks/useTranslation'
 import { useAuth } from '@/auth';
@@ -86,7 +85,6 @@ function UserNew ( { lord , onChange } : Props) {
         setSubmitting(true);
         try {
                const result =  await onSignUp(data);
-               console.log("User created", result);
                const payload = {
                  updatedBy : userId,
                  id_user: result.data.userId,              

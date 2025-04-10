@@ -1,6 +1,7 @@
 
-import { USER_ROLE } from '@/constants/roles.constant';
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { USER_ROLE } from "../shared/schema";
 
 export interface Document {
     id: string;

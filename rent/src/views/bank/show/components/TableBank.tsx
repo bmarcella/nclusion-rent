@@ -40,6 +40,7 @@ import classNames from 'classnames';
 import { HiHome } from 'react-icons/hi';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
 import { deleteBank } from '@/services/firebase/BankService';
+import MapPopup from '../MapPopup';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -135,7 +136,11 @@ const pageSizeOption = [
             },
             {
               header: 'Ville',
-              accessorKey: 'city',
+              cell: ({ row }) => (
+                <div>
+                    <MapPopup bank={row.original}/>
+                </div>
+                ),
             },
             {
                 header: 'Date de creation',
@@ -158,7 +163,7 @@ const pageSizeOption = [
                 cell: ({ row }) => {
 
                  if (!step) return (
-                        <div className="min-w-[160px]">
+                        <div>
                         <Button variant="solid"  size="sm" onClick={() => openDialog(row.original)}>
                             <PiEyeLight />
                          </Button>
@@ -166,7 +171,7 @@ const pageSizeOption = [
                     </div>);
                  else return (
                     <div>
-                         <Button variant="solid"  size="sm" className="ml-2" onClick={() => navigate("/bank/"+row.original.id) }>
+                         <Button variant="solid"  size="sm" onClick={() => navigate("/bank/"+row.original.id) }>
                             <PiCheck />
                          </Button>
                          {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
