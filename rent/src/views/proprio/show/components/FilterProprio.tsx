@@ -14,7 +14,7 @@ interface Props {
   proprio: any;
   t: (key: string) => string;
   onChangeRegion: (payload:  number[]) => void;
-  onChangeRole: (role: string[] ) => void;
+  onChangeRole: (role: string) => void;
 }
 
 export const convertToSelectOptionsRegion = (items: RegionType[]) => {
