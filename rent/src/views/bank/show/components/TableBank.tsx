@@ -9,6 +9,11 @@ import {
     DocumentSnapshot,
     getDoc,
     where,
+    DocumentData,
+    Query,
+    QueryConstraint,
+    Timestamp,
+    CollectionReference,
   } from 'firebase/firestore';
   import  { useEffect, useMemo, useRef, useState } from 'react';
   import { Bank, BankStep } from '@/views/Entity';
@@ -41,6 +46,8 @@ import { HiHome } from 'react-icons/hi';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
 import { deleteBank } from '@/services/firebase/BankService';
 import MapPopup from '../MapPopup';
+import FilterBank from '@/views/bank/show/components/FilterBank';
+import FilterMyBank from './FilterMyBank';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -72,6 +79,13 @@ const pageSizeOption = [
     const [alert, setAlert] = useState("success") as any;
     const { t } = useTranslation();
     const navigate = useNavigate()
+    // 
+    const [ regions, setRegions] = useState<number>(0);
+    const [agents, setAgents] = useState<string>();
+    const [start, setStart] = useState<Date>();
+    const [end, setEnd] = useState<Date>();
+    const [steps, setSteps] = useState<string>();
+    // 
     const openDialog = (bank: Bank) => {
         setCBank(bank);
         setIsOpen(true)
@@ -80,10 +94,10 @@ const pageSizeOption = [
     const onDialogClose = () => {
         setIsOpen(false)
     }
-      const yes  = async  (idToDel: string) => {
+    const yes  = async  (idToDel: string) => {
                 await deleteBank(idToDel || '');
                 setBanks(prev => prev.filter(item => item.id !== idToDel));
-      }
+    }
 
     const columns = useMemo<ColumnDef<any>[]>(
         () => [
@@ -182,16 +196,63 @@ const pageSizeOption = [
         [],
     )
 
+    const getQueryDate = (q: Query<DocumentData, DocumentData>)  => {
+         
+            const filters: QueryConstraint[] = [];
+
+            if (regions && regions != 0) {
+                filters.push(where('id_region', '==', regions));
+            } else {
+                const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
+                filters.push(where("id_region", "in", ids))
+            }
+
+            if (agents) {
+                filters.push(where('createdBy', '==', agents));
+            }
+
+            if (steps) {
+                filters.push(where('step', '==', steps));
+            }
+           
+            if (start && end) {
+                const isSameDay =
+                start.toDateString() === end.toDateString();
+
+                if (isSameDay) {
+                const startOfDay = new Date(start);
+                startOfDay.setHours(0, 0, 0, 0);
+
+                const endOfDay = new Date(end);
+                endOfDay.setHours(23, 59, 59, 999);
+
+                filters.push(where('createdAt', '>=', Timestamp.fromDate(startOfDay)));
+                filters.push(where('createdAt', '<=', Timestamp.fromDate(endOfDay)));
+                } else {
+                filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
+                filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
+                }
+            } else {
+                if (start) {
+                filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
+                }
+                if (end) {
+                filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
+                }
+            }
+            return filters.length > 0 ? query(q, ...filters) : q;
+    }
+
     const fetchBanks = async (pageNum: number) => {
-        let q = null;
+        let q: Query<DocumentData>;
         if (!step){
            q = query(BankDoc, orderBy("createdAt", "desc"), where("createdBy", "==", userId), limit(pageSizeOption[0].value));
-        } else {
-           const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
-           console.log("Regions: ", ids);
-           q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step),  where("id_region", "in", ids),  limit(pageSizeOption[0].value));
+         } else {
+           q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step),  limit(pageSizeOption[0].value));
         }
-      
+    
+         q = getQueryDate(q);
+
         // If we're not on the first page, we need to start after a document
         if (pageNum > 1 && pageDocs[pageNum - 2]) {
            q = query(q, startAfter(pageDocs[pageNum - 2]));
@@ -212,6 +273,7 @@ const pageSizeOption = [
             return { id: docSnap.id, ...data, landlord };
           })
         );
+        console.log("banksWithLandlords:", banksWithLandlords);
         // Update state
         setBanks(banksWithLandlords as any);
         setCurrentPage(pageNum);
@@ -223,12 +285,19 @@ const pageSizeOption = [
             return updated;
           });
         }
-      };
-    
+    };
     useEffect(() => {
-      if (fetchedRef.current) return;
-      fetchBanks(1); // load first page
-    }, []);
+        if (fetchedRef.current) return;
+         fetchBanks(1); // load first page
+      }, []);
+
+    useEffect(() => {
+        fetchBanks(1);
+     }, [start, end, regions, agents, steps]);
+
+
+    
+   
 
     // const handlePrev = () => {
     //     if (page > 1) {
@@ -242,7 +311,7 @@ const pageSizeOption = [
     //     }
     //   };
 
-      const table = useReactTable({
+    const table = useReactTable({
         data: banks,
         columns,
         getCoreRowModel: getCoreRowModel(),
@@ -257,7 +326,7 @@ const pageSizeOption = [
     const onSelectChange = (value = 0) => {
         table.setPageSize(Number(value))
     }
-   const onChangeBank = (payload: any, step:number) => {
+    const onChangeBank = (payload: any, step:number) => {
     if(step != 1) {
         setCBank((prev: any) => {
             const updatedData = { ...prev, ...payload };
@@ -277,9 +346,9 @@ const pageSizeOption = [
         fetchBanks(currentPage);
     }
 
-   }
+    }
 
-   const nextStep = async (step: number, data: any ) => {
+    const nextStep = async (step: number, data: any ) => {
      console.log(`Step Data (${step}) =>`, data);
      switch (step) {
         case 6:
@@ -294,9 +363,27 @@ const pageSizeOption = [
           console.warn(`Unhandled step: ${step}`);
         return;
       }
-   }
-    return (
+    }
 
+    const onChangeRegion = async (id: number) => {
+        console.log("onChangeRegion: ", id);
+        setRegions(id);
+    }
+
+    const onChangeAgent = async (id: string) =>{
+       console.log("onChangeAgent: ", id);
+       setAgents(id);
+     }
+
+     const onChangeDate = async (start: Date, end: Date) => {
+        setStart(start);
+        setEnd(end);
+     }
+     const onChangeStep = async (step: BankStep) => {
+        console.log("onChangeStep: ", step);
+        setSteps(step);
+     }
+    return (
       <div>
          <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
             <div className={classNames( 'rounded-2xl p-4 flex flex-col justify-center','bg-green-100' )} >
@@ -307,7 +394,7 @@ const pageSizeOption = [
                     </div>
                     <div
                         className={
-                            'flex items-center justify-center min-h-12 min-w-12 max-h-12 max-w-12 bg-gray-900 text-white rounded-full text-2xl'
+                            'flex items-center justify-center min-h-12 min-w-12 max-h-12 max-w-12 bg-gray-900 text-white rounded-full text-2xl md:hidden'
                         }
                     >
                     <HiHome />
@@ -315,6 +402,17 @@ const pageSizeOption = [
                 </div>
             </div>
           </div>
+          { step && 
+          <FilterBank  authority={authority || []} proprio={proprio} t={t}
+           onChangeRegion={onChangeRegion} 
+           onChangeAgent={onChangeAgent} 
+           onChangeDate = {onChangeDate}
+          >
+
+           </FilterBank> } 
+              { !step && <FilterMyBank 
+             onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t}></FilterMyBank> } 
+      
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
            <Table>
                 <THead>
@@ -493,4 +591,6 @@ const pageSizeOption = [
   
 
   export default TableBank;
+
+
   
