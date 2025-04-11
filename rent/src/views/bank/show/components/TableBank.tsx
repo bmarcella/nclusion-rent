@@ -179,7 +179,7 @@ const pageSizeOption = [
 
                  if (!step) return (
                         <div>
-                        <Button variant="solid"  size="sm" onClick={() => openDialog(row.original)}>
+                        <Button variant="solid"  shape="circle" size="xs" onClick={() => openDialog(row.original)}>
                             <PiEyeLight />
                          </Button>
                          {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
@@ -187,10 +187,10 @@ const pageSizeOption = [
                  else return (
                     <div className="min-w-[200px]">
                         { (hasAuthority(authority, 'admin'))&&
-                         <Button variant="solid" className='mr-1 '  size="sm" onClick={() => openDialog(row.original)}>
+                         <Button variant="solid"  shape="circle" size="xs" className='mr-1 '  onClick={() => openDialog(row.original)}>
                             <PiEyeLight />
                          </Button> }
-                         <Button variant="solid"  size="sm" onClick={() => navigate("/bank/"+row.original.id) }>
+                         <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs"  onClick={() => navigate("/bank/"+row.original.id) }>
                             <PiCheck />
                          </Button>
                          {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}

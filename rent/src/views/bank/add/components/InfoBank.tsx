@@ -166,7 +166,6 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
         try {
           setSubmitting(true)
           const bank: Bank =  getBlankBank(data, userId || '', location || { lat: 0, lng: 0 });
-          console.log("Bank data:", bank);
           const docRef = await addDoc(BankDoc, bank);
           const snapshot = await getDoc(docRef);
           if (snapshot.exists()) {
