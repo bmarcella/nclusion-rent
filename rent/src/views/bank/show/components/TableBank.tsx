@@ -48,6 +48,7 @@ import { deleteBank } from '@/services/firebase/BankService';
 import MapPopup from '../MapPopup';
 import FilterBank from '@/views/bank/show/components/FilterBank';
 import FilterMyBank from './FilterMyBank';
+import { hasAuthority } from '@/utils/RoleChecker';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -178,14 +179,18 @@ const pageSizeOption = [
 
                  if (!step) return (
                         <div>
-                        <Button variant="solid"  size="sm" onClick={() => openDialog(row.original)}>
+                        <Button variant="solid"  shape="circle" size="xs" onClick={() => openDialog(row.original)}>
                             <PiEyeLight />
                          </Button>
                          {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
                     </div>);
                  else return (
-                    <div>
-                         <Button variant="solid"  size="sm" onClick={() => navigate("/bank/"+row.original.id) }>
+                    <div className="min-w-[200px]">
+                        { (hasAuthority(authority, 'admin'))&&
+                         <Button variant="solid"  shape="circle" size="xs" className='mr-1 '  onClick={() => openDialog(row.original)}>
+                            <PiEyeLight />
+                         </Button> }
+                         <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs"  onClick={() => navigate("/bank/"+row.original.id) }>
                             <PiCheck />
                          </Button>
                          {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
@@ -273,7 +278,6 @@ const pageSizeOption = [
             return { id: docSnap.id, ...data, landlord };
           })
         );
-        console.log("banksWithLandlords:", banksWithLandlords);
         // Update state
         setBanks(banksWithLandlords as any);
         setCurrentPage(pageNum);
@@ -409,7 +413,8 @@ const pageSizeOption = [
            onChangeDate = {onChangeDate}
           >
 
-           </FilterBank> } 
+           </FilterBank> }
+
               { !step && <FilterMyBank 
              onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t}></FilterMyBank> } 
       
@@ -551,7 +556,11 @@ const pageSizeOption = [
                                             <span className="break-all ">{message}</span>
                                         </Alert>
                                         )}
-                                        { cbank?.id && <ImageLandlord nextStep={nextStep} lordId={cbank.landlord.id}  userId={userId || ''} isEdit={true}></ImageLandlord> }
+                                        { cbank?.id && cbank?.landlord?.id && 
+                                        <ImageLandlord nextStep={nextStep}
+                                          lordId={cbank.landlord.id} 
+                                          userId={userId || ''} 
+                                          isEdit={true}></ImageLandlord> }
                                     </TabContent>
                                 </div>
                             </Tabs>
@@ -562,7 +571,10 @@ const pageSizeOption = [
                             <span className="break-all ">{message}</span>
                         </Alert>
                         )}
-                    { cbank?.id && <CommentsBank nextStep={nextStep} bankId={cbank.id}  userId={userId || ''} isEdit={true}/> }
+                    { cbank?.id && <CommentsBank nextStep={nextStep}
+                      bankId={cbank.id} 
+                      userId={userId || ''} 
+                      isEdit={true}/> }
                     </TabContent>
 
                     <TabContent value="tab4">

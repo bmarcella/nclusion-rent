@@ -43,8 +43,8 @@ interface Props {
 function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onChangeDate  }: Props) {
   const [regions, setRegions] = useState<OptionType[]>([]);
   const [agents, setAgents] = useState<OptionType[]>([]);
-  const [steps, setSteps] = useState<OptionType[]>([]);
-  // bankSteps
+
+ 
   //
   const [selectedRegions, setSelectedRegions] = useState<number>();
   const [selectedAgents, setSelectedAgents] = useState<string>();

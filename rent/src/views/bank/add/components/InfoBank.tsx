@@ -42,7 +42,6 @@ const schema: ZodType<Partial<Bank>>  = z.object({
   landlord: z.string(),
   isrefSameAsLandlord: z.boolean(),
   urgency: z.boolean(),
-
 })
 export type FormValuesInfo = z.infer<typeof schema>;
 
@@ -158,15 +157,15 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           addresse: defaultValues?.addresse,
           id_region: defaultValues?.id_region,
           reference: defaultValues?.reference,
-          landlord: (isEdit) ? defaultValues?.landlord.id : defaultValues?.landlord,
+          landlord: (isEdit) ? (defaultValues?.landlord?.id ) ? defaultValues?.landlord.id : undefined : defaultValues?.landlord,
           isrefSameAsLandlord: defaultValues?.isrefSameAsLandlord,
           urgency: defaultValues?.urgency,
         },
       });
       const addNewBank = async (data: FormValuesInfo) => {
         try {
+          setSubmitting(true)
           const bank: Bank =  getBlankBank(data, userId || '', location || { lat: 0, lng: 0 });
-          console.log("Bank data:", bank);
           const docRef = await addDoc(BankDoc, bank);
           const snapshot = await getDoc(docRef);
           if (snapshot.exists()) {
@@ -175,10 +174,14 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
            const newBank = { ...data, id: docRef.id };
            await updateDoc(docRef, {id: docRef.id});
            nextStep(1, newBank);
+           setSubmitting(false)
          } else {
+          setTimeout(() => setSubmitting(false), 1000)
            onError("Document not found");
          }
-        } catch (error: any) { onError(error) }
+        } catch (error: any) { 
+          onError(error);
+          setTimeout(() => setSubmitting(false), 1000)}
       }
 
 
@@ -345,7 +348,9 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
     </div>
 
     <div className="mt-6">
-      <Button type="submit" variant="solid">{isEdit ? t('common.update') : t('common.next')}</Button>
+      <Button type="submit" variant="solid"
+       loading={isSubmitting}
+      >{isEdit ? t('common.update') : t('common.next')}</Button>
     </div>
   </Form>
 </div>
