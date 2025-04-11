@@ -51,7 +51,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=>
         {images.map((image, index) => (
           <div
             key={index}
-            className="flex flex-col overflow-hidden rounded-xl shadow hover:shadow-lg transition-shadow duration-200 bg-white dark:bg-gray-900"
+            className="flex flex-col overflow-hidden rounded-xl h-auto shadow hover:shadow-lg transition-shadow duration-200 bg-white dark:bg-gray-900"
           >
             <img
              onClick={() => {
@@ -59,7 +59,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=>
             }}
               src={image.imageUrl}
               alt={image.fileName}
-              className={ !showPic ? 'w-full h-64 object-cover hover:scale-105 transition-transform duration-300' : 'card-image'}
+              className={ !showPic ? 'w-full h-64 object-cover hover:scale-105 transition-transform duration-300' : 'card-image h-auto'}
             />
             <div className="p-3 flex-1 flex flex-col justify-between">
               <div className="mb-2">

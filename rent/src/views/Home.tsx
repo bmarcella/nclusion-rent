@@ -24,13 +24,13 @@ const Home = () => {
     regs();
   }, [userId]);
     return <>
-    <div className="flex flex-col  text-center px-4">
+   { !is_ai && <div className="flex flex-col w-full text-center px-4">
      
         <div className="mb-4">
             <SimplePie labels={regions} series={values}        ></SimplePie>
         </div>
         <div className={classNames("overflow-x-auto", { "hidden": is_ai })} >
-        { !is_ai && <div className="grid grid-flow-col auto-cols-max gap-4" >
+        & <div className="grid grid-flow-col auto-cols-max gap-4" >
             {report.map((item, index) => (
                 <div key={index} className="rounded bg-white m-1" >
                     <h6 className="text-center text-lg font-bold text-gray-400">
@@ -41,13 +41,13 @@ const Home = () => {
                     </div>
                 </div>
             ))}
-        </div> }
+        </div> 
         </div>
-   
+        </div> }
           
     
         {userId && is_ai && (
-            <div className="mt-8 flex flex-col gap-4 items-center w-full max-w-sm">
+         <div className="mt-8 flex flex-col gap-2 items-center justify-center w-full">
                    <h1 className="text-4xl font-bold">Bienvenue sur la plateforme de gestion immobilière</h1>
                    <p className="mt-4 text-lg">Utilisez le bouton en haut à droite pour ouvrir le menu.</p>
             <a href="/proprio/add" className="block w-full text-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
@@ -64,7 +64,7 @@ const Home = () => {
             </a>
             </div>
         )}
-    </div>
+   
 
     </>
 }

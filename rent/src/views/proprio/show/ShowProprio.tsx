@@ -346,6 +346,8 @@ const fetchPage = async (pageNumber: number) => {
       <div>
          <h4>{name} - {data.length}</h4>
          <FilterProprio authority={authority || []} proprio={proprio} t={t} onChangeRegion={onChangeRegion} onChangeRole={onChangeRole} ></FilterProprio>
+      
+      
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
        
         <Table>
