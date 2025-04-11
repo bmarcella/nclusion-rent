@@ -164,6 +164,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
       });
       const addNewBank = async (data: FormValuesInfo) => {
         try {
+          setSubmitting(true)
           const bank: Bank =  getBlankBank(data, userId || '', location || { lat: 0, lng: 0 });
           console.log("Bank data:", bank);
           const docRef = await addDoc(BankDoc, bank);
@@ -174,10 +175,14 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
            const newBank = { ...data, id: docRef.id };
            await updateDoc(docRef, {id: docRef.id});
            nextStep(1, newBank);
+           setSubmitting(false)
          } else {
+          setTimeout(() => setSubmitting(false), 1000)
            onError("Document not found");
          }
-        } catch (error: any) { onError(error) }
+        } catch (error: any) { 
+          onError(error);
+          setTimeout(() => setSubmitting(false), 1000)}
       }
 
 
@@ -344,7 +349,9 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
     </div>
 
     <div className="mt-6">
-      <Button type="submit" variant="solid">{isEdit ? t('common.update') : t('common.next')}</Button>
+      <Button type="submit" variant="solid"
+       loading={isSubmitting}
+      >{isEdit ? t('common.update') : t('common.next')}</Button>
     </div>
   </Form>
 </div>
