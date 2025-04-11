@@ -109,7 +109,7 @@ function EditBank( { docRef , onChangeBank , id , userId} : Props) {
                 </Alert>
         )}
 
-      <div className=" w-full max-w-2xl">
+      <div className=" w-full">
         <InfoBank nextStep={nextStep} defaultValues={docRef} isEdit={true} userId={userId} onError={onError} /> 
         <hr className='mb-4 mt-4'></hr>
         <RentDetails nextStep={nextStep}  defaultValues={docRef.rentDetails} isEdit={true}  />

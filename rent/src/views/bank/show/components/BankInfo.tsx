@@ -14,6 +14,8 @@ import {
   FaExclamationCircle,
   FaInfoCircle,
 } from "react-icons/fa";
+import Badge from "@/components/ui/Badge";
+import StepHistory from "./StepHistory";
 
 interface BankInfoProps {
   bank: Bank;
@@ -99,96 +101,107 @@ const BankInfo: React.FC<BankInfoProps> = ({ bank }) => {
       </div>
 
       <hr className="my-4" />
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base">
+      <div className="space-y-2">
       {bank.demoDetails && (
-        <div>
-          <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
-            <FaInfoCircle /> {t("bank.internetProviders.label")}
-          </h3>
-          <p>
-            <strong>{t("bank.internetProviders.label")}: </strong>
-            {renderTranslatedArray(bank.demoDetails.internetService, "bank.internetProviders")}
-          </p>
-          <p>
-            <strong>{t("bank.lotteryCompetitions.label")}: </strong>
-            {renderTranslated(bank.demoDetails.lotteryCompetition, "bank.lotteryCompetitions")}
-          </p>
-          <p>
-            <strong>{t("bank.bankEntrances.label")}: </strong>
-            {renderTranslatedArray(bank.demoDetails.bankEntrance, "bank.bankEntrances")}
-          </p>
-          <p>
-            <strong>{t("bank.populationInAreas.label")}: </strong>
-            {renderTranslated(bank.demoDetails.populationInArea, "bank.populationInAreas")}
-          </p>
-          <p>
-            <strong>{t("bank.expectedRevenue.label")}: </strong>
-            {renderTranslated(bank.demoDetails.expectedRevenue, "bank.expectedRevenue")}
-          </p>
-          <p>
-            <strong>{t("bank.buildingStabilities.label")}: </strong>
-            {renderTranslated(bank.demoDetails.buildingStability, "bank.buildingStabilities")}
-          </p>
-        </div>
-      )}
+          <div>
+            <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+              <FaInfoCircle /> {t("bank.internetProviders.label")}
+            </h3>
+            <p>
+              <strong>{t("bank.internetProviders.label")}: </strong>
+              {renderTranslatedArray(bank.demoDetails.internetService, "bank.internetProviders")}
+            </p>
+            <p>
+              <strong>{t("bank.lotteryCompetitions.label")}: </strong>
+              {renderTranslated(bank.demoDetails.lotteryCompetition, "bank.lotteryCompetitions")}
+            </p>
+            <p>
+              <strong>{t("bank.bankEntrances.label")}: </strong>
+              {renderTranslatedArray(bank.demoDetails.bankEntrance, "bank.bankEntrances")}
+            </p>
+            <p>
+              <strong>{t("bank.populationInAreas.label")}: </strong>
+              {renderTranslated(bank.demoDetails.populationInArea, "bank.populationInAreas")}
+            </p>
+            <p>
+              <strong>{t("bank.expectedRevenue.label")}: </strong>
+              {renderTranslated(bank.demoDetails.expectedRevenue, "bank.expectedRevenue")}
+            </p>
+            <p>
+              <strong>{t("bank.buildingStabilities.label")}: </strong>
+              {renderTranslated(bank.demoDetails.buildingStability, "bank.buildingStabilities")}
+            </p>
+          </div>
+        )}
 
-      {bank.securityDetails && (
-        <div className="mt-4">
-          <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
-            <FaShieldAlt /> {t("bank.currentSecurities.label")}
-          </h3>
-          <p>
-            <strong>{t("bank.areaStabilities.label")}: </strong>
-            {renderTranslated(bank.securityDetails.areaStability, "bank.areaStabilities")}
-          </p>
-          <p>
-            <strong>{t("bank.openHours.label")}: </strong>
-            {renderTranslated(bank.securityDetails.openHour, "bank.openHours")}
-          </p>
-          <p>
-            <strong>{t("bank.closeHours.label")}: </strong>
-            {renderTranslated(bank.securityDetails.closeHour, "bank.closeHours")}
-          </p>
-          <p>
-            <strong>{t("bank.currentSecurities.label")}: </strong>
-            {renderTranslatedArray(bank.securityDetails.currentSecurity, "bank.currentSecurities")}
-          </p>
-        </div>
-      )}
+        {bank.securityDetails && (
+          <div className="mt-4">
+            <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+              <FaShieldAlt /> {t("bank.currentSecurities.label")}
+            </h3>
+            <p>
+              <strong>{t("bank.areaStabilities.label")}: </strong>
+              {renderTranslated(bank.securityDetails.areaStability, "bank.areaStabilities")}
+            </p>
+            <p>
+              <strong>{t("bank.openHours.label")}: </strong>
+              {renderTranslated(bank.securityDetails.openHour, "bank.openHours")}
+            </p>
+            <p>
+              <strong>{t("bank.closeHours.label")}: </strong>
+              {renderTranslated(bank.securityDetails.closeHour, "bank.closeHours")}
+            </p>
+            <p>
+              <strong>{t("bank.currentSecurities.label")}: </strong>
+              {renderTranslatedArray(bank.securityDetails.currentSecurity, "bank.currentSecurities")}
+            </p>
+          </div>
+        )}
 
-      {bank.renovationDetails && (
-        <div className="mt-4">
-          <h3 className="text-xl font-semibold mb-2">{t("bank.title.renov")}</h3>
-          <p>
-            <strong>{t("bank.currentSecurities.label")}: </strong>
-            {renderTranslatedArray(bank.renovationDetails.neededSecurity, "bank.currentSecurities")}
-          </p>
-          <p>
-            <strong>{t("bank.majorRenovations.label")}: </strong>
-            {renderTranslatedArray(bank.renovationDetails.majorRenovation, "bank.majorRenovations")}
-          </p>
-          <p>
-            <strong>{t("bank.minorRenovations.label")}: </strong>
-            {renderTranslatedArray(bank.renovationDetails.minorRenovation, "bank.minorRenovations")}
-          </p>
-        </div>
-      )}
+        {bank.renovationDetails && (
+          <div className="mt-4">
+            <h3 className="text-xl font-semibold mb-2">{t("bank.title.renov")}</h3>
+            <p>
+              <strong>{t("bank.currentSecurities.label")}: </strong>
+              {renderTranslatedArray(bank.renovationDetails.neededSecurity, "bank.currentSecurities")}
+            </p>
+            <p>
+              <strong>{t("bank.majorRenovations.label")}: </strong>
+              {renderTranslatedArray(bank.renovationDetails.majorRenovation, "bank.majorRenovations")}
+            </p>
+            <p>
+              <strong>{t("bank.minorRenovations.label")}: </strong>
+              {renderTranslatedArray(bank.renovationDetails.minorRenovation, "bank.minorRenovations")}
+            </p>
+          </div>
+        )}
 
-      {bank.finalDecision && (
-        <div className="mt-4">
-          <h3 className="text-xl font-semibold mb-2">
-            {t("bank.finalDecisionStatuses.label")}
-          </h3>
-          <p>
-            <strong>{t("bank.finalDecisionStatuses.label")}: </strong>
-            {renderTranslated(bank.finalDecision.status, "bank.finalDecisionStatuses")}
-          </p>
-          <p>
-            <strong>{t("bank.reason_why")}: </strong>
-            {getText(bank.finalDecision.reason_why)}
-          </p>
-        </div>
-      )}
+        {bank.finalDecision && (
+          <div className="mt-4">
+            <h3 className="text-xl font-semibold mb-2">
+              {t("bank.finalDecisionStatuses.label")}
+            </h3>
+            <p>
+              <strong>{t("bank.finalDecisionStatuses.label")}: </strong>
+              {renderTranslated(bank.finalDecision.status, "bank.finalDecisionStatuses")}
+            </p>
+            <p>
+              <strong>{t("bank.reason_why")}: </strong>
+              {getText(bank.finalDecision.reason_why)}
+            </p>
+          </div>
+        )}
+      </div>
+      <div className="space-y-2">
+
+      <div className="max-w-[700px]">
+           <StepHistory bankId={bank.id} />
+      </div>
+
+      </div>
+      
+    </div>
     </div>
   );
 };

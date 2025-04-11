@@ -4,6 +4,7 @@ import { BankLeaseDoc, bankPicturesDoc, getBankDoc, getLandlordDoc, hdDoc, hStep
 import { BankImage } from "@/views/bank/show/components/ImageGallery";
 import { ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 import { storage } from "./FirebaseStorage";
+import { BankStep, StepDecision } from "@/views/Entity";
 
 export const getBankById = async (bankId: string) => {
     const bankRef = getBankDoc(bankId);
@@ -60,6 +61,22 @@ export const getBankById = async (bankId: string) => {
        return false;
     }
   };
+
+  export  const getBankStepsHistory = async (bankId: string) => {
+    const stepsRef = hStepsDoc as CollectionReference<StepDecision>;
+    const q = query(stepsRef, where('bankId', '==', bankId));
+    const querySnapshot = await getDocs(q);
+    const objs = querySnapshot.docs.map(doc => {
+        const id = doc.id;
+        const obj  = {
+            id,
+        ...doc.data(),
+        } as StepDecision;
+        obj.id = id;
+        return obj;
+    });
+    return objs; 
+};
 
   export  const getBankImages = async (bankId: string) => {
           const picturesRef = bankPicturesDoc as CollectionReference<BankImage>;

@@ -48,6 +48,12 @@ export const ShowBankDetailsBase= () => {
          step : "bankSteps.rejected",
          finalDecision: dec
       };
+      const step = {
+        createdBy: userId,
+        createdAt: new Date(),
+        step: "bankSteps.rejected" as BankStep,
+      } as StepDecision;
+      SaveSteps (step);
       SaveHistory(reject, dec);
   }
 
@@ -67,6 +73,12 @@ export const ShowBankDetailsBase= () => {
        step : "bankSteps.pending" as BankStep,
        finalDecision: dec
     };
+    const step = {
+      createdBy: userId,
+      createdAt: new Date(),
+      step: "bankSteps.pending" as BankStep,
+    } as StepDecision;
+    SaveSteps (step);
     SaveHistory(reject, dec);
   }
 
@@ -78,11 +90,7 @@ export const ShowBankDetailsBase= () => {
       status: finalDecisionStatuses[0],
       reason_why:  (data.text) ? data.text : 'Aucune raison fournie',
     } as HistoricDecision;
-    const step = {
-      createdBy: userId,
-      createdAt: new Date(),
-      step: "bankSteps.needApproval" as BankStep,
-    } as StepDecision;
+ 
     const reject = {
        reject: false,
        approve: true,
@@ -90,6 +98,11 @@ export const ShowBankDetailsBase= () => {
        step : "bankSteps.needApprobation" as BankStep,
        finalDecision: dec
     };
+    const step = {
+      createdBy: userId,
+      createdAt: new Date(),
+      step: "bankSteps.needApprobation" as BankStep,
+    } as StepDecision;
     SaveHistory(reject, dec);
     SaveSteps (step);
   }
@@ -98,7 +111,7 @@ export const ShowBankDetailsBase= () => {
     const step = {
       createdBy: userId,
       createdAt: new Date(),
-      step: "bankSteps.needApprobation" as BankStep,
+      step: "bankSteps.needContract" as BankStep,
     } as StepDecision;
     const reject = {
        step : "bankSteps.needContract" as BankStep,
@@ -110,7 +123,7 @@ export const ShowBankDetailsBase= () => {
     const step = {
       createdBy: userId,
       createdAt: new Date(),
-      step:  "bankSteps.needContract" as BankStep,
+      step:  "bankSteps.needRenovation" as BankStep,
     } as StepDecision;
     const reject = {
       step : "bankSteps.needRenovation" as BankStep,
@@ -134,7 +147,7 @@ export const ShowBankDetailsBase= () => {
     const step = {
       createdBy: userId,
       createdAt: new Date(),
-      step: "bankSteps.needRenovation"  as BankStep,
+      step: "bankSteps.readyToUse"  as BankStep,
     } as StepDecision;
     const reject = {
        step : "bankSteps.readyToUse" as BankStep,
