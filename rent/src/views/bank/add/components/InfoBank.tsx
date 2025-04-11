@@ -42,7 +42,6 @@ const schema: ZodType<Partial<Bank>>  = z.object({
   landlord: z.string(),
   isrefSameAsLandlord: z.boolean(),
   urgency: z.boolean(),
-
 })
 export type FormValuesInfo = z.infer<typeof schema>;
 
@@ -158,7 +157,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           addresse: defaultValues?.addresse,
           id_region: defaultValues?.id_region,
           reference: defaultValues?.reference,
-          landlord: (isEdit) ? defaultValues?.landlord.id : defaultValues?.landlord,
+          landlord: (isEdit) ? (defaultValues?.landlord?.id ) ? defaultValues?.landlord.id : undefined : defaultValues?.landlord,
           isrefSameAsLandlord: defaultValues?.isrefSameAsLandlord,
           urgency: defaultValues?.urgency,
         },

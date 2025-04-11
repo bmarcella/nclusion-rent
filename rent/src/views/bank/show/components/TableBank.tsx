@@ -48,6 +48,7 @@ import { deleteBank } from '@/services/firebase/BankService';
 import MapPopup from '../MapPopup';
 import FilterBank from '@/views/bank/show/components/FilterBank';
 import FilterMyBank from './FilterMyBank';
+import { hasAuthority } from '@/utils/RoleChecker';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -184,7 +185,11 @@ const pageSizeOption = [
                          {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
                     </div>);
                  else return (
-                    <div>
+                    <div className="min-w-[200px]">
+                        { (hasAuthority(authority, 'admin'))&&
+                         <Button variant="solid" className='mr-1 '  size="sm" onClick={() => openDialog(row.original)}>
+                            <PiEyeLight />
+                         </Button> }
                          <Button variant="solid"  size="sm" onClick={() => navigate("/bank/"+row.original.id) }>
                             <PiCheck />
                          </Button>
@@ -273,7 +278,6 @@ const pageSizeOption = [
             return { id: docSnap.id, ...data, landlord };
           })
         );
-        console.log("banksWithLandlords:", banksWithLandlords);
         // Update state
         setBanks(banksWithLandlords as any);
         setCurrentPage(pageNum);
@@ -409,7 +413,8 @@ const pageSizeOption = [
            onChangeDate = {onChangeDate}
           >
 
-           </FilterBank> } 
+           </FilterBank> }
+
               { !step && <FilterMyBank 
              onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t}></FilterMyBank> } 
       
@@ -551,7 +556,11 @@ const pageSizeOption = [
                                             <span className="break-all ">{message}</span>
                                         </Alert>
                                         )}
-                                        { cbank?.id && <ImageLandlord nextStep={nextStep} lordId={cbank.landlord.id}  userId={userId || ''} isEdit={true}></ImageLandlord> }
+                                        { cbank?.id && cbank?.landlord?.id && 
+                                        <ImageLandlord nextStep={nextStep}
+                                          lordId={cbank.landlord.id} 
+                                          userId={userId || ''} 
+                                          isEdit={true}></ImageLandlord> }
                                     </TabContent>
                                 </div>
                             </Tabs>
@@ -562,7 +571,10 @@ const pageSizeOption = [
                             <span className="break-all ">{message}</span>
                         </Alert>
                         )}
-                    { cbank?.id && <CommentsBank nextStep={nextStep} bankId={cbank.id}  userId={userId || ''} isEdit={true}/> }
+                    { cbank?.id && <CommentsBank nextStep={nextStep}
+                      bankId={cbank.id} 
+                      userId={userId || ''} 
+                      isEdit={true}/> }
                     </TabContent>
 
                     <TabContent value="tab4">
