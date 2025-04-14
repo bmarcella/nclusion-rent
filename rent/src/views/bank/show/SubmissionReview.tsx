@@ -24,7 +24,7 @@ import LeaseContractForm from "./components/LeaseContractForm";
 import { Steps } from "@/components/ui/Steps";
 import { useTranslation } from "@/utils/hooks/useTranslation";
 import { BiPrinter } from "react-icons/bi";
-import TaskManager from "./components/TaskManager";
+import AllTask from "./components/AllTask";
 
 interface Props {
     bankId: string;
@@ -35,11 +35,12 @@ interface Props {
     onRenovOk: () => void,
     onChangeState: (component: React.ReactNode, name?: string) => void;
     onPendingOk: (data: any) => void
+    genTasks?: () => void
     bank?: Bank;
     userId: string
 }
 
-const SubmissionReview = ( { bankId,  onChangeState, onRenovOk, onRejectOk, onPendingOk, onApproveOk, onPermitOk, onContratOk, bank, userId } : Props) => {
+const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejectOk, onPendingOk, onApproveOk, onPermitOk, onContratOk, bank, userId } : Props) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const reactToPrintFn = useReactToPrint({ contentRef });
     const [images, setImages] = useState<BankImage[]>([])
@@ -52,15 +53,14 @@ const SubmissionReview = ( { bankId,  onChangeState, onRenovOk, onRejectOk, onPe
     const [pConfig, setPConfig] = useState(false);
     const { authority } = useSessionUser((state) => state.user);
     const { t } = useTranslation();
-    console.log("Bank ID: ", bank);
-       useEffect(() => {
+    useEffect(() => {
              getBankImages(bankId).then((imgs: BankImage[]) => {
                  console.log("Bank Images: ", imgs);
                  setImages(imgs);
              });
-           }, [bankId]);
+    }, [bankId]);
 
-      useEffect(() => {
+    useEffect(() => {
     
         if (bank)  getLordImages(bank.landlord).then((imgs: any[]) => {
             console.log("Bank Images: ", imgs);
@@ -73,7 +73,6 @@ const SubmissionReview = ( { bankId,  onChangeState, onRenovOk, onRejectOk, onPe
      }, [bankId]);
      const pdfExport = async () => {
        setPdf(true);
-      
        setTimeout(async () => {
         await   generatePDF(contentRef,  PdfOps(bank?.bankName+'.pdf'));
         setPdf(false);
@@ -157,9 +156,14 @@ const SubmissionReview = ( { bankId,  onChangeState, onRenovOk, onRejectOk, onPe
  
      <div className="p-6 space-y-6"  ref={contentRef}>
 
-     {/* { bank && bank.step=='bankSteps.needRenovation' && <TaskManager bank={bank} /> } */}
+      {/* { bank && bank.step=='bankSteps.needRenovation' && <TaskManager bank={bank} /> } */}
 
       { bank && (contrat || bank.step=='bankSteps.needContract') && <LeaseContractForm bank={bank} ></LeaseContractForm> }
+
+      { bank && bank.id && (bank.step=='bankSteps.needRenovation') && <div>
+        <h2 className="text-2xl font-bold mb-2 text-pink-600">Rénovation</h2>
+        <AllTask bankId={bank.id} genTasks={genTasks}></AllTask>
+        </div> }
 
       {  (pdf || pConfig) && <div className={ (pConfig && !pdf ) ? "w-full border" : "w-full" } style={{ height: h3+'px' }}></div> }
      <h2 className="text-2xl font-bold mb-2 text-pink-600">Bank Location</h2>
@@ -210,10 +214,11 @@ const SubmissionReview = ( { bankId,  onChangeState, onRenovOk, onRejectOk, onPe
       { !pdf &&  
       <div className="flex justify-around items-center pt-6">
          { (bank &&  bank.step=='bankSteps.needRenovation')  && bank?.approve && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
-         onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onContratOk() }} />, "Approbation")}
+         onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onRenovOk() }} />, "Approbation")}
         >
           <PiCheckFatFill /> Rénovation terminée
         </Button> }
+
         { (bank &&  bank.step=='bankSteps.needContract')  && bank?.approve && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onContratOk() }} />, "Approbation")}
         >

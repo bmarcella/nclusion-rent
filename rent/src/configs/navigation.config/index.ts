@@ -62,7 +62,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.vendor',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "ve"],
+                authority: ["admin", "vendor_management"],
                 subMenu: [],
             }
         ],

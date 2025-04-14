@@ -11,8 +11,9 @@ const bankComments = "BankComments";
 const landlordPictures = "LandlordPictures";
 const historicDecision = "HistoricDecision";
 const historicSteps = "HistoricSteps";
-const task = "tasks";
+const task = "BankTasks";
 // 
+export const TaskDoc  = collection(db, task);
 export const hStepsDoc   = collection(db, historicSteps);
 export const Landlord   = collection(db, entity);
 export const LandlordDoc = Landlord;
@@ -38,4 +39,8 @@ export const getBankPictureRef = (id: string ) => {
 
 export const getLandlordPicturesRef = (id: string ) => {
      return doc(db, landlordPictures, id);
+}
+
+export const getBankTask = (id: string ) => {
+     return  doc(db, task, id);
 }

@@ -189,9 +189,9 @@ interface Props {
               baseColumns.push({
                 header: 'Action',
                 cell: ({ row }) => (
-                    <div className="flex items-center">
+                    <div className="flex items-center justify-end">
                         { row.original.type_person!="admin" && <div>
-                            <Button variant="solid" size="sm" onClick={() => openDialog(row?.original)}>
+                            <Button variant="solid" shape='circle' size="xs" onClick={() => openDialog(row?.original)}>
                                 <PiEyeLight />
                             </Button>
                            { !row.original.email && <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
