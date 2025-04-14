@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { addDoc, CollectionReference, deleteDoc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
-import { BankLeaseDoc, bankPicturesDoc, getBankDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc } from "../Landlord";
+import { BankLeaseDoc, bankPicturesDoc, getBankDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc, TaskDoc } from "../Landlord";
 import { BankImage } from "@/views/bank/show/components/ImageGallery";
 import { ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 import { storage } from "./FirebaseStorage";
@@ -31,6 +31,17 @@ export const getBankById = async (bankId: string) => {
   export const addStepsHistory = async ( data: any) => {
     try {
          const docRef = await addDoc(hStepsDoc, data);
+        return docRef.id;
+      } catch (error) {
+       console.error("Error adding document: ", error);
+       throw new Error("Error adding document: " + error);
+       return false;
+    }
+  };
+
+  export const addBankTask = async ( data: any) => {
+    try {
+        const docRef = await addDoc(TaskDoc, data);
         return docRef.id;
       } catch (error) {
        console.error("Error adding document: ", error);
