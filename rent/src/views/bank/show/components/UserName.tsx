@@ -12,7 +12,7 @@ interface ImageGalleryProps {
   sub_str? : number
 }
 
-const UserName: React.FC<ImageGalleryProps> = ({ userId, keyName = "id_user", sub_str =0 }) => {
+const UserName: React.FC<ImageGalleryProps> = ({ userId, keyName = "id_user", sub_str =-1 }) => {
 const [lord, setLord] = useState() as any;
      const getLandlordByUserId = async (userId: string) => {
         const q = query(LandlordDoc, where(keyName, '==', userId));
@@ -31,8 +31,8 @@ const [lord, setLord] = useState() as any;
         }, [userId]);
   return (
     <>
-      { lord && sub_str==0 && <i className=" font-semibold ">{ lord.fullName }</i>}
-      { lord && sub_str==1 && <i className=" font-semibold ">{ lord.fullName.charAt(sub_str) }</i>}
+      { lord && sub_str==-1 && <i className=" font-semibold ">{ lord.fullName }</i>}
+      { lord && sub_str==0 && <i className=" font-semibold ">{ lord.fullName.charAt(sub_str) }</i>}
     </>
   );
 };

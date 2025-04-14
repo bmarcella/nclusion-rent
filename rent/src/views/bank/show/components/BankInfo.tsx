@@ -91,7 +91,7 @@ const BankInfo: React.FC<BankInfoProps> = ({ bank }) => {
           </p>
           <p className="flex items-center gap-2">
             <FaMoneyBillWave className="text-green-600" />
-            <strong>{t("bank.rentCost")}: </strong> {bank.rentCost ?? 0} HTG
+            <strong>{t("bank.rentCost")}: </strong> HTG { new Intl.NumberFormat('fr-FR').format(Number(bank.rentCost)) }
           </p>
           <p className="flex items-center gap-2">
             <FaShieldAlt className="text-indigo-600" />

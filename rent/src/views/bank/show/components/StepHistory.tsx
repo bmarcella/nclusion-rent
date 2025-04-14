@@ -47,7 +47,7 @@ function StepHistory( { bankId } : any) {
                     return (
                         <Timeline.Item key={step.id} className="mb-4" media = {
                         <TimelineAvatar className="bg-amber-500">
-                           { step.createdBy && <UserName userId={step.createdBy } sub_str={1} /> }
+                           { step.createdBy && <UserName userId={step.createdBy } sub_str={0} /> }
                         </TimelineAvatar>
                         }>
                             <p className="my-1 flex ">

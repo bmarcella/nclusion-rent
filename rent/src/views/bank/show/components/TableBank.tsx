@@ -63,8 +63,9 @@ const pageSizeOption = [
     interface Props {
         step?: BankStep;
         isAgent?:boolean;
+        all?: boolean;
    }
-  export function TableBank ( { step , isAgent = false  }: Props) { 
+  export function TableBank ( { step , isAgent = false, all = false  }: Props) { 
     const [page, setPage] = useState(1);
     const [hasNext, setHasNext] = useState(true);
     const [banks, setBanks] = useState<Bank[]>([]);
@@ -251,7 +252,11 @@ const pageSizeOption = [
     const fetchBanks = async (pageNum: number) => {
         let q: Query<DocumentData>;
         if (!step){
-           q = query(BankDoc, orderBy("createdAt", "desc"), where("createdBy", "==", userId), limit(pageSizeOption[0].value));
+           if (!all) {
+              q = query(BankDoc, orderBy("createdAt", "desc"), where("createdBy", "==", userId), limit(pageSizeOption[0].value));
+            } else{
+                q = query(BankDoc, orderBy("createdAt", "desc"), limit(pageSizeOption[0].value));
+            }
          } else {
            q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step),  limit(pageSizeOption[0].value));
         }
@@ -406,7 +411,7 @@ const pageSizeOption = [
                 </div>
             </div>
           </div>
-          { step && 
+          { (step || all) && 
           <FilterBank  authority={authority || []} proprio={proprio} t={t}
            onChangeRegion={onChangeRegion} 
            onChangeAgent={onChangeAgent} 
@@ -416,7 +421,7 @@ const pageSizeOption = [
            </FilterBank> }
 
               { !step && <FilterMyBank 
-             onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t}></FilterMyBank> } 
+             onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t} all={all} ></FilterMyBank> } 
       
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
            <Table>

@@ -13,10 +13,17 @@ export const ShowNeedApprovalBankBase= () => {
   
   return (
     <div>
-       <Tabs defaultValue={ListBankSteps[0].key} className="w-full">
+       <Tabs defaultValue={'all'} className="w-full">
                 <TabList>
+                  <TabNav key={'all'} value={'all'}>Tout</TabNav>
                    { ListBankSteps.map((step, index)=>(<TabNav key={index} value={step.key}>{step.label}</TabNav>) )  }
                 </TabList>
+
+                <TabContent value={'all'}>
+                       {<TaskManager key={'all'} /> }
+                       <TableBank all={true} />
+                </TabContent>
+
                 { ListBankSteps.map((step, index)=>( 
                   <div key={index}>
                     <TabContent value={step.key}>
