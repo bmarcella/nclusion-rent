@@ -276,6 +276,11 @@
           "label": "Air Conditionée",
           "yes": "Oui",
           "no": "Non"
+        },
+        "renovSteps": {
+          "construction": "Contruction",
+          "comptoire": "Comptoire",
+          "peinture": "Peinture"
         }
     },
     "entity": {

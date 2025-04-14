@@ -35,8 +35,8 @@ const UploadImgBank = ( { bankId, isEdit = false, nextStep, userId } : Props) =>
     }
   
     const validateBeforeUpload = (fileList: FileList | null, current: File[]) => {
-      if (fileList && fileList[0].size > 2 * 1024 * 1024) {
-        return 'File too large (max 2MB)'
+      if (fileList && fileList[0].size > 50 * 1024 * 1024) {
+        return 'File too large (max 50MB)'
       }
       return true
     }
@@ -109,7 +109,7 @@ const UploadImgBank = ( { bankId, isEdit = false, nextStep, userId } : Props) =>
             beforeUpload={validateBeforeUpload}
             accept=".png,.jpg,.jpeg"
             tip={<p className="text-xs text-gray-500 mt-2">{t('upload.maxSize')}</p>}
-            uploadLimit={5}
+            uploadLimit={10}
             onChange={handleFileChange}
             onFileRemove={handleFileRemove}
           >

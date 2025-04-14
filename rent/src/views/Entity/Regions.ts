@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Regions } from '@/views/Entity/Regions';
 import { BankDoc } from "@/services/Landlord";
 import { getDocs, orderBy, query, where } from "firebase/firestore";
 import { ListBankSteps } from ".";

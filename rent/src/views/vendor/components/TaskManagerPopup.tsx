@@ -4,17 +4,17 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from '@/utils/hooks/useTranslation';
-import { addDoc, getDocs, updateDoc, doc, where, orderBy, query } from 'firebase/firestore';
+import { addDoc, getDocs, updateDoc, doc, where, orderBy, query, DocumentData, Query, QueryConstraint, startAfter, Timestamp } from 'firebase/firestore';
 import {  useEffect, useState } from 'react';
 import { Landlord, taskCollection } from '@/services/Landlord';
 import { useSessionUser } from '@/store/authStore';
 import { getRegionIds } from '@/views/Entity/Regions';
-import { Proprio } from '@/views/Entity';
-import { convertToSelectOptions } from '../../add/components/InfoBank';
+import { BankTask, Proprio } from '@/views/Entity';
+import { convertToSelectOptions } from '../../bank/add/components/InfoBank';
+import { formatRelative } from 'date-fns/formatRelative';
+import { fr } from 'date-fns/locale';
+import BankName from '@/views/bank/show/components/BankName';
 
-
-const predefinedTasks = ['Construction', 'Comptoire', 'Penture'];
-const assignees = ['Alice', 'Bob', 'Charlie', 'Dana'];
 
 const schema = z.object({
   taskName: z.string().min(1, 'Required'),
@@ -36,8 +36,19 @@ function TaskManagerPopup() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [filter, setFilter] = useState<'all' | TaskForm['state']>('all');
   const [isSubmitting, setSubmitting] = useState(false);
-  const {  proprio , authority } = useSessionUser((state) => state.user);
+  const {  userId,  proprio , authority } = useSessionUser((state) => state.user);
   const [landlordsOptions, setLandlordsOptions] = useState<any  []>([]);
+  const [selectedtasks, setSelectedTasks] = useState<any[]>([]);
+
+  // 
+
+  const [ regions, setRegions] = useState<number>(0);
+  const [agents, setAgents] = useState<string>();
+  const [start, setStart] = useState<Date>();
+  const [end, setEnd] = useState<Date>();
+  const [steps, setSteps] = useState<string>();
+  const [states, setStates] = useState<string>();
+  
   const {
     control,
     handleSubmit,
@@ -57,9 +68,7 @@ function TaskManagerPopup() {
 
    const fetchLandlords = async () => {
           try {
-
-             let q = null;
-
+            let q = null;
             const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
             console.log("Regions: ", ids);
             q = query(Landlord, orderBy("createdAt", "desc"),   where("regions", "array-contains-any", ids),  where("type_person", "==", "vendeur"));
@@ -73,11 +82,66 @@ function TaskManagerPopup() {
           }
     };
 
-  const fetchTasks = async () => {
-    const snapshot = await getDocs(taskCollection);
-    const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    setTasks(list);
-  };
+  const getQueryDate = (q: Query<DocumentData, DocumentData>)  => {
+            
+               const filters: QueryConstraint[] = [];
+   
+               if (regions && regions != 0) {
+                   filters.push(where('id_region', '==', regions));
+               } else {
+                   const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
+                   filters.push(where("id_region", "in", ids))
+               }
+   
+               if (agents) {
+                   filters.push(where('createdBy', '==', agents));
+               }
+   
+               if (states) {
+                   filters.push(where('state', '==', states));
+               }
+              
+               if (start && end) {
+                   const isSameDay =
+                   start.toDateString() === end.toDateString();
+   
+                   if (isSameDay) {
+                   const startOfDay = new Date(start);
+                   startOfDay.setHours(0, 0, 0, 0);
+   
+                   const endOfDay = new Date(end);
+                   endOfDay.setHours(23, 59, 59, 999);
+   
+                   filters.push(where('createdAt', '>=', Timestamp.fromDate(startOfDay)));
+                   filters.push(where('createdAt', '<=', Timestamp.fromDate(endOfDay)));
+                   } else {
+                   filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
+                   filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
+                   }
+               } else {
+                   if (start) {
+                   filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
+                   }
+                   if (end) {
+                   filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
+                   }
+               }
+               return filters.length > 0 ? query(q, ...filters) : q;
+    }
+   const fetchTasks = async () => {
+            try {
+              let q : Query<DocumentData>;
+              const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
+                  q = query(taskCollection, orderBy("createdAt", "asc"), where("contratId","==",""), where('id_region', 'in', ids));
+                  q = getQueryDate(q);
+              const snapshot = await getDocs(q);
+              const t: BankTask[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BankTask));
+              console.log(t);
+              setTasks(t);
+            } catch (err) {
+              console.error("Error fetching landlords:", err);
+            }
+      };
 
   const onSubmitTask = async (data: TaskForm) => {
     try {
@@ -99,36 +163,33 @@ function TaskManagerPopup() {
     fetchTasks();
   };
 
-  const filteredTasks = filter === 'all' ? tasks : tasks.filter((task) => task.state === filter);
-  const completedTasks = tasks.filter((task) => task.state === 'completed').length;
-  const allDone = tasks.length > 0 && completedTasks === tasks.length;
+  const handleAdd = async (task: BankTask) => {
+    setSelectedTasks((prev) => [...prev, task]);
+  };
+
+  const handleRemove = async (task: BankTask) => {
+    setSelectedTasks((prev) => prev.filter((t) => t.id !== task.id));
+  };
+
 
   useEffect(() => {
     fetchLandlords();
+    fetchTasks();
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-1 gap-6 w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
+    <div className="grid grid-cols-2 md:grid-cols-2 gap-6 w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
       {/* Left - Form */}
       <div>
         <form onSubmit={handleSubmit(onSubmitTask)}>
           <div className="grid grid-cols-2 gap-4">
-            <FormItem label="Task Name" invalid={!!errors.taskName} errorMessage={errors.taskName?.message}>
-              <Controller name="taskName" control={control} render={({ field }) =>
-                <Select
-                  placeholder="Select a task"
-                  options={predefinedTasks.map((item) => ({ value: item, label: item }))}
-                  value={field.value ? { value: field.value, label: field.value } : null}
-                  onChange={(option) => field.onChange(option?.value)}
-                />
-              } />
-            </FormItem>
+  
 
             <FormItem label="Assignee" invalid={!!errors.assignee} errorMessage={errors.assignee?.message}>
               <Controller name="assignee" control={control} render={({ field }) =>
                 <Select
                   placeholder="Select assignee"
-                  options={assignees.map((item) => ({ value: item, label: item }))}
+                  options={landlordsOptions}
                   value={field.value ? { value: field.value, label: field.value } : null}
                   onChange={(option) => field.onChange(option?.value)}
                 />
@@ -180,21 +241,6 @@ function TaskManagerPopup() {
                 <Input {...field} />
               } />
             </FormItem>
-
-            <FormItem label="Status" invalid={!!errors.state} errorMessage={errors.state?.message}>
-              <Controller name="state" control={control} render={({ field }) =>
-                <Select
-                  placeholder="Select status"
-                  options={[
-                    { value: 'pending', label: 'Pending' },
-                    { value: 'in-progress', label: 'In Progress' },
-                    { value: 'completed', label: 'Completed' },
-                  ]}
-                  value={{ value: field.value, label: field.value.replace('-', ' ') }}
-                  onChange={(option) => field.onChange(option?.value)}
-                />
-              } />
-            </FormItem>
           </div>
 
           <div className="mt-6">
@@ -208,50 +254,47 @@ function TaskManagerPopup() {
       {/* Right - Task List */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold">📋 Tasks</h3>
-          <Select
-            options={[
-              { value: 'all', label: 'All' },
-              { value: 'pending', label: 'Pending' },
-              { value: 'in-progress', label: 'In Progress' },
-              { value: 'completed', label: 'Completed' },
-            ]}
-            value={{ value: filter, label: filter.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase()) }}
-            onChange={(val) => setFilter(val?.value || 'all')}
-          />
+          <h3 className="text-lg font-bold">📋 Travaux Disponibles</h3>
+
         </div>
 
-        <div className="text-sm text-gray-700 mb-2">
-          {completedTasks} of {tasks.length} completed
-          {allDone && <p className="text-green-500 font-medium">✅ All tasks are done!</p>}
-        </div>
-
-        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-          {filteredTasks.map((task) => (
-            <div key={task.id} className="bg-white p-4 rounded-lg shadow border">
-              <div className="flex justify-between items-center mb-1">
-                <div>
-                  <p className="font-semibold">{task.taskName}</p>
-                  <p className="text-xs text-gray-500">Assigned to: {task.assignee}</p>
-                </div>
-                <Select
-                  className="w-[140px]"
-                  options={[
-                    { value: 'pending', label: 'Pending' },
-                    { value: 'in-progress', label: 'In Progress' },
-                    { value: 'completed', label: 'Completed' },
-                  ]}
-                  value={{ value: task.state, label: task.state.replace('-', ' ') }}
-                  onChange={(val) => updateTaskState(task.id, val?.value)}
-                />
+     {/* Task List */}
+     <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+        {tasks.map((task) => (
+          <div
+            key={task.id}
+            className="bg-white p-4 rounded-lg shadow border flex justify-between items-center"
+          >
+            {/* Task content */}
+            <div className="flex-1">
+              <div className="mb-1">
+                <p className="font-semibold">{t('bank.' + task.taskName)}</p>
+                <p className="text-xs text-gray-500">
+                  Bank: <BankName id={task.bankId} />
+                </p>
               </div>
               <p className="text-sm mb-1">{task.description}</p>
               <p className="text-xs text-gray-500">
-                {new Date(task.startDate).toLocaleDateString()} → {new Date(task.endDate).toLocaleDateString()}
+                {formatRelative(
+                  task.createdAt.toDate?.() || task.createdAt,
+                  new Date(),
+                  { locale: fr }
+                )}
               </p>
             </div>
-          ))}
-        </div>
+
+            {/* Plus Button */}
+            <button
+              onClick={() => handleAdd(task)} // Replace with your actual handler
+              className="ml-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+              title="Add"
+            >
+              +
+            </button>
+          </div>
+        ))}
+      </div>
+
       </div>
     </div>
   );

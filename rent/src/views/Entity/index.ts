@@ -1,6 +1,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { boolean } from "zod";
 import { USER_ROLE } from "../shared/schema";
 
 export interface Document {
@@ -263,6 +264,14 @@ export type ClientVisibility = typeof clientVisibilities[number];
 export type LotteryCompetition = typeof lotteryCompetitions[number];
 export type NonRenewalReason = typeof nonRenewalReasons[number];
 export type RoofType = typeof roofTypes[number];
+
+export const renovSteps = [
+  "renovSteps.construction",
+  "renovSteps.comptoire",
+  "renovSteps.peinture",
+] as const;
+export type RenovStep = typeof renovSteps[number];
+
 export type StepDecision = {
   id?: string;
   bankId?: string;
@@ -290,10 +299,12 @@ export type HistoricDecision = {
   status?: FinalDecisionStatus;
   reason_why?: string
 };
+
 export const FrenchNumber = ({ number }: { number: number }) => {
   const formatted = new Intl.NumberFormat('fr-FR').format(number);
   return formatted;
 };
+
 export interface Bank {
     id?: string;
     bankName: string;
@@ -547,4 +558,30 @@ export const getEndDateYear = (date: string, y : any ) => {
   const newDate = new Date(date);
   newDate.setFullYear(newDate.getFullYear() + y);
   return newDate as Date;
+}
+
+
+export interface BankTask {
+  id: string;
+  taskName: RenovStep;
+  bankId : string ;
+  state: string;
+  id_region: number | string ;
+  description: string;
+  done :  boolean;
+  createdBy: string;
+  createdAt: Date;
+  contratId?: string;
+}
+
+export interface RenovContract {
+  id: string;
+  userId : string ,
+  createdBy: string;
+  createdAt: Date;
+  montant_total: number;
+  montant_initial: number;
+  description: string;
+  start_date: Date;
+  end_date: Date;
 }

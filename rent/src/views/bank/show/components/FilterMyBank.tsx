@@ -15,6 +15,7 @@ interface Props {
   onChangeDate: (start:  Date, end? : Date) => void;
   onChangeStep: (d: string ) => void;
   t : (key: string) => string;
+  all : boolean;
 }
 
 export const convertToSelectOptionsRegion = (items: RegionType[]) => {
@@ -41,7 +42,7 @@ export const convertToSelectOptionsSteps = (items: string[], t: any) => {
 }
 
 
-function FilterMyBank({ onChangeDate, onChangeStep, t }: Props) {
+function FilterMyBank({ onChangeDate, onChangeStep, t, all }: Props) {
   const [start, setStart] = useState<Date>();
   const [end, setEnd] = useState<Date>();
   const [steps, setSteps] = useState<OptionType[]>(convertToSelectOptionsSteps(bankSteps, t));
@@ -74,26 +75,28 @@ function FilterMyBank({ onChangeDate, onChangeStep, t }: Props) {
                 }}
               />
             )}
+        { !all && (<>
+              <DatePicker placeholder="Date debut"  onChange={(date) => {
+                          setStart(undefined);
+                          if (!date) {
+                              setStart(undefined);
+                              return;
+                            }
+                          console.log('start:', date);
+                          setStart(new Date(date));
+                        }} />
 
-      <DatePicker placeholder="Date debut"  onChange={(date) => {
-            setStart(undefined);
-            if (!date) {
-                 setStart(undefined);
-                return;
-              }
-             console.log('start:', date);
-             setStart(new Date(date));
-          }} />
-
-       <DatePicker placeholder="Date fin" onChange={(date) => {
-            setEnd(undefined);
-            if (!date) {
-                 setEnd(undefined);
-                return;
-              }
-             console.log('start:', date);
-             setEnd(new Date(date));
-          }}  />
+                    <DatePicker placeholder="Date fin" onChange={(date) => {
+                          setEnd(undefined);
+                          if (!date) {
+                              setEnd(undefined);
+                              return;
+                            }
+                          console.log('start:', date);
+                          setEnd(new Date(date));
+                        }}  /> 
+        </>) }
+            
 
   
     </div>

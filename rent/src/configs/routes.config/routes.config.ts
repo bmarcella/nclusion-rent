@@ -36,11 +36,17 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/bank/show/pages/BankByStep')),
         authority: [],
     },
-  
     {
         key: 'bankMenu.bankDetails',
         path: '/bank/:bankId',
         component: lazy(() => import('@/views/bank/show/BankDetails')),
+        authority: [],
+    },
+  
+    {
+        key: 'bankMenu.vendor',
+        path: '/bank/vendor',
+        component: lazy(() => import('@/views/vendor')),
         authority: [],
     },
     {

@@ -5,7 +5,7 @@ import { formatRelative } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import UserName from "./UserName";
 
-const stepColorClassMap: Record<
+export const stepColorClassMap: Record<
   string,
   {
     bg: string;
