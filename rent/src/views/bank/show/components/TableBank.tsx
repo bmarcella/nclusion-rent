@@ -305,10 +305,6 @@ const pageSizeOption = [
         fetchBanks(1);
      }, [start, end, regions, agents, steps]);
 
-
-    
-   
-
     // const handlePrev = () => {
     //     if (page > 1) {
     //         fetchBanks(page - 1);

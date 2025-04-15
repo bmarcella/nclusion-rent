@@ -3,8 +3,8 @@ import { Pagination, Select } from '@/components/ui';
 import { useTranslation } from '@/utils/hooks/useTranslation';
 import { DocumentData, DocumentSnapshot, getDocs, limit, orderBy, Query, query, QueryConstraint, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import {  useEffect, useMemo, useState } from 'react';
-import { getBankTask, taskCollection } from '@/services/Landlord';
-import { BankTask } from '@/views/Entity';
+import { contractsDoc, getBankTask, taskCollection } from '@/services/Landlord';
+import { BankTask, RenovContract } from '@/views/Entity';
 import { useSessionUser } from '@/store/authStore';
 import { getRegionIds, getRegionsById } from '@/views/Entity/Regions';
 import { ColumnDef } from '@/components/shared/DataTable';
@@ -15,50 +15,42 @@ import Tr from '@/components/ui/Table/Tr';
 import Th from '@/components/ui/Table/Th';
 import TBody from '@/components/ui/Table/TBody';
 import Td from '@/components/ui/Table/Td';
-import BankName from '@/views/bank/show/components/BankName';
 import { formatRelative } from 'date-fns/formatRelative';
 import { fr } from 'date-fns/locale/fr';
+import UserName from '@/views/bank/show/components/UserName';
+import { hasAuthority } from '@/utils/RoleChecker';
+import Currency from '@/views/shared/Currency';
+import Button from 'react-scroll/modules/components/Button';
+import { PiCheck, PiEyeLight } from 'react-icons/pi';
+import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
+import { useNavigate } from 'react-router-dom';
 
 const pageSizeOption = [
     { value: 100, label: '100 / page' },
     { value: 200, label: '200 / page' },
 ]
 
-interface Props {
-    state : number;
-}
 
-function AllFreeTask ({ state } : Props ) {
+function ShowContrat ( ) {
   const [currentPage, setCurrentPage] = useState(1);
-
+  const navigate = useNavigate()
   const { t } = useTranslation();
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [conts, setConts] = useState<any[]>([]);
   const [totalData, setTotalData] = useState(0);
   const [pageDocs, setPageDocs] = useState<DocumentSnapshot[]>([]);
      // 
-  const { userId, proprio , authority } = useSessionUser((state) => state.user);
-  const [ regions, setRegions] = useState<number>(0);
-  const [agents, setAgents] = useState<string>();
+  const { userId, authority } = useSessionUser((state) => state.user);
+
   const [start, setStart] = useState<Date>();
   const [end, setEnd] = useState<Date>();
-  const [steps, setSteps] = useState<string>();
   const [states, setStates] = useState<string>();
       // 
 
   const getQueryDate = (q: Query<DocumentData, DocumentData>)  => {
            
               const filters: QueryConstraint[] = [];
+
   
-              if (regions && regions != 0) {
-                  filters.push(where('id_region', '==', regions));
-              } else {
-                  const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
-                  filters.push(where("id_region", "in", ids))
-              }
-  
-              if (agents) {
-                  filters.push(where('createdBy', '==', agents));
-              }
   
               if (states) {
                   filters.push(where('state', '==', states));
@@ -96,78 +88,67 @@ function AllFreeTask ({ state } : Props ) {
   const fetchTasks = async (pageNum: number) => {
           try {
             let q : Query<DocumentData>;
-            if(state==0) {
-               q = query(taskCollection, orderBy("createdAt", "asc"), where("contratId","==",""), limit(pageSizeOption[0].value));
+            if ( hasAuthority(authority, "admin") ) {
+                q = query(contractsDoc, orderBy("createdAt", "desc"), limit(pageSizeOption[0].value));
+            } else {
+              q = query(contractsDoc, where('createdBy', '==', userId), orderBy("createdAt", "desc"), limit(pageSizeOption[0].value));
             }
-            else if(state==1 ) {
-                q = query(taskCollection, orderBy("createdAt", "asc"), where('state', "==", "in-progress") , limit(pageSizeOption[0].value));
-             } else {
-                q = query(taskCollection, orderBy("createdAt", "asc"), where('state', "==", "completed") , limit(pageSizeOption[0].value));
-             }
-            q = getQueryDate(q);
+            // q = getQueryDate(q);
              // If we're not on the first page, we need to start after a document
-           if (pageNum > 1 && pageDocs[pageNum - 2]) {
+            if (pageNum > 1 && pageDocs[pageNum - 2]) {
              q = query(q, startAfter(pageDocs[pageNum - 2]));
             }
             const snapshot = await getDocs(q);
-            const t: BankTask[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BankTask));
+            const t: RenovContract[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RenovContract));
             console.log(t);
-            setTasks(t);
+            setConts(t);
           } catch (err) {
             console.error("Error fetching landlords:", err);
           }
     };
 
-  const updateTaskState = async (taskId: string, state: string) => {
-    try {
-      const taskRef = getBankTask(taskId);
-      await   updateDoc(taskRef, { state });
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === taskId ? { ...task, state } : task))
-      );
-    } catch (error) {
-      console.error("Error updating task state:", error);
-    }
-  }
+ 
 
   useEffect(() => {
     fetchTasks(1);
   }, []);
 
-  const columns = useMemo<ColumnDef<BankTask>[]>(
+  const columns = useMemo<ColumnDef<RenovContract>[]>(
     () => [
         {
-            header: 'Bank',
+            header: 'Vendeur',
             cell: ({ row }) => (
                 <div>
-                    { row.original.bankId && <p className="font-semibold"><BankName id={row.original.bankId}></BankName></p>}
+                    { row.original.assignee && <p className="font-semibold"><UserName userId={row.original.assignee} keyName='id'/></p>}
                 </div>
                 ),
             
         },
         {
-            header: 'Travaux',
-            cell: ({ row }) => (
-                <div>
-                    { row.original.taskName && <p className="font-semibold">{t('bank.'+row.original.taskName)}</p>}
-                </div>
-                ),
-            
-        },
-        {
-            header: 'Régions',
-            cell: ({ row }) => (
-                <div>
-                    { row.original.id_region && <p className="font-semibold">{getRegionsById(row.original.id_region).label}</p>}
-                </div>
-                ),
-            
-        },
-        {
-            header: 'Date création',
+            header: 'Date Debut',
             cell: ({ row }) => (
                   <div className="min-w-[160px]">
-                      <div className="font-medium"> {    formatRelative(row.original.createdAt.toDate?.() || row.original.createdAt, new Date(), { locale: fr } )  }</div>
+                      <div className="font-medium"> {    formatRelative(row.original.startDate.toDate?.() || row.original.startDate, new Date(), { locale: fr } )  }</div>
+                    </div>
+                ),
+            
+        },
+        {
+            header: 'Date Fin',
+            cell: ({ row }) => (
+                  <div className="min-w-[160px]">
+                      <div className="font-medium"> {    formatRelative(row.original.endDate.toDate?.() || row.original.endDate, new Date(), { locale: fr } )  }</div>
+                    </div>
+                ),
+            
+        },
+        {
+            header: 'Paiement',
+            cell: ({ row }) => (
+                   <div className="min-w-[160px]">
+                      <div className="font-medium">Total : <Currency amount = {row.original.montant_total} /></div>
+                      <div className="font-medium"> Initial : <Currency amount = {row.original.montant_initial} /> </div>
+                      <div className="font-medium"> Balance : {  <Currency amount = { (row.original.montant_total -row.original.montant_initial)} />   }</div>
                     </div>
                 ),
             
@@ -176,28 +157,34 @@ function AllFreeTask ({ state } : Props ) {
             header: 'Etat',
             cell: ({ row }) => (
                   <div className="min-w-[160px]">
-                    <Select
-                    isDisabled={state!=2}
-                  className="w-[140px]"
-                  options={[
-                    { value: 'pending', label: 'Pending' },
-                    { value: 'in-progress', label: 'In Progress' },
-                    { value: 'completed', label: 'Completed' },
-                  ]}
-                  value={{ value: row.original.state, label: row.original.state.replace('-', ' ') }}
-                  onChange={(val) => updateTaskState(row.original.id, val?.value)}
-                />
-                                       
-                  </div>
+                     { !row.original.completed && <div className="font-medium text-orange-500"> encours </div> }
+                     { row.original.completed && <div className="font-medium text-green-500"> terminé </div> }
+                    </div>
                 ),
             
+        },
+        {
+            header: 'Action',
+            cell: ({ row }) => {
+              return (
+                <div className="min-w-[200px]">
+                    { (hasAuthority(authority, 'admin'))&&
+                     <Button variant="solid"  shape="circle" size="xs" className='mr-1 '  onClick={() => {} }>
+                        <PiEyeLight />
+                     </Button> }
+                     <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs"  onClick={() => navigate("/bank/"+row.original.id) }>
+                        <PiCheck />
+                     </Button>
+                     {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
+                </div>);
+            } 
         },
     ],
     [],
 )
 
  const table = useReactTable({
-        data: tasks,
+        data: conts,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
@@ -280,4 +267,4 @@ function AllFreeTask ({ state } : Props ) {
   );
 }
 
-export default AllFreeTask;
+export default ShowContrat;

@@ -576,12 +576,16 @@ export interface BankTask {
 
 export interface RenovContract {
   id: string;
-  userId : string ,
+  assignee: string;
   createdBy: string;
   createdAt: Date;
   montant_total: number;
   montant_initial: number;
-  description: string;
-  start_date: Date;
-  end_date: Date;
+  description?: string;
+  endDate: Date;
+  startDate: Date;
+  completed: boolean;
+  completedAt?: Date;
+  validated : boolean;
+  validatedAt?: Date;
 }

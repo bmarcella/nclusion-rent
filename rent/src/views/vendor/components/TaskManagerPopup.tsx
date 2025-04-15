@@ -1,35 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FormItem, Select, DatePicker, Input, Button } from '@/components/ui';
+import { FormItem, Select, DatePicker, Input, Button, Alert } from '@/components/ui';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from '@/utils/hooks/useTranslation';
-import { addDoc, getDocs, updateDoc, doc, where, orderBy, query, DocumentData, Query, QueryConstraint, startAfter, Timestamp } from 'firebase/firestore';
+import { addDoc, getDocs, updateDoc, doc, where, orderBy, query, DocumentData, Query, QueryConstraint,  Timestamp } from 'firebase/firestore';
 import {  useEffect, useState } from 'react';
-import { Landlord, taskCollection } from '@/services/Landlord';
+import { contractsDoc, Landlord, taskCollection } from '@/services/Landlord';
 import { useSessionUser } from '@/store/authStore';
 import { getRegionIds } from '@/views/Entity/Regions';
-import { BankTask, Proprio } from '@/views/Entity';
+import { BankTask, Proprio, RenovContract } from '@/views/Entity';
 import { convertToSelectOptions } from '../../bank/add/components/InfoBank';
 import { formatRelative } from 'date-fns/formatRelative';
 import { fr } from 'date-fns/locale';
 import BankName from '@/views/bank/show/components/BankName';
+import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage';
 
 
 const schema = z.object({
-  taskName: z.string().min(1, 'Required'),
   assignee: z.string().min(1, 'Required'),
-  montant_total: z.number().min(1, 'Required'),
-  montant_initial: z.number().min(1, 'Required'),
-  description: z.string().min(1, 'Required'),
+  montant_total: z.string().min(1, 'Required'),
+  montant_initial: z.string().min(1, 'Required'),
+  description: z.string().optional(),
   startDate: z.string().min(1, 'Required'),
   endDate: z.string().min(1, 'Required'),
-  state: z.enum(['pending', 'in-progress', 'completed']),
 });
 
 type TaskForm = z.infer<typeof schema>;
-
-
 
 function TaskManagerPopup() {
   const { t } = useTranslation();
@@ -39,6 +36,9 @@ function TaskManagerPopup() {
   const {  userId,  proprio , authority } = useSessionUser((state) => state.user);
   const [landlordsOptions, setLandlordsOptions] = useState<any  []>([]);
   const [selectedtasks, setSelectedTasks] = useState<any[]>([]);
+  const [message, setMessage] = useTimeOutMessage();
+  const [alert, setAlert] = useState("success") as any;
+
 
   // 
 
@@ -57,12 +57,10 @@ function TaskManagerPopup() {
   } = useForm<TaskForm>({
     resolver: zodResolver(schema),
     defaultValues: {
-      taskName: '',
       assignee: '',
       description: '',
       startDate: '',
       endDate: '',
-      state: 'pending',
     },
   });
 
@@ -141,34 +139,67 @@ function TaskManagerPopup() {
             } catch (err) {
               console.error("Error fetching landlords:", err);
             }
-      };
+    };
 
   const onSubmitTask = async (data: TaskForm) => {
+    if (Number(data.montant_initial) > Number(data.montant_total)){
+      setAlert("danger");
+      setMessage( 'Montant versé doit être inférieur ou egal au montant total' );
+      return;
+    }
     try {
       setSubmitting(true);
-      const docRef = await addDoc(taskCollection, data);
+      const contrat = {
+        createdBy: userId,
+        createdAt: new Date(),
+        completed:false,
+        completedAt: null,
+        validated: false,
+        validatedAt: null,
+        ...data,
+      } ;
+      const docRef = await addDoc(contractsDoc, contrat);
+     
+      updateTaskState(docRef.id);
       await updateDoc(docRef, { id: docRef.id });
+      setAlert("success");
+      setMessage( 'Contrat crée avec succes' );
       reset();
       fetchTasks();
     } catch (err) {
       console.error(err);
+      setAlert("danger");
+      setMessage("Error adding landlord");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const updateTaskState = async (id: string, state: TaskForm['state']) => {
-    const taskRef = doc(taskCollection, id);
-    await updateDoc(taskRef, { state });
-    fetchTasks();
+
+  const updateTaskState = async (taskId: string) => {
+      await Promise.all(
+        selectedtasks.map(async (task: BankTask) => {
+          const taskRef = doc(taskCollection, task.id);
+          await updateDoc(taskRef, { 
+            contratId: taskId,
+            state: 'in-progress'
+          } as Partial<BankTask>);
+          setSelectedTasks([]);
+          fetchTasks();
+         })
+            );
   };
+
+
 
   const handleAdd = async (task: BankTask) => {
     setSelectedTasks((prev) => [...prev, task]);
+    setTasks((prev) => prev.filter((t) => t.id !== task.id));
   };
 
   const handleRemove = async (task: BankTask) => {
     setSelectedTasks((prev) => prev.filter((t) => t.id !== task.id));
+    setTasks((prev) => [...prev, task]);
   };
 
 
@@ -178,19 +209,22 @@ function TaskManagerPopup() {
   }, []);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-2 gap-6 w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
+    <>
+     {message && (
+                <Alert showIcon className="mb-4" type={alert}>
+                    <span className="break-all">{message}</span>
+                </Alert>
+            )}
+     <div className="grid grid-cols-2 md:grid-cols-2 gap-6 w-full rounded p-4 ">
       {/* Left - Form */}
-      <div>
+      <div className=" bg-gray-50 dark:bg-gray-700 rounded p-4 shadow" >
         <form onSubmit={handleSubmit(onSubmitTask)}>
           <div className="grid grid-cols-2 gap-4">
-  
-
             <FormItem label="Assignee" invalid={!!errors.assignee} errorMessage={errors.assignee?.message}>
               <Controller name="assignee" control={control} render={({ field }) =>
                 <Select
                   placeholder="Select assignee"
                   options={landlordsOptions}
-                  value={field.value ? { value: field.value, label: field.value } : null}
                   onChange={(option) => field.onChange(option?.value)}
                 />
               } />
@@ -199,6 +233,7 @@ function TaskManagerPopup() {
             <FormItem label="Montant Total" invalid={!!errors.montant_total} errorMessage={errors.montant_total?.message}>
               <Controller name="montant_total" control={control} render={({ field }) =>
                 <Input
+                type="number"
               {...field}
               placeholder="Montant total"
              
@@ -209,6 +244,7 @@ function TaskManagerPopup() {
             <FormItem label="Montant versé" invalid={!!errors.montant_initial} errorMessage={errors.montant_initial?.message}>
               <Controller name="montant_initial" control={control} render={({ field }) =>
                 <Input
+                  type="number"
                   {...field}
                   placeholder="Montant versé"
                  
@@ -242,9 +278,8 @@ function TaskManagerPopup() {
               } />
             </FormItem>
           </div>
-
           <div className="mt-6">
-            <Button type="submit" variant="solid" loading={isSubmitting}>
+            <Button title={selectedtasks.length==0 ? 'Selectionner au moins une bank' : 'Ajouter une bank'} type="submit" variant="solid" disabled={selectedtasks.length==0} loading={isSubmitting}>
               {t('common.add') || 'Submit'}
             </Button>
           </div>
@@ -252,51 +287,101 @@ function TaskManagerPopup() {
       </div>
 
       {/* Right - Task List */}
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold">📋 Travaux Disponibles</h3>
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-6 w-full  p-4 ">
+       
 
-        </div>
+             {/* Right - Task List */}
+             <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow" >
+                <div className="flex justify-between items-center mb-4">
+                  <h6 className="text-md font-bold">📋 Travaux Sélectionés</h6>
+                </div>
 
-     {/* Task List */}
-     <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="bg-white p-4 rounded-lg shadow border flex justify-between items-center"
-          >
-            {/* Task content */}
-            <div className="flex-1">
-              <div className="mb-1">
-                <p className="font-semibold">{t('bank.' + task.taskName)}</p>
-                <p className="text-xs text-gray-500">
-                  Bank: <BankName id={task.bankId} />
-                </p>
+                {/* Task List */}
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                    {selectedtasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className="bg-white p-2 rounded-lg shadow border flex justify-between items-center"
+                      >
+                        {/* Task content */}
+                        <div className="flex-1">
+                          <div className="mb-1">
+                            <p className="font-semibold">{t('bank.' + task.taskName)}</p>
+                            <p className="text-xs text-gray-500">
+                              Bank: <BankName id={task.bankId} />
+                            </p>
+                          </div>
+                          <p className="text-sm mb-1">{task.description}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatRelative(
+                              task.createdAt.toDate?.() || task.createdAt,
+                              new Date(),
+                              { locale: fr }
+                            )}
+                          </p>
+                        </div>
+
+                        {/* Plus Button */}
+                        <button
+                          disabled={isSubmitting}
+                          onClick={() => handleRemove(task)} // Replace with your actual handler
+                          className="ml-4 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+                          title="Add"
+                        >
+                          -
+                        </button>
+                      </div>
+                    ))}
+                </div>
+             </div>
+
+    
+            <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
+              <div className="flex justify-between items-center mb-4">
+                  <h6 className="text-md font-bold">📋 Travaux Disponibles</h6>
               </div>
-              <p className="text-sm mb-1">{task.description}</p>
-              <p className="text-xs text-gray-500">
-                {formatRelative(
-                  task.createdAt.toDate?.() || task.createdAt,
-                  new Date(),
-                  { locale: fr }
-                )}
-              </p>
+                {/* Task List */}
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                    {tasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className="bg-white p-2 rounded-lg shadow border flex justify-between items-center"
+                      >
+                        {/* Task content */}
+                        <div className="flex-1">
+                          <div className="mb-1">
+                            <p className="font-semibold">{t('bank.' + task.taskName)}</p>
+                            <p className="text-xs text-gray-500">
+                              Bank: <BankName id={task.bankId} />
+                            </p>
+                          </div>
+                          <p className="text-sm mb-1">{task.description}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatRelative(
+                              task.createdAt.toDate?.() || task.createdAt,
+                              new Date(),
+                              { locale: fr }
+                            )}
+                          </p>
+                        </div>
+
+                        {/* Plus Button */}
+                        <button
+                          disabled={isSubmitting}
+                          onClick={() => handleAdd(task)} // Replace with your actual handler
+                          className="ml-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+                          title="Add"
+                        >
+                          +
+                        </button>
+                      </div>
+                    ))}
+                </div>
             </div>
-
-            {/* Plus Button */}
-            <button
-              onClick={() => handleAdd(task)} // Replace with your actual handler
-              className="ml-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
-              title="Add"
-            >
-              +
-            </button>
-          </div>
-        ))}
       </div>
-
-      </div>
-    </div>
+     </div>
+    </>
+   
   );
 }
 
