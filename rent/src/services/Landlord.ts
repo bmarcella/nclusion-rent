@@ -46,3 +46,7 @@ export const getLandlordPicturesRef = (id: string ) => {
 export const getBankTask = (id: string ) => {
      return  doc(db, task, id);
 }
+
+export const getContrat = (id: string ) => {
+     return  doc(db, contracts, id);
+}

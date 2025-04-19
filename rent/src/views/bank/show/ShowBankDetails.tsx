@@ -184,7 +184,7 @@ export const ShowBankDetailsBase= () => {
         done: false,
         index: index,
         state: "pending",
-        contratId: undefined,
+        contratId: '',
       };
      tasks.push(task);
     });

@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Pagination, Select } from '@/components/ui';
+import { Button, Pagination, Select } from '@/components/ui';
 import { useTranslation } from '@/utils/hooks/useTranslation';
-import { DocumentData, DocumentSnapshot, getDocs, limit, orderBy, Query, query, QueryConstraint, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
+import { deleteDoc, DocumentData, DocumentSnapshot, getDocs, limit, orderBy, Query, query, QueryConstraint, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import {  useEffect, useMemo, useState } from 'react';
-import { contractsDoc, getBankTask, taskCollection } from '@/services/Landlord';
+import { contractsDoc, getBankTask, getContrat, taskCollection } from '@/services/Landlord';
 import { BankTask, RenovContract } from '@/views/Entity';
 import { useSessionUser } from '@/store/authStore';
-import { getRegionIds, getRegionsById } from '@/views/Entity/Regions';
 import { ColumnDef } from '@/components/shared/DataTable';
 import Table from '@/components/ui/Table/Table';
 import THead from '@/components/ui/Table/THead';
@@ -20,7 +19,6 @@ import { fr } from 'date-fns/locale/fr';
 import UserName from '@/views/bank/show/components/UserName';
 import { hasAuthority } from '@/utils/RoleChecker';
 import Currency from '@/views/shared/Currency';
-import Button from 'react-scroll/modules/components/Button';
 import { PiCheck, PiEyeLight } from 'react-icons/pi';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
 import { useNavigate } from 'react-router-dom';
@@ -169,11 +167,11 @@ function ShowContrat ( ) {
               return (
                 <div className="min-w-[200px]">
                     { (hasAuthority(authority, 'admin'))&&
-                     <Button variant="solid"  shape="circle" size="xs" className='mr-1 '  onClick={() => {} }>
-                        <PiEyeLight />
+                     <Button variant="solid"  shape="circle" size="xs" className='mr-1'  onClick={() => {} }>
+                        <PiCheck />
                      </Button> }
                      <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs"  onClick={() => navigate("/bank/"+row.original.id) }>
-                        <PiCheck />
+                          <PiEyeLight />
                      </Button>
                      {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
                 </div>);
@@ -190,79 +188,98 @@ function ShowContrat ( ) {
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
     });
-    const onPaginationChange = (page: number) => {
+ const onPaginationChange = (page: number) => {
         table.setPageIndex(page - 1)
     }
-    const onSelectChange = (value = 0) => {
+ const onSelectChange = (value = 0) => {
         table.setPageSize(Number(value))
     }
+  const yes  = async  (id : string ) =>{
+           try {
+                const q = query(taskCollection, where("contratId","==",id))
+                const snapshot = await getDocs(q);
+                const t: BankTask[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BankTask));
+                t.forEach(async (task) => {
+                  const taskRef = await  getBankTask(task.id);
+                  updateDoc(taskRef, {
+                    contratId : '',
+                    completed : true,
+                    completedAt : null,
+                    state : 'pending',
+                  } );
+                });
+               const contRef = getContrat(id);
+               await deleteDoc(contRef);
+              } catch (err) {
+                console.error("Error fetching landlords:", err);
+              }
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-1 gap-6 w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
-  <div className="w-full  mt-6  p-6 ">
-           <Table>
-                <THead>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <Tr key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
-                                return (
-                                    <Th
-                                        key={header.id}
-                                        colSpan={header.colSpan}
-                                    >
-                                        {flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext(),
-                                        )}
-                                    </Th>
-                                )
-                            })}
-                        </Tr>
-                    ))}
-                </THead>
-                <TBody>
-                    {table.getRowModel().rows.map((row) => {
-                        return (
-                            <Tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => {
+            <div className="w-full  mt-6  p-6 ">
+                    <Table>
+                            <THead>
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <Tr key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => {
+                                            return (
+                                                <Th
+                                                    key={header.id}
+                                                    colSpan={header.colSpan}
+                                                >
+                                                    {flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext(),
+                                                    )}
+                                                </Th>
+                                            )
+                                        })}
+                                    </Tr>
+                                ))}
+                            </THead>
+                            <TBody>
+                                {table.getRowModel().rows.map((row) => {
                                     return (
-                                        <Td key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext(),
-                                            )}
-                                        </Td>
+                                        <Tr key={row.id}>
+                                            {row.getVisibleCells().map((cell) => {
+                                                return (
+                                                    <Td key={cell.id}>
+                                                        {flexRender(
+                                                            cell.column.columnDef.cell,
+                                                            cell.getContext(),
+                                                        )}
+                                                    </Td>
+                                                )
+                                            })}
+                                        </Tr>
                                     )
                                 })}
-                            </Tr>
-                        )
-                    })}
-                </TBody>
-            </Table>
-            <div className="flex items-center justify-between mt-4">
-                <Pagination
-                    pageSize={table.getState().pagination.pageSize}
-                    currentPage={table.getState().pagination.pageIndex + 1}
-                    total={totalData}
-                    onChange={onPaginationChange}
-                />
-                <div style={{ minWidth: 130 }}>
-                    <Select<Option>
-                        size="sm"
-                        isSearchable={false}
-                        value={pageSizeOption.filter(
-                            (option) =>
-                                option.value ===
-                                table.getState().pagination.pageSize,
-                        )}
-                        options={pageSizeOption}
-                        onChange={(option) => onSelectChange(option?.value)}
-                    />
-                </div>
+                            </TBody>
+                        </Table>
+                        <div className="flex items-center justify-between mt-4">
+                            <Pagination
+                                pageSize={table.getState().pagination.pageSize}
+                                currentPage={table.getState().pagination.pageIndex + 1}
+                                total={totalData}
+                                onChange={onPaginationChange}
+                            />
+                            <div style={{ minWidth: 130 }}>
+                                <Select<Option>
+                                    size="sm"
+                                    isSearchable={false}
+                                    value={pageSizeOption.filter(
+                                        (option) =>
+                                            option.value ===
+                                            table.getState().pagination.pageSize,
+                                    )}
+                                    options={pageSizeOption}
+                                    onChange={(option) => onSelectChange(option?.value)}
+                                />
+                            </div>
 
+                        </div>
             </div>
-        </div>
-
     </div>
   );
 }

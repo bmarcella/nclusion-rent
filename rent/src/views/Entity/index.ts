@@ -576,6 +576,7 @@ export interface BankTask {
 
 export interface RenovContract {
   id: string;
+  renovStep : RenovStep;
   assignee: string;
   createdBy: string;
   createdAt: Date;
