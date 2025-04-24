@@ -125,34 +125,7 @@ function EditContrat(  { contrat } : Props) {
         }
       }, [contrat.banksId]);
     
-      const updateContratBank = async (bank : Bank) => {
-  
-        try {
-          setSubmitting(true);
-          const banksId = selectedtasks.map((task) => task.id);
-          let regionsId = selectedtasks.map((task) => task.id_region);
-          regionsId = [...new Set(regionsId)];
-          const newData = {
-            updatedBy: userId,
-            updatedAt: new Date(),
-            banksId,
-            regionsId,
-          };
-          const docRef = getContratDoc(contrat.id);
-          await updateDoc(docRef, newData);
-          setAlert("success");
-          setMessage( 'Contrat modifié avec succes' );
-          setSelectedTasks([]);
-          fetchBanks(contrat.renovStep as RenovStep);
-          reset();
-        } catch (err) {
-          console.error(err);
-          setAlert("danger");
-          setMessage("Error updating contrat: " + err);
-        } finally {
-          setSubmitting(false);
-        }
-      };
+
 
   const onSubmitContrat = async (data: TaskForm) => {
     console.log("Selected data: ", data,  parseInt(data.montant_total) > parseInt(data.montant_initial));
