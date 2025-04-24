@@ -67,7 +67,7 @@ const navigationConfig: NavigationTree[] = [
             },
             {
                 key: 'bankMenu.report',
-                path: '/bank/report',
+                path: '/report',
                 title: 'Report',
                 translateKey: 'nav.bankMenu.report',
                 icon: '',
