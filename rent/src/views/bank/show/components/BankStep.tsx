@@ -4,6 +4,7 @@ import Tooltip from "@/components/ui/Tooltip";
 import { formatRelative } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import UserName from "./UserName";
+import { BankStep, RenovStep } from "@/views/Entity";
 
 export const stepColorClassMap: Record<
   string,
@@ -74,9 +75,10 @@ interface BankStepBadgeProps {
   step: string;
   finaldec?: any;
   isAgent? : boolean
+  renovStep?: RenovStep;
 }
 
-const BankStepBadge: React.FC<BankStepBadgeProps> = ({ step ,  finaldec = false, isAgent = false }) => {
+const BankStepBadge: React.FC<BankStepBadgeProps> = ({ step , renovStep,  finaldec = false, isAgent = false }) => {
   const { t } = useTranslation();
 
   const key = step.replace("bankSteps.", "");
@@ -101,8 +103,6 @@ const ncolor = stepColorClassMap[nkey] || {
 
    { nkey && 
    (
-   
-   
     <Tooltip
                              title= {
                                    <div>
@@ -121,15 +121,16 @@ const ncolor = stepColorClassMap[nkey] || {
     >
       {t(`bank.${finaldec.status}`)}
     </div>
-                           </Tooltip>
-   
-   
-   
+     </Tooltip>
   ) }
     { !nkey && <div
       className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset  mb-4 ${ncolor.bg} ${ncolor.text} ${ncolor.ring}`}
     >
       En cours
+    </div> }
+
+    { step == 'bankSteps.needRenovation' as BankStep  && <div className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset  mb-4 bg-indigo-50 text-indigo-600 ring-purple-500/10`}>
+      {t(`bank.${renovStep}`)}
     </div> }
     </>
    

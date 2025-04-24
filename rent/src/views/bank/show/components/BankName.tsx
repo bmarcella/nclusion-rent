@@ -3,7 +3,7 @@
 import { BankDoc } from "@/services/Landlord";
 import { getDocs, query, where  } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 
 
 interface ImageGalleryProps {
@@ -12,6 +12,7 @@ interface ImageGalleryProps {
 
 const BankName: React.FC<ImageGalleryProps> = ({ id }) => {
 const [lord, setLord] = useState() as any;
+const navigate = useNavigate()
      const getLandlordByUserId = async () => {
         const q = query(BankDoc,  where('id', '==', id));
         const querySnapshot = await getDocs(q);
@@ -29,7 +30,9 @@ const [lord, setLord] = useState() as any;
         }, [id]);
   return (
     <>
-      { lord && <i className=" font-semibold ">{ lord.bankName }</i> }
+      { lord && 
+          <i className=" font-semibold " onClick={() => navigate("/bank/"+id) } >{ lord.bankName }</i>
+      }
     </>
   );
 };

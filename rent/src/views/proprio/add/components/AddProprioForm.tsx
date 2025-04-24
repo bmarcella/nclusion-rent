@@ -34,10 +34,7 @@ function AddProprioForm( { done } : Props) {
   const [ docRef, setDocRef] = useState() as any;
   const [lord, setLord] = useState() as any;
   const [message, setMessage] = useTimeOutMessage()
-
   const { t } = useTranslation();
-  
-  
   const [alert, setAlert] = useState("success") as any;
   const [ typeOptions, setTypeOptions] = useState([]) as any;
   const [ regions, setRegions] = useState([]) as any;

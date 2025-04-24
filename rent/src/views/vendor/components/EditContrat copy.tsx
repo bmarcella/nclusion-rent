@@ -4,18 +4,17 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from '@/utils/hooks/useTranslation';
-import { addDoc, getDocs, updateDoc, doc, where, orderBy, query, } from 'firebase/firestore';
+import { getDocs, updateDoc, doc, where, orderBy, query, getDoc, } from 'firebase/firestore';
 import {  useEffect, useState } from 'react';
-import { BankDoc, contractsDoc, Landlord } from '@/services/Landlord';
+import { BankDoc,  getBankDoc,  getContratDoc, Landlord } from '@/services/Landlord';
 import { useSessionUser } from '@/store/authStore';
 import { getRegionIds, getRegionsById } from '@/views/Entity/Regions';
-import { Bank, Proprio, RenovStep } from '@/views/Entity';
+import { Bank, Proprio, RenovContract, RenovStep } from '@/views/Entity';
 import { convertToSelectOptions } from '../../bank/add/components/InfoBank';
 import { formatRelative } from 'date-fns/formatRelative';
 import { fr } from 'date-fns/locale';
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage';
 import UserName from '@/views/bank/show/components/UserName';
-import { useNavigate } from 'react-router-dom';
 
 
 const schema = z.object({
@@ -25,25 +24,27 @@ const schema = z.object({
   montant_initial: z.string().min(1, 'Required'),
   transport: z.string(),
   description: z.string().optional(),
-  startDate: z.string().min(1, 'Required'),
+  startDate: z.string().min(1 ,'Required'),
   endDate: z.string().min(1, 'Required'),
 });
 
 type TaskForm = z.infer<typeof schema>;
+interface Props {
+  contrat : RenovContract
+}
 
-function TaskManagerPopup() {
+function EditContrat(  { contrat } : Props) {
   const { t } = useTranslation();
   const [banks, setBanks] = useState<any[]>([]);
   const [filter, setFilter] = useState<'all' | TaskForm['state']>('all');
   const [isSubmitting, setSubmitting] = useState(false);
-  const {  userId,  proprio , authority } = useSessionUser((state) => state.user);
+  const { userId,  proprio , authority } = useSessionUser((state) => state.user);
   const [landlordsOptions, setLandlordsOptions] = useState<any  []>([]);
   const [selectedtasks, setSelectedTasks] = useState<any[]>([]);
   const [message, setMessage] = useTimeOutMessage();
   const [alert, setAlert] = useState("success") as any;
   const [bankSearch, setBankSearch] = useState('');
-  const [selectedStep, setSelectedStep] = useState<any>();
-  const navigate = useNavigate()
+  const [selectedStep, setSelectedStep] = useState<any>(contrat.renovStep);
 
 
   // 
@@ -64,15 +65,18 @@ function TaskManagerPopup() {
   } = useForm<TaskForm>({
     resolver: zodResolver(schema),
     defaultValues: {
-      assignee: '',
-      description: '',
-      startDate: '',
-      endDate: '',
+      assignee: contrat.assignee,
+      renovStep: contrat.renovStep,
+      montant_total: String(contrat.montant_total),
+      montant_initial: String(contrat.montant_initial),
+      description: contrat.description,
+      transport: String(contrat.transport),
+      startDate: new Date(contrat.startDate).toISOString(),
+      endDate:  new Date(contrat.endDate).toISOString(),
     },
   });
   const renovStep = watch('renovStep');
   const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
-  console.log("Regions: ", ids);
   const fetchLandlords = async () => {
           try {
             let q = null;
@@ -99,7 +103,56 @@ function TaskManagerPopup() {
         setBanks(banks);
     
     };
+
+
+     useEffect(() => {
+        const fetchBanks = async () => {
+          const promises = contrat.banksId.map(async (id) => {
+            const docRef = getBankDoc(id);
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+              return {  ...snap.data() } as Bank;
+            }
+            return null;
+          });
+    
+          const results = await Promise.all(promises);
+          setSelectedTasks(results.filter((b): b is Bank => b !== null)); // filter out nulls
+        };
+    
+        if (contrat.banksId.length > 0) {
+          fetchBanks();
+        }
+      }, [contrat.banksId]);
+    
+      const updateContratBank = async (bank : Bank) => {
   
+        try {
+          setSubmitting(true);
+          const banksId = selectedtasks.map((task) => task.id);
+          let regionsId = selectedtasks.map((task) => task.id_region);
+          regionsId = [...new Set(regionsId)];
+          const newData = {
+            updatedBy: userId,
+            updatedAt: new Date(),
+            banksId,
+            regionsId,
+          };
+          const docRef = getContratDoc(contrat.id);
+          await updateDoc(docRef, newData);
+          setAlert("success");
+          setMessage( 'Contrat modifié avec succes' );
+          setSelectedTasks([]);
+          fetchBanks(contrat.renovStep as RenovStep);
+          reset();
+        } catch (err) {
+          console.error(err);
+          setAlert("danger");
+          setMessage("Error updating contrat: " + err);
+        } finally {
+          setSubmitting(false);
+        }
+      };
 
   const onSubmitContrat = async (data: TaskForm) => {
     console.log("Selected data: ", data,  parseInt(data.montant_total) > parseInt(data.montant_initial));
@@ -108,77 +161,66 @@ function TaskManagerPopup() {
       setMessage( 'Montant versé doit être inférieur ou egal au montant total' );
       return;
     }
-
-    if (selectedtasks.length <= 0){
-      setAlert("danger");
-      setMessage( 'Vous devez ajouter au moins un bank.' );
-      return;
-    }
     try {
       setSubmitting(true);
-      const banksId = selectedtasks.map((task) => task.id);
-      let regionsId = selectedtasks.map((task) => task.id_region);
-      regionsId = [...new Set(regionsId)];
-      const contrat = {
-        createdBy: userId,
-        createdAt: new Date(),
-        completed:false,
-        completedAt: null,
-        validated: false,
-        validatedAt: null,
-        regionsId,
-        banksId,
+      //const banksId = selectedtasks.map((task) => task.id);
+      // let regionsId = selectedtasks.map((task) => task.id_region);
+      // regionsId = [...new Set(regionsId)];
+      const newData = {
+        updatedBy: userId,
+        updatedAt: new Date(),
         ...data,
-      };
-      const docRef = await addDoc(contractsDoc, contrat);
-      await updateDoc(docRef, { id: docRef.id });
-      await updateBanks(banksId, docRef.id, data.renovStep); 
+      } ;
+      const docRef = getContratDoc(contrat.id);
+      await updateDoc(docRef, newData);
       setAlert("success");
-      setMessage( 'Contrat crée avec succes' );
+      setMessage( 'Contrat modifié avec succes' );
       setSelectedTasks([]);
       fetchBanks(data.renovStep as RenovStep);
       reset();
-      navigate("/contrat/"+docRef.id);
     } catch (err) {
       console.error(err);
       setAlert("danger");
-      setMessage("Error adding landlord");
+      setMessage("Error updating contrat: " + err);
     } finally {
       setSubmitting(false);
     }
   };
 
-  async function updateBanks(banksId: any[], contractId: string, renovStep: string) {
-    try {
-     const data = (renovStep == "renovSteps.comptoire" as RenovStep) ? {
-      comptoireContratId : contractId,
-      renovStep :  "renovSteps.peinture" as RenovStep,
-      updatedAt: new Date(),
-    }  as Partial<Bank> :  
-    {
-      peintureContratId : contractId,
-      renovStep :  "renovSteps.in_process" as RenovStep ,
-      updatedAt: new Date(),
-    } as Partial<Bank>;
-      const updatePromises = banksId.map((bankId) => {
-        const bankRef = doc(BankDoc, bankId);
-        return updateDoc(bankRef,data);
-      });
-      await Promise.all(updatePromises);
-      console.log("Banks updated successfully");
-    } catch (error) {
-      console.error("Error updating banks:", error);
-      throw new Error("Failed to update banks");
-    }
-  }
+  // async function updateBanks(banksId: any[],  renovStep: string) {
+  //   try {
+  //     const data = (renovStep == "renovSteps.comptoire" as RenovStep) ? {
+  //     comptoireContratId : "",
+  //     renovStep :  "renovSteps.comptoire" as RenovStep,
+  //     updatedAt: new Date(),
+  //   }  as Partial<Bank> :  
+  //   {
+  //     peintureContratId : "",
+  //     renovStep :  "renovSteps.peiture" as RenovStep ,
+  //     updatedAt: new Date(),
+  //   } as Partial<Bank>;
+  //     const updatePromises = banksId.map((bankId) => {
+  //       const bankRef = doc(BankDoc, bankId);
+  //       return updateDoc(bankRef,data);
+  //     });
+  //     await Promise.all(updatePromises);
+  //     console.log("Banks updated successfully");
+  //   } catch (error) {
+  //     console.error("Error updating banks:", error);
+  //     throw new Error("Failed to update banks");
+  //   }
+  // }
 
 
 
 
   const handleAdd = async (task: Bank) => {
-    setSelectedTasks((prev) => [...prev, task]);
+    await setSelectedTasks((prev) => [...prev, task]);
     setBanks((prev) => prev.filter((t) => t.id !== task.id));
+    updateContratBank(task);
   };
+
+
 
   const handleRemove = async (task: Bank) => {
     setSelectedTasks((prev) => prev.filter((t) => t.id !== task.id));
@@ -190,7 +232,16 @@ function TaskManagerPopup() {
     fetchLandlords();
     if (selectedStep) fetchBanks(selectedStep);
   }, [selectedStep]);
-
+ const renovs = [ 
+  {
+  value: 'renovSteps.comptoire',
+  label: t('bank.renovSteps.comptoire'),
+  },
+  {
+    value: 'renovSteps.peinture',
+    label: t('bank.renovSteps.peinture'),
+  }
+];
   return (
     <>
      { message && (
@@ -207,17 +258,10 @@ function TaskManagerPopup() {
             <FormItem label="Type Rénovation" invalid={!!errors.renovStep} errorMessage={errors.renovStep?.message}>
               <Controller name="renovStep" control={control} render={({ field }) =>
                 <Select
+                  isDisabled={true}
                   placeholder="Selectionner Type Rénovation"
-                  options={[ 
-                    {
-                    value: 'renovSteps.comptoire',
-                    label: t('bank.renovSteps.comptoire'),
-                    },
-                    {
-                      value: 'renovSteps.peinture',
-                      label: t('bank.renovSteps.peinture'),
-                    },
-                ]}
+                  options={renovs}
+                  value={renovs.find(option => option.value === field.value) || null}
                   onChange={(option) => { 
                     field.onChange(option?.value);
                      setSelectedTasks([]);
@@ -234,6 +278,7 @@ function TaskManagerPopup() {
                 <Select
                   placeholder="Select assignee"
                   options={landlordsOptions}
+                  value={landlordsOptions.find(option => option.value === field.value) || null}
                   onChange={(option) => { 
                     field.onChange(option?.value);
                   }}
@@ -251,8 +296,6 @@ function TaskManagerPopup() {
             />
               } />
             </FormItem>
-
-           
 
             <FormItem label="Montant versé" invalid={!!errors.montant_initial} errorMessage={errors.montant_initial?.message}>
               <Controller name="montant_initial" control={control} render={({ field }) =>
@@ -276,12 +319,14 @@ function TaskManagerPopup() {
               } />
             </FormItem>
 
+           
+
             <FormItem label="Start Date" invalid={!!errors.startDate} errorMessage={errors.startDate?.message}>
               <Controller name="startDate" control={control} render={({ field }) =>
                 <DatePicker
                   placeholder="Choose start date"
                   value={field.value ? new Date(field.value) : null}
-                  onChange={(date) => field.onChange(date ? date.toISOString() : '')}
+                  onChange={(date) => field.onChange(date ? date.toISOString() : new Date())}
                 />
               } />
             </FormItem>
@@ -291,7 +336,7 @@ function TaskManagerPopup() {
                 <DatePicker
                   placeholder="Choose end date"
                   value={field.value ? new Date(field.value) : null}
-                  onChange={(date) => field.onChange(date ? date.toISOString() : '')}
+                  onChange={(date) => field.onChange(date ? date.toISOString() : new Date() )}
                 />
               } />
             </FormItem>
@@ -307,8 +352,8 @@ function TaskManagerPopup() {
             </FormItem>
             </div>
           <div className="mt-6">
-            <Button title={selectedtasks.length==0 ? 'Selectionner au moins une bank' : 'Ajouter une bank'} type="submit" variant="solid" disabled={selectedtasks.length==0} loading={isSubmitting}>
-              {t('common.add') || 'Submit'}
+            <Button title={ 'Modifier une bank'} type="submit" variant="solid" disabled={ contrat.completed} loading={isSubmitting}>
+              {t('common.edit') || 'Modifier' }
             </Button>
           </div>
         </form>
@@ -353,14 +398,14 @@ function TaskManagerPopup() {
                         </div>
 
                         {/* Plus Button */}
-                        <button
+                        { selectedtasks.length > 1 && <button
                           disabled={isSubmitting}
                           onClick={() => handleRemove(bank)} // Replace with your actual handler
                           className="ml-4 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
                           title="Add"
                         >
                           -
-                        </button>
+                        </button> } 
                       </div>
                     ))}
                 </div>
@@ -434,6 +479,4 @@ function TaskManagerPopup() {
   );
 }
 
-
-
-export default TaskManagerPopup;
+export default EditContrat;

@@ -1,6 +1,6 @@
 
 import { z } from "zod";
-export const USER_ROLES = ["vendeur",
+export const USER_ROLES = ["super_manager","vendeur",
      "proprietaire", 'vendor_management', 
       "reference", "agent_immobilier", "coordonator", 
       "assist_coordonator", "manager", "assist_manager",

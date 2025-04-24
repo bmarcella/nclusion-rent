@@ -19,7 +19,7 @@ export const ShowNeedApprovalBankBase= () => {
                 </TabList>
 
                 <TabContent value={'all'}>
-                       <TableBank all={false} />
+                       <TableBank all={true} />
                 </TabContent>
 
                 { ListBankSteps.map((step, index)=>( 

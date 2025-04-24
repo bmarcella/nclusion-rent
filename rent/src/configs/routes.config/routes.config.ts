@@ -67,6 +67,12 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/proprio/show/MyProprio')),
         authority: [],
     },
+    {
+        key: 'vendorMenu.contrat',
+        path: '/contrat/:id',
+        component: lazy(() => import('@/views/vendor/Contrat')),
+        authority: [],
+    },
 
     ...othersRoute,
 ]
