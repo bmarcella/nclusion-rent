@@ -10,7 +10,7 @@ import { BankStep } from "../Entity";
 export function VendorManagementBase() {
   return (
     <>
-    <h4>Gestionnaires de vendeurs</h4>
+    <h4>Contrats</h4>
         <div>
             <Tabs defaultValue="tab1">
                 <TabList>
