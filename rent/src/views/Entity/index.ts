@@ -1,7 +1,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { boolean } from "zod";
 import { USER_ROLE } from "../shared/schema";
 
 export interface Document {
@@ -269,6 +268,8 @@ export const renovSteps = [
   "renovSteps.construction",
   "renovSteps.comptoire",
   "renovSteps.peinture",
+  "renovSteps.in_process",
+  "renovSteps.completed",
 ] as const;
 export type RenovStep = typeof renovSteps[number];
 
@@ -316,8 +317,11 @@ export interface Bank {
     superficie?: number | string;
     nombre_chambre?: number | string;
     addresse : string;
+    comptoireContratId?: string;
+    peintureContratId?: string;
     landlord: string | any;
     reference?:  string;
+    renovStep? : RenovStep; // new add 
     isrefSameAsLandlord: boolean;
     urgency: boolean;
     createdBy: string;
@@ -326,6 +330,8 @@ export interface Bank {
     reject: boolean;
     pending: boolean;
     approve: boolean;
+    paintedAt?: Date;
+    comptoireBuildedAt?: Date;
     location: {
       lat: any,
       lng: any,
@@ -382,6 +388,9 @@ export const getEmptyPartialBank = () : any => {
   return {
     bankName: '',
     id_region: '',
+    comptoireContratId: '',
+    peintureContratId: '',
+    renovStep : '' as RenovStep,
     city: '',
     addresse: ' ',
     superficie: '',
@@ -393,6 +402,8 @@ export const getEmptyPartialBank = () : any => {
     landlord: '',
     isrefSameAsLandlord: false,
     urgency: false,
+    paintedAt: '',
+    comptoireBuildedAt: '',
   };
 }
 
@@ -576,12 +587,24 @@ export interface BankTask {
 
 export interface RenovContract {
   id: string;
-  userId : string ,
+  transport: number;
+  renovStep : RenovStep;
+  assignee: string;
   createdBy: string;
+  regionsId: number[];
   createdAt: Date;
   montant_total: number;
   montant_initial: number;
-  description: string;
-  start_date: Date;
-  end_date: Date;
+  description?: string;
+  endDate: Date;
+  startDate: Date;
+  completed: boolean;
+  completedAt?: Date;
+  validated : boolean;
+  validatedAt?: Date;
+  banksId: string [];
+  updatedAt: Date,
+  updatedBy: string,
+  completedBy: string,
+
 }

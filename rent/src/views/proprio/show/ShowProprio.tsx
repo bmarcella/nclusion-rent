@@ -190,7 +190,7 @@ interface Props {
                 header: 'Action',
                 cell: ({ row }) => (
                     <div className="flex items-center justify-end">
-                        { row.original.type_person!="admin" && <div>
+                        { (row.original.type_person!="admin" || hasAuthority(authority, 'admin')) && <div>
                             <Button variant="solid" shape='circle' size="xs" onClick={() => openDialog(row?.original)}>
                                 <PiEyeLight />
                             </Button>

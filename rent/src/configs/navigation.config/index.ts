@@ -64,6 +64,16 @@ const navigationConfig: NavigationTree[] = [
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: ["admin", "vendor_management"],
                 subMenu: [],
+            },
+            {
+                key: 'bankMenu.report',
+                path: '/bank/report',
+                title: 'Report',
+                translateKey: 'nav.bankMenu.report',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
             }
         ],
     },
