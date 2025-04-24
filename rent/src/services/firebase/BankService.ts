@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { addDoc, CollectionReference, deleteDoc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
-import { BankLeaseDoc, bankPicturesDoc, getBankDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc, TaskDoc } from "../Landlord";
+import { BankDoc, BankLeaseDoc, bankPicturesDoc, getBankDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc, TaskDoc } from "../Landlord";
 import { BankImage } from "@/views/bank/show/components/ImageGallery";
 import { ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 import { storage } from "./FirebaseStorage";
@@ -154,3 +154,4 @@ export const deleteLord = async (bankId: string ) => {
   await deleteDoc(docRef);
   console.log('Document deleted');
 };
+
