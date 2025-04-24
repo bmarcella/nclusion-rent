@@ -5,7 +5,7 @@ import Dialog from "@/components/ui/Dialog";
 import Button from "@/components/ui/Button";
 import { useEffect, useState } from "react";
 import { addBankLease, addBankTask, addDecisionHistory, addStepsHistory, getBankById, updateBankById } from "@/services/firebase/BankService";
-import {  Bank, BankLease, BankStep, BankTask, finalDecisionStatuses, getEndDateYear, HistoricDecision, renovSteps, StepDecision } from "@/views/Entity";
+import {  Bank, BankLease, BankStep, BankTask, finalDecisionStatuses, getEndDateYear, HistoricDecision, RenovStep, renovSteps, StepDecision } from "@/views/Entity";
 import { useSessionUser } from "@/store/authStore";
 
 export const ShowBankDetailsBase= () => {
@@ -127,6 +127,7 @@ export const ShowBankDetailsBase= () => {
     } as StepDecision;
     const reject = {
       step : "bankSteps.needRenovation" as BankStep,
+      renovStep: "renovSteps.comptoire" as RenovStep,
     };
     const lease : BankLease = {
       createdBy: userId || '',
@@ -162,6 +163,7 @@ export const ShowBankDetailsBase= () => {
         l.bankId = bankId;
         await addBankLease(l);
   }
+
   const SaveSteps = async (step: StepDecision  ) => {
     if(step) { 
       step.bankId = bankId;
@@ -170,7 +172,7 @@ export const ShowBankDetailsBase= () => {
   }
 
   const SaveBankTasks = async () => {
-   const hasRenov =  ((bank?.renovationDetails?.neededSecurity?.length ?? 0) > 0 || 
+  const hasRenov =  ((bank?.renovationDetails?.neededSecurity?.length ?? 0) > 0  || 
                       (bank?.renovationDetails?.majorRenovation?.length ?? 0) > 0 || 
                       (bank?.renovationDetails?.minorRenovation?.length ?? 0) > 0 )
    const tasks: BankTask [] = [];
@@ -183,12 +185,12 @@ export const ShowBankDetailsBase= () => {
         id_region: bank?.id_region,
         done: false,
         index: index,
-        state: "pending",
-        contratId: '',
+        state: "pending"
       };
      tasks.push(task);
     });
-
+   tasks.pop();
+   tasks.pop();
    if(!hasRenov) { tasks.shift();}
    tasks.forEach(async (task) => {
       await addBankTask(task);
@@ -208,12 +210,12 @@ export const ShowBankDetailsBase= () => {
     });
   }
 
-
   const onDialogClose = () => {
       setIsOpen(false)
   }
 
   { !bankId && <Navigate to="/" /> }
+
   return (
     <div>
       { bankId && <SubmissionReview bankId={bankId} 

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Pagination, Select } from '@/components/ui';
 import { useTranslation } from '@/utils/hooks/useTranslation';
-import { deleteDoc, DocumentData, DocumentSnapshot, getDocs, limit, orderBy, Query, query, QueryConstraint, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
+import { deleteDoc, doc, DocumentData, DocumentSnapshot, getDoc, getDocs, limit, orderBy, Query, query, QueryConstraint, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import {  useEffect, useMemo, useState } from 'react';
-import { contractsDoc, getBankTask, getContrat, taskCollection } from '@/services/Landlord';
-import { BankTask, RenovContract } from '@/views/Entity';
+import { BankDoc, contractsDoc, getContratDoc } from '@/services/Landlord';
+import { Bank, BankStep,  RenovContract, RenovStep } from '@/views/Entity';
 import { useSessionUser } from '@/store/authStore';
 import { ColumnDef } from '@/components/shared/DataTable';
 import Table from '@/components/ui/Table/Table';
@@ -22,6 +22,7 @@ import Currency from '@/views/shared/Currency';
 import { PiCheck, PiEyeLight } from 'react-icons/pi';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
 import { useNavigate } from 'react-router-dom';
+import ShowListBankName from './ShowListBankName';
 
 const pageSizeOption = [
     { value: 100, label: '100 / page' },
@@ -123,23 +124,28 @@ function ShowContrat ( ) {
             
         },
         {
-            header: 'Date Debut',
+            header: 'Type ',
             cell: ({ row }) => (
-                  <div className="min-w-[160px]">
-                      <div className="font-medium"> {    formatRelative(row.original.startDate.toDate?.() || row.original.startDate, new Date(), { locale: fr } )  }</div>
-                    </div>
+                <div>
+                    { row.original.renovStep && <p className="font-semibold">
+                        {t('bank.'+row.original.renovStep) }
+                       </p>}
+                </div>
                 ),
             
         },
         {
-            header: 'Date Fin',
+            header: 'Date',
             cell: ({ row }) => (
                   <div className="min-w-[160px]">
-                      <div className="font-medium"> {    formatRelative(row.original.endDate.toDate?.() || row.original.endDate, new Date(), { locale: fr } )  }</div>
+                      <div className="font-medium">  Debut :{    formatRelative(row.original.startDate.toDate?.() || 
+                      row.original.startDate, new Date(), { locale: fr } )  }</div>
+                        <div className="font-medium"> Fin : {    formatRelative(row.original.endDate.toDate?.() || row.original.endDate, new Date(), { locale: fr } )  }</div>
                     </div>
                 ),
             
         },
+       
         {
             header: 'Paiement',
             cell: ({ row }) => (
@@ -162,18 +168,27 @@ function ShowContrat ( ) {
             
         },
         {
+            header: 'Bank',
+            cell: ({ row }) => (
+                 <div className="min-w-[160px]">
+                  <ShowListBankName bankIds={row.original.banksId} />
+                  </div>
+                ),
+            
+        },
+        {
             header: 'Action',
             cell: ({ row }) => {
               return (
                 <div className="min-w-[200px]">
-                    { (hasAuthority(authority, 'admin'))&&
-                     <Button variant="solid"  shape="circle" size="xs" className='mr-1'  onClick={() => {} }>
+                    { (hasAuthority(authority, 'admin') || row.original.createdBy == userId  ) && !row.original.completed  &&
+                     <Button variant="solid"  shape="circle" size="xs" className='mr-1'  onClick={()=> { completContrat(row.original.id); }}>
                         <PiCheck />
                      </Button> }
-                     <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs"  onClick={() => navigate("/bank/"+row.original.id) }>
+                     <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs"  onClick={() => navigate("/contrat/"+row.original.id) }>
                           <PiEyeLight />
                      </Button>
-                     {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
+                     {  !row.original.completed  && <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
                 </div>);
             } 
         },
@@ -196,24 +211,88 @@ function ShowContrat ( ) {
     }
   const yes  = async  (id : string ) =>{
            try {
-                const q = query(taskCollection, where("contratId","==",id))
-                const snapshot = await getDocs(q);
-                const t: BankTask[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BankTask));
-                t.forEach(async (task) => {
-                  const taskRef = await  getBankTask(task.id);
-                  updateDoc(taskRef, {
-                    contratId : '',
-                    completed : true,
-                    completedAt : null,
-                    state : 'pending',
-                  } );
-                });
-               const contRef = getContrat(id);
+               const contrat = await conts.find((cont) => cont.id === id) as RenovContract;
+               updateBanksForDelete(contrat.banksId, contrat.renovStep);
+               const contRef = getContratDoc(id);
                await deleteDoc(contRef);
+               setConts((prevConts) => prevConts.filter((cont) => cont.id !== id));
               } catch (err) {
                 console.error("Error fetching landlords:", err);
               }
   }
+
+  const completContrat  = async (id: string) => {
+    try {
+        const contRef = getContratDoc(id);
+        const contSnap = await getDoc(contRef);
+        if (contSnap.exists()) {
+            const data = contSnap.data() as RenovContract;
+            await updateDoc(contRef, {
+                completed: true,
+                updatedAt: new Date(),
+                updatedBy: userId,
+                completedBy: userId,
+                completedAt: new Date(),
+            })
+            setConts((prevConts) => prevConts.map((cont) => (cont.id === id ? { ...cont, completed: true } : cont)));
+            completedBanks(data.banksId, data.renovStep);
+        } else {
+            console.log("Document does not exist!");
+        }
+    } catch (err) {
+        console.error("Error fetching landlords:", err);
+    }
+  }
+
+  async function completedBanks(banksId: any[],  renovStep: string) {
+    try {
+      const data = (renovStep == "renovSteps.peinture" )  ? 
+      {
+       paintedAt: new Date(),
+       updatedAt: new Date(),
+       updatedBy: userId,
+       step:  "bankSteps.readyToUse" as BankStep,
+       renovStep: "renovSteps.completed" as RenovStep,
+      } : 
+      {
+        comptoireBuildedAt: new Date(),
+        updatedAt: new Date(),
+        updatedBy: userId,
+      } as Partial<Bank>; 
+
+      const updatePromises = banksId.map((bankId) => {
+        const bankRef = doc(BankDoc, bankId);
+        return updateDoc(bankRef,data);
+      });
+      await Promise.all(updatePromises);
+      console.log("Banks updated successfully");
+    
+    } catch (error) {
+      console.error("Error updating banks:", error);
+      throw new Error("Failed to update banks");
+    }
+  }
+
+  async function updateBanksForDelete(banksId: any[],  renovStep: string) {
+      try {
+        const data =  {
+        comptoireContratId : '',
+        renovStep :  renovStep as RenovStep,
+        updatedAt: new Date(),
+        }  as Partial<Bank> ; 
+
+        const updatePromises = banksId.map((bankId) => {
+          const bankRef = doc(BankDoc, bankId);
+          return updateDoc(bankRef,data);
+        });
+        await Promise.all(updatePromises);
+        console.log("Banks updated successfully");
+      } catch (error) {
+        console.error("Error updating banks:", error);
+        throw new Error("Failed to update banks");
+      }
+    }
+  
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-1 gap-6 w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">

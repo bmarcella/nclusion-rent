@@ -11,8 +11,9 @@
             "rejected": "Rejetées",
             "contrat": "Paiement & Contrats",
             "renovation": "Rénovation",
-            "pending": "Considération"
-
+            "pending": "Considération",
+            "vendor": "Gestionnaires de vendeurs",
+            "report": "Rapport"
         },
         "proprioMenu": {
             "proprio": "Entités",
@@ -280,7 +281,9 @@
         "renovSteps": {
           "construction": "Contruction",
           "comptoire": "Comptoire",
-          "peinture": "Peinture"
+          "peinture": "Peinture",
+          "in_process": "En Attente",
+          "completed": "Terminé"
         }
     },
     "entity": {
@@ -294,6 +297,7 @@
       "agent_immobilier": "Agent immobilier",
       "coordonator": "Coordinateur",
       "assist_coordonator": "Assistant coordinateur",
+      "super_manager": "Super Manager",
       "manager": "Manager",
       "assist_manager": "Assistant manager",
       "operation": "Opérations",

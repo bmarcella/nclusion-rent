@@ -47,6 +47,6 @@ export const getBankTask = (id: string ) => {
      return  doc(db, task, id);
 }
 
-export const getContrat = (id: string ) => {
+export const getContratDoc = (id: string ) => {
      return  doc(db, contracts, id);
 }

@@ -5,6 +5,7 @@ import { getRegionsByValues, Regions } from "@/views/Entity/Regions"
 import { USER_ROLES } from "@/views/shared/schema"
 
 export const ADMIN = 'admin'
+export const SUPER_MANAGER = 'super_manager'
 export const AGENT_IMMOBILLIER= 'agent_immobilier'
 export const COORDONATOR = 'coordonator'
 export const ASSIST_COORDONATOR = 'assist_coordonator'

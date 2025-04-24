@@ -160,7 +160,7 @@ const pageSizeOption = [
                 ),
             },
             {
-                header: 'Date de creation',
+                header: 'Date de création',
                 cell: ({ row }) => (
                     <div className="min-w-[160px]">
                        <div className="font-medium"> {    formatRelative(row.original.createdAt.toDate?.() || row.original.createdAt, new Date(), { locale: fr } )  }</div>
@@ -171,7 +171,7 @@ const pageSizeOption = [
                 header: 'Etape',
                 cell: ({ row }) => (
                     <div className="min-w-auto">
-                       <BankStepBadge step={row.original.step} finaldec={row.original.finalDecision} isAgent={isAgent}/>
+                       <BankStepBadge renovStep={row.original?.renovStep} step={row.original.step} finaldec={row.original.finalDecision} isAgent={isAgent}/>
                      </div>
                     ),
             },
