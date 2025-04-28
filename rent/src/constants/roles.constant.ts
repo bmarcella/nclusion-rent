@@ -32,15 +32,15 @@ export const REFERENCE = 'reference'
   }
 
 export const getRolesByAhth = (auth: string ) => {
-     let roles: any [] = [ "proprietaire", "reference"]
+     let roles: any [] = [ "proprietaire", "reference"];
+       auth = auth.toLowerCase().trim();
         switch (auth) {
            case "admin":
                roles  = [...USER_ROLES];
-            break;
+              break;
           case "coordonator":
             roles = roles.concat(["agent_immobilier","assist_coordonator"])
             break;
-      
           case "assist_coordonator":
             roles.push("agent_immobilier");
             break;
@@ -56,12 +56,14 @@ export const getRolesByAhth = (auth: string ) => {
           case "operation":
             roles = roles.concat(["agent_immobilier","vendeur"]);
             break;
-      
           case "vendor_management":
             roles = roles.concat(["vendeur"]);
           break;
+          case "super_manager":
+            roles= roles.concat(["vendeur","agent_immobilier","assist_manager", "assist_coordonator", "coordonator"]);  
+         break;
           default:
-            // console.log("Rôle non reconnu :", auth);
+            roles  = [...USER_ROLES];
           break;
         }
         return roles;

@@ -1,6 +1,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DatePicker } from '@/components/ui';
+import Checkbox from '@/components/ui/Checkbox/Checkbox';
 import { Select } from '@/components/ui/Select';
 import { manageAuth } from '@/constants/roles.constant';
 import { Landlord } from '@/services/Landlord';
@@ -37,10 +38,10 @@ interface Props {
   onChangeRegion: (id:  number) => void;
   onChangeAgent: (d: string ) => void;
   onChangeDate: (start:  Date, end? : Date) => void;
- 
+  onChangeMap?: (value: boolean) => void;
 }
 
-function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onChangeDate  }: Props) {
+function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onChangeDate, onChangeMap = (value: any)=>{}  }: Props) {
   const [regions, setRegions] = useState<OptionType[]>([]);
   const [agents, setAgents] = useState<OptionType[]>([]);
 
@@ -106,7 +107,11 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded">
-
+  <Checkbox  onChange={(options: any) => {
+             onChangeMap(options);
+          }}>
+      Show on Map 
+  </Checkbox>
     {regions.length > 1 && (
         <Select
           placeholder="Region"
@@ -158,6 +163,8 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
              console.log('start:', date);
              setEnd(new Date(date));
           }}  />
+
+        
 
   
     </div>

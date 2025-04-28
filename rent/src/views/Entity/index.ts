@@ -332,6 +332,7 @@ export interface Bank {
     approve: boolean;
     paintedAt?: Date;
     comptoireBuildedAt?: Date;
+    images: any[];
     location: {
       lat: any,
       lng: any,
