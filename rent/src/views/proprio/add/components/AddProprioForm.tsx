@@ -71,6 +71,7 @@ function AddProprioForm( { done } : Props) {
     const auth = authority[0];
     const manage = async () => {
      const { regions , roles } = await manageAuth(auth, proprio, t);
+      console.log("Roles", roles)
      setRegions(regions); // setRegions first
      if (regions.length === 1) {
        setValue("regions", [regions[0].value]); // safe to call here

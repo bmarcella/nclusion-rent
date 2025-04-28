@@ -90,7 +90,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     const  canApprove = () => {
       try {
         const role = authority?.[0] || null;
-        if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="admin" || role =="manager" || role =="asssit_manager") ) {
+        if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="admin" || role =="super_manager" || role =="manager" || role =="asssit_manager") ) {
             return true;
         }
         return false;
