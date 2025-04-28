@@ -3,6 +3,7 @@ import TabContent from '@/components/ui/Tabs/TabContent'
 import TabList from '@/components/ui/Tabs/TabList'
 import TabNav from '@/components/ui/Tabs/TabNav'
 import AIReport from './components/AIReport'
+import RegionReport from './components/RegionReport'
 
 export function ReportBase() {
   return (
@@ -17,7 +18,7 @@ export function ReportBase() {
                <AIReport></AIReport>
             </TabContent>
             <TabContent value="tab2">
-              
+              <RegionReport></RegionReport>
             </TabContent>
 
         </div>

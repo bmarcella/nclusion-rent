@@ -32,7 +32,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.add',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["agent_immobilier", "admin"],
+                authority: ["agent_immobilier", "admin",  'super_manager'],
                 subMenu: [],
             },
             {
@@ -42,7 +42,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.show',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["agent_immobilier", "admin"],
+                authority: ["agent_immobilier", "admin", 'super_manager'],
                 subMenu: [],
             },
             {
@@ -52,7 +52,17 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.current',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager"],
+                authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager", 'super_manager'],
+                subMenu: [],
+            },
+            {
+                key: 'bankMenu.icurrent',
+                path: '/bank/inactive',
+                title: 'Banks Inactives',
+                translateKey: 'nav.bankMenu.icurrent',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager", 'super_manager'],
                 subMenu: [],
             },
             {
@@ -62,7 +72,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.vendor',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "vendor_management"],
+                authority: ["admin", "vendor_management", 'super_manager', 'super_manager'],
                 subMenu: [],
             },
             {
@@ -72,7 +82,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.report',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ["admin",'super_manager', "coordonator", "assist_coordonator","manager", "assist_manager", 'super_manager'],
                 subMenu: [],
             }
         ],
