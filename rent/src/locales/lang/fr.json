@@ -5,14 +5,15 @@
             "bankMenu": "Gestion Bank",
             "add": "Ajouter",
             "show": "Mes banks",
-            "current": "Banks",
+            "current": "Banks Actives",
+            "icurrent": "Banks Inactives",
             "approved": "Approbation",
             "ready": "Disponible",
             "rejected": "Rejetées",
             "contrat": "Paiement & Contrats",
             "renovation": "Rénovation",
             "pending": "Considération",
-            "vendor": "Contrats",
+            "vendor": "Rénovation",
             "report": "Rapport"
         },
         "proprioMenu": {

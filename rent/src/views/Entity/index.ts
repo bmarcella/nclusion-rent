@@ -467,7 +467,35 @@ export const getBlankBank  = (data: any, uuid: string, location: any): Bank => {
       
 }
 
-export const ListBankSteps = [
+
+
+
+export const ListIBankSteps = [
+  {
+    key: "bankSteps.pending",
+    label: "Considération",
+    title: "Banque en attente",
+    description: "La banque est en attente d'approbation.",
+    authority : []
+  },
+  {
+    key: "bankSteps.rejected",
+    label: "Rejeté",
+    title: "Banque rejetée",
+    description: "La banque a été rejetée et nécessite une approbation.",
+    authority : []
+  },
+  {
+    key: "bankSteps.notProceeded",
+    label: "Non traité",
+    title: "Banque non traitée",
+    description: "La banque n'a pas encore été traitée dans le système.",
+    authority : []
+  }
+];
+
+
+export const ListABankSteps = [
   {
     key: "bankSteps.needApproval",
     label: "Validation",
@@ -502,29 +530,10 @@ export const ListBankSteps = [
     title: "Banque prête",
     description: "La banque est prête à être utilisée.",
 
-  },
-  {
-    key: "bankSteps.pending",
-    label: "Considération",
-    title: "Banque en attente",
-    description: "La banque est en attente d'approbation.",
-    authority : []
-  },
-  {
-    key: "bankSteps.rejected",
-    label: "Rejeté",
-    title: "Banque rejetée",
-    description: "La banque a été rejetée et nécessite une approbation.",
-    authority : []
-  },
-  {
-    key: "bankSteps.notProceeded",
-    label: "Non traité",
-    title: "Banque non traitée",
-    description: "La banque n'a pas encore été traitée dans le système.",
-    authority : []
   }
 ];
+
+export const ListBankSteps = ListABankSteps.concat(ListIBankSteps);
 
 
 export const ListBankStepsDetails= [

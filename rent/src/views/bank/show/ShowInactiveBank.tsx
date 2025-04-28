@@ -1,13 +1,13 @@
 /* eslint-disable react/jsx-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BankStep, ListABankSteps } from "@/views/Entity";
+import { BankStep,  ListIBankSteps } from "@/views/Entity";
 import TableBank from "./components/TableBank";
 import Tabs from "@/components/ui/Tabs";
 import TabList from "@/components/ui/Tabs/TabList";
 import TabContent from "@/components/ui/Tabs/TabContent";
 import TabNav from "@/components/ui/Tabs/TabNav";
 
-export const ShowNeedApprovalBankBase= () => {
+export const ShowInactiveBankBase= () => {
  
   
   return (
@@ -15,14 +15,14 @@ export const ShowNeedApprovalBankBase= () => {
        <Tabs defaultValue={'all'} className="w-full">
                 <TabList>
                   <TabNav key={'all'} value={'all'}>Tout</TabNav>
-                   { ListABankSteps.map((step, index)=>(<TabNav key={index} value={step.key}>{step.label}</TabNav>) )  }
+                   { ListIBankSteps.map((step, index)=>(<TabNav key={index} value={step.key}>{step.label}</TabNav>) )  }
                 </TabList>
 
                 <TabContent value={'all'}>
                        <TableBank all={true} />
                 </TabContent>
 
-                { ListABankSteps.map((step, index)=>( 
+                { ListIBankSteps.map((step, index)=>( 
                   <div key={index}>
                     <TabContent value={step.key}>
                        <TableBank step={ step.key as BankStep} key={step.key} />
@@ -34,8 +34,8 @@ export const ShowNeedApprovalBankBase= () => {
 }
 
 
-const ShowNeedApprovalBank = () => {
-    return <ShowNeedApprovalBankBase />
+const ShowInactiveBank = () => {
+    return <ShowInactiveBankBase />
 }
 
-export default ShowNeedApprovalBank;
+export default ShowInactiveBank;

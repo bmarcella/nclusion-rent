@@ -250,52 +250,75 @@ const pageSizeOption = [
             return filters.length > 0 ? query(q, ...filters) : q;
     }
 
-    const fetchBanks = async (pageNum: number) => {
+    const fetchTotalCount = async () => {
         let q: Query<DocumentData>;
-        if (!step){
-           if (!all) {
-              q = query(BankDoc, orderBy("createdAt", "desc"), where("createdBy", "==", userId), limit(pageSizeOption[0].value));
-            } else{
-                q = query(BankDoc, orderBy("createdAt", "desc"), limit(pageSizeOption[0].value));
+        if (!step) {
+            if (!all) {
+                q = query(BankDoc, orderBy("createdAt", "desc"), where("createdBy", "==", userId));
+            } else {
+                q = query(BankDoc, orderBy("createdAt", "desc"));
             }
-         } else {
-           q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step),  limit(pageSizeOption[0].value));
+        } else {
+            q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step));
         }
+        q = getQueryDate(q);
     
-         q = getQueryDate(q);
-
-        // If we're not on the first page, we need to start after a document
-        if (pageNum > 1 && pageDocs[pageNum - 2]) {
-           q = query(q, startAfter(pageDocs[pageNum - 2]));
-        }
-      
         const snapshot = await getDocs(q);
         setTotalData(snapshot.size);
-        // Resolve landlords
-        const banksWithLandlords = await Promise.all(
-          snapshot.docs.map(async (docSnap) => {
-            const data = docSnap.data();
-            const landlordId = data.landlord;
-            let landlord = null;
-            if (landlordId) {
-              const landlordSnap = await getDoc(getLandlordDoc(landlordId));
-              landlord = landlordSnap.exists() ? landlordSnap.data() : null;
-            }
-            return { id: docSnap.id, ...data, landlord };
-          })
-        );
-        // Update state
-        setBanks(banksWithLandlords as any);
-        setCurrentPage(pageNum);
-        // Store the snapshot for this page if it’s new
-        if (!pageDocs[pageNum - 1]) {
-          setPageDocs((prev) => {
-            const updated = [...prev];
-            updated[pageNum - 1] = snapshot.docs[0]; // store the first doc of this page
-            return updated;
-          });
-        }
     };
+
+    const fetchBanks = async (pageNum: number) => {
+        let q: Query<DocumentData>;
+        if (!step) {
+            if (!all) {
+                q = query(BankDoc, orderBy("createdAt", "desc"), where("createdBy", "==", userId), limit(pageSizeOption[0].value));
+            } else {
+                q = query(BankDoc, orderBy("createdAt", "desc"), limit(pageSizeOption[0].value));
+            }
+        } else {
+            q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step), limit(pageSizeOption[0].value));
+        }
+    
+        q = getQueryDate(q);
+    
+        // Only if not first page
+        if (pageNum > 1 && pageDocs[pageNum - 2]) {
+            q = query(q, startAfter(pageDocs[pageNum - 2]));
+        }
+
+        fetchTotalCount();
+    
+        const snapshot = await getDocs(q);
+    
+        const newBanks = await Promise.all(
+            snapshot.docs.map(async (docSnap) => {
+                const data = docSnap.data();
+                const landlordId = data.landlord;
+                let landlord = null;
+                if (landlordId) {
+                    const landlordSnap = await getDoc(getLandlordDoc(landlordId));
+                    landlord = landlordSnap.exists() ? landlordSnap.data() : null;
+                }
+                return { id: docSnap.id, ...data, landlord };
+            })
+        );
+    
+        // Instead of replacing, accumulate
+        setBanks((prevBanks: any) => (pageNum === 1 ? newBanks : [...prevBanks, ...newBanks]));
+        setCurrentPage(pageNum);
+    
+        // Important: set the last doc for next page
+        if (snapshot.docs.length > 0) {
+            setPageDocs((prev) => {
+                const updated = [...prev];
+                updated[pageNum - 1] = snapshot.docs[snapshot.docs.length - 1];
+                return updated;
+            });
+        }
+    
+        // (optional) update totalData properly if you fetched total separately
+    };
+    
     useEffect(() => {
         if (fetchedRef.current) return;
          fetchBanks(1); // load first page
@@ -326,7 +349,10 @@ const pageSizeOption = [
     })
 
     const onPaginationChange = (page: number) => {
-        table.setPageIndex(page - 1)
+        if (page > currentPage) {
+            fetchBanks(page); // fetch next page when needed
+        }
+        table.setPageIndex(page - 1);
     }
 
     const onSelectChange = (value = 0) => {
