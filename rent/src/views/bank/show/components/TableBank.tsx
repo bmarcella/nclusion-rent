@@ -14,6 +14,7 @@ import {
     QueryConstraint,
     Timestamp,
     CollectionReference,
+    getCountFromServer,
   } from 'firebase/firestore';
   import  { useEffect, useMemo, useRef, useState } from 'react';
   import { Bank, BankStep } from '@/views/Entity';
@@ -263,8 +264,8 @@ const pageSizeOption = [
         }
         q = getQueryDate(q);
     
-        const snapshot = await getDocs(q);
-        setTotalData(snapshot.size);
+        const snapshot = await getCountFromServer(q);  // 🚀 NOT getDocs!
+        setTotalData(snapshot.data().count);
     };
 
     const fetchBanks = async (pageNum: number) => {
