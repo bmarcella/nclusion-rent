@@ -66,6 +66,5 @@ export const getRolesByAhth = (auth: string ) => {
             roles  = [...USER_ROLES];
           break;
         }
-        console.log("roles", roles);
         return roles;
 }
