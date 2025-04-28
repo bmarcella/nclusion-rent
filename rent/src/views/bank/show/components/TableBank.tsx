@@ -13,7 +13,6 @@ import {
     Query,
     QueryConstraint,
     Timestamp,
-    CollectionReference,
     getCountFromServer,
   } from 'firebase/firestore';
   import  { useEffect, useMemo, useRef, useState } from 'react';
@@ -21,7 +20,7 @@ import {
   import { BankDoc, getLandlordDoc } from '@/services/Landlord';
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import Table from '@/components/ui/Table';
-import { Alert, Badge, Button, Dialog, Pagination, Select, Tabs, Tooltip } from '@/components/ui';
+import { Alert, Button, Dialog, Pagination, Select, Tabs, Tooltip } from '@/components/ui';
 import { useSessionUser } from '@/store/authStore';
 import { PiCheck, PiEyeLight } from 'react-icons/pi';
 import EditBank from './EditBank';
@@ -45,11 +44,12 @@ import { getRegionIds } from '@/views/Entity/Regions';
 import classNames from 'classnames';
 import { HiHome } from 'react-icons/hi';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
-import { deleteBank } from '@/services/firebase/BankService';
+import { deleteBank, getBankImages } from '@/services/firebase/BankService';
 import MapPopup from '../MapPopup';
 import FilterBank from '@/views/bank/show/components/FilterBank';
 import FilterMyBank from './FilterMyBank';
 import { hasAuthority } from '@/utils/RoleChecker';
+import GoogleMapWithMarkers from '../GoogleMapWithMarkers';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -89,6 +89,8 @@ const pageSizeOption = [
     const [start, setStart] = useState<Date>();
     const [end, setEnd] = useState<Date>();
     const [steps, setSteps] = useState<string>();
+    const [isMap, setMap] = useState<boolean>();
+    const [mapData, setMapData] = useState<any[]>();
     // 
     const openDialog = (bank: Bank) => {
         setCBank(bank);
@@ -300,7 +302,8 @@ const pageSizeOption = [
                     const landlordSnap = await getDoc(getLandlordDoc(landlordId));
                     landlord = landlordSnap.exists() ? landlordSnap.data() : null;
                 }
-                return { id: docSnap.id, ...data, landlord };
+                const images = await getBankImages(docSnap.id);
+                return { id: docSnap.id, ...data, landlord, images };
             })
         );
     
@@ -440,15 +443,39 @@ const pageSizeOption = [
            onChangeRegion={onChangeRegion} 
            onChangeAgent={onChangeAgent} 
            onChangeDate = {onChangeDate}
+           onChangeMap={(value) => { 
+            if (value) {
+                const data = banks.map((bank: any) => {
+                    if (bank.location?.lng && bank.location?.lat) {
+                    return {
+                        lng: bank.location?.lng,
+                        lat: bank.location?.lat,
+                        name: bank.bankName,
+                        price: bank.rentCost,
+                        state : bank.step,
+                        id: bank.id,
+                        imageUrls: bank.images,
+                    } as any;
+                 } else  return  null
+                }).filter((bank: any) => bank !== null);
+                console.log("mapData: ", data);
+                setMapData(data);
+            } else {
+                setMapData([]);
+            }
+            setMap(value);
+
+           }}
           >
 
-           </FilterBank> }
+          </FilterBank> }
 
               { !step && <FilterMyBank 
              onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t} all={all} ></FilterMyBank> } 
       
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
-           <Table>
+          { !isMap &&  <>
+            <Table>
                 <THead>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <Tr key={headerGroup.id}>
@@ -487,6 +514,15 @@ const pageSizeOption = [
                     })}
                 </TBody>
             </Table>
+            </> }
+            {
+                  isMap && mapData && mapData.length > 0 && (
+                    <GoogleMapWithMarkers
+                    locations={mapData}
+                    // zoom={8} // optional
+                  />
+                  )
+            }
             <div className="flex items-center justify-between mt-4">
                 <Pagination
                     pageSize={table.getState().pagination.pageSize}

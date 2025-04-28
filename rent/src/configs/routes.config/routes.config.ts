@@ -64,7 +64,7 @@ export const protectedRoutes: Routes = [
         key: 'proprioMenu.show',
         path: '/proprio/show',
         component: lazy(() => import('@/views/proprio/show')),
-        authority: ["admin"],
+        authority: ["admin", 'super_manager'],
     },
     {
         key: 'proprioMenu.myEntity',
