@@ -28,7 +28,13 @@ export const protectedRoutes: Routes = [
         key: 'bankMenu.needApproval',
         path: '/bank/approval',
         component: lazy(() => import('@/views/bank/show/NeedApproval')),
-        authority: ["coordonator", "assist_coordonator", "admin", "manager", "assist_manager"],
+        authority: ["coordonator", "assist_coordonator", "admin", "manager", "assist_manager", 'super_manager'],
+    },
+    {
+        key: 'bankMenu.icurrent',
+        path: '/bank/inactive',
+        component: lazy(() => import('@/views/bank/show/InactiveBank')),
+        authority: ["coordonator", "assist_coordonator", "admin", "manager", "assist_manager", 'super_manager'],
     },
     {
         key: 'bankMenu.approved',
@@ -42,7 +48,6 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/bank/show/BankDetails')),
         authority: [],
     },
-  
     {
         key: 'bankMenu.vendor',
         path: '/bank/vendor',

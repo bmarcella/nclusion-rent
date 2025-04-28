@@ -2,16 +2,15 @@ import React, { useEffect, useState } from 'react';
 import Table from '@/components/ui/Table';
 import THead from '@/components/ui/Table/THead';
 import TBody from '@/components/ui/Table/TBody';
-import { fetchReportPerCreator } from '@/services/Report';
-import UserName from '@/views/bank/show/components/UserName';
+import { fetchReportPerReport } from '@/views/Entity/Regions';
 
-function AIReport() {
+function RegionReport() {
   const [data, setData] = useState<any[]>([]);
   const [steps, setSteps] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchReportPerCreator().then((result) => {
+    fetchReportPerReport().then((result) => {
       setData(result);
 
       if (result.length > 0) {
@@ -40,7 +39,7 @@ function AIReport() {
         </caption>
         <THead>
           <tr>
-            <th>Agents</th>
+            <th>Regions</th>
             {steps.map((step) => (
               <th key={step} className="text-center capitalize">
                 {step}
@@ -66,7 +65,7 @@ function AIReport() {
             return (
               <tr key={name} className="border-t">
                 <td className="p-2">
-                  <UserName userId={name} />
+                   { name }
                 </td>
                 {values.map((value, index) => (
                   <td key={`${name}-${index}`} className="text-center">
@@ -86,4 +85,4 @@ function AIReport() {
   );
 }
 
-export default AIReport;
+export default RegionReport;
