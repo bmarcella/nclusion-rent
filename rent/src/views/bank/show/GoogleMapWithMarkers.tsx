@@ -75,7 +75,7 @@ const GoogleMapWithMarkers: React.FC<GoogleMapWithMarkersProps> = ({
          onClick={() => setSelectedLocation(loc)}
          icon={{
            url: getMarkerColor(loc.state),
-           scaledSize: new window.google.maps.Size(40, 40),
+           scaledSize: new window.google.maps.Size(32, 32),
          }}
        />
       ))}
