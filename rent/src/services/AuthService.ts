@@ -194,7 +194,6 @@ const changeMyPassword = async (newPassword: string)  => {
     const updateUserPassword = httpsCallable(functions, 'updateUserPassword');
     try {
       const result = await updateUserPassword({ uid, newPassword });
-      console.log(result.data);
     } catch (error) {
       console.error('Error:', error);
     }

@@ -16,7 +16,6 @@ const Home = () => {
     const regs = async () => { 
         const { regions, values } = await getBankCountsByRegion();
         const report = await fetchReportPerReport();
-        console.log('report', report);
         setRegions(regions);
         setValues(values);
         setReport(report);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import EXIF from 'exif-js';
-import ChangeLocation from '../../add/components/changeLocation';
+import ChangeLocation from '../../add/components/ChangeLocation';
 
 interface ReadExifFromUrlProps {
   imageUrl: string;

@@ -17,8 +17,8 @@ export interface Person {
     nickName?: string;
     companyName?: string;
     id_user?: string; 
-    nif: string;
-    cin: string;
+    nif?: string;
+    cin?: string;
     address: string;
     phone: string;
     phone_b?: string;
@@ -313,7 +313,8 @@ export interface Bank {
     id_region: number | string ;
     yearCount: number | string;
     date:  string;
-    rentCost: number | string;
+    rentCost?: number | string;
+    final_rentCost: number | string;
     superficie?: number | string;
     nombre_chambre?: number | string;
     addresse : string;
