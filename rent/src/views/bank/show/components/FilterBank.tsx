@@ -39,9 +39,10 @@ interface Props {
   onChangeAgent: (d: string ) => void;
   onChangeDate: (start:  Date, end? : Date) => void;
   onChangeMap?: (value: boolean) => void;
+  isMap?: boolean;
 }
 
-function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onChangeDate, onChangeMap = (value: any)=>{}  }: Props) {
+function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onChangeDate, isMap,  onChangeMap = (value: any)=>{}  }: Props) {
   const [regions, setRegions] = useState<OptionType[]>([]);
   const [agents, setAgents] = useState<OptionType[]>([]);
 
@@ -107,11 +108,11 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded">
-  <Checkbox  onChange={(options: any) => {
+ { isMap && <Checkbox  onChange={(options: any) => {
              onChangeMap(options);
           }}>
       Show on Map 
-  </Checkbox>
+  </Checkbox> }
     {regions.length > 1 && (
         <Select
           placeholder="Region"

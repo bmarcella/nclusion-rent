@@ -21,7 +21,7 @@ const GoogleMapApp: React.FC<MyMapProps> = ({ position }) => {
   if (!isLoaded) return <div>Loading Map...</div>;
 
   return (
-    <GoogleMap mapContainerStyle={containerStyle} center={position} zoom={13}>
+     <GoogleMap mapContainerStyle={containerStyle} center={position} zoom={13}>
       <Marker position={position} />
     </GoogleMap>
   );
