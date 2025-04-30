@@ -51,8 +51,6 @@ const OtpVerificationForm = (props: OtpVerificationFormProps) => {
             )
             setSubmitting(false)
         }
-
-        console.log('otp', otp)
         setSubmitting(false)
     }
 

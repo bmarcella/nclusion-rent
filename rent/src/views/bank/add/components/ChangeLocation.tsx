@@ -16,7 +16,6 @@ function ChangeLocation({ location, bankId, hide }: { location: string; bankId: 
             setAlert("danger");
             return;
         }
-        console.log("saveLocation", location, bankId);
         await update({ location });
     }
 

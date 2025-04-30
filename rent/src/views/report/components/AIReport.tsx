@@ -51,12 +51,10 @@ function AIReport() {
   );
 
   const onChangeRegion = async (id: number) => {
-    console.log("onChangeRegion: ", id);
     setRegions(id);
 }
 
 const onChangeAgent = async (id: string) =>{
-   console.log("onChangeAgent: ", id);
    setAgents(id);
  }
 
