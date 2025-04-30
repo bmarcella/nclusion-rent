@@ -84,10 +84,12 @@ const LeaseContractForm = ( { bank }: Props) => {
       <h2 className="text-xl font-semibold mt-6 mb-2">Article 3 - Loyer</h2>
       <p>
         Montant :
-        <span className="inline-block w-auto border-b border-gray-400 ml-2" > HTG {  new Intl.NumberFormat('fr-FR').format(Number(bank.rentCost)) } </span> (
-        <span className="inline-block w-auto uppercase border-b border-gray-400 mx-2" >{ n2words(bank.rentCost, { lang: 'fr' }) }</span>) payable à la date d’entrée dans
+        <span className="inline-block w-auto border-b border-gray-400 ml-2" > HTG {  new Intl.NumberFormat('fr-FR').format(Number(bank?.final_rentCost || 0)) } </span> (
+        <span className="inline-block w-auto uppercase border-b border-gray-400 mx-2" >{ n2words(bank?.final_rentCost || 0, { lang: 'fr' }) }</span>) payable à la date d’entrée dans
         les lieux.
       </p>
+
+      { (!bank?.final_rentCost  || bank?.final_rentCost==0) &&<p className="text-red-400"> Le montant du loyer est egal a 0 , vous devez aller le modifier dans la section Banks Actives {'->'} Contrat</p> }
 
       <div className="mt-6">
         <p>

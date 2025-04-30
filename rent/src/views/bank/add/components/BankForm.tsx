@@ -48,7 +48,7 @@ const BankForm = () => {
 
   const onChange = (nextStep: number) => {
     if (nextStep < 0) {
-        setStep(0)
+        setStep(0);
     } else if (nextStep > 7) {
         setStep(7)
     } else {
@@ -66,7 +66,7 @@ const onNext = () => onChange(step + 1);
   "images",
   "commentaires",
   "termine"
-]
+];
 
 const update = async (data: any)  => {
     return new Promise((resolve, reject) => {
@@ -93,6 +93,7 @@ const nextStep = async (step: number, data: any ) => {
   try {
     switch (step) {
       case 1:
+        console.log("Bank Info", data);
          await setDocRef(data);
         break;
       case 2:
