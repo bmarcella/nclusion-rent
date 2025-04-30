@@ -139,7 +139,7 @@ const UploadImgBank = ( { bankId, isEdit = false, nextStep, userId } : Props) =>
         )}
       
         {isEdit && images.length > 0 && (
-          <ImageGallery images={images} userId={userId || ''} onDelete={OnDeleteImg} />
+          <ImageGallery images={images} userId={userId || ''}  bankId={bankId} onDelete={OnDeleteImg} />
         )}
       </div>
       

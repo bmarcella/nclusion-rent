@@ -2,16 +2,37 @@ import React, { useEffect, useState } from 'react';
 import Table from '@/components/ui/Table';
 import THead from '@/components/ui/Table/THead';
 import TBody from '@/components/ui/Table/TBody';
-import { fetchReportPerCreator } from '@/services/Report';
+import { fetchReportPerCreator, getQueryFilters } from '@/services/Report';
 import UserName from '@/views/bank/show/components/UserName';
-
+import FilterBank from '@/views/bank/show/components/FilterBank';
+import useTranslation from '@/utils/hooks/useTranslation';
+import { useNavigate } from 'react-router';
+import { useSessionUser } from '@/store/authStore';
+import { BankDoc } from '@/services/Landlord';
+import { Query, DocumentData, query } from 'firebase/firestore';
 function AIReport() {
   const [data, setData] = useState<any[]>([]);
   const [steps, setSteps] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { proprio , authority } = useSessionUser((state) => state.user);
+  // -------------------
+  const [ regions, setRegions] = useState<number>(0);
+  const [agents, setAgents] = useState<string>();
+  const [start, setStart] = useState<Date>();
+  const [end, setEnd] = useState<Date>();
 
   useEffect(() => {
-    fetchReportPerCreator().then((result) => {
+    const q: Query<DocumentData> = query(BankDoc);
+    fetchReportPerCreator(getQueryFilters(q, {
+      regions: regions,
+      agents: agents,
+      start: start,
+      end: end,
+      authority: authority,
+      proprio: proprio
+    })).then((result) => {
       setData(result);
 
       if (result.length > 0) {
@@ -20,7 +41,7 @@ function AIReport() {
 
       setLoading(false);
     });
-  }, []);
+  }, [regions, agents, start, end]);
 
   if (loading) return <p>Chargement du rapport...</p>;
 
@@ -29,11 +50,34 @@ function AIReport() {
     data.reduce((sum, item) => sum + (item.values[index] || 0), 0)
   );
 
+  const onChangeRegion = async (id: number) => {
+    console.log("onChangeRegion: ", id);
+    setRegions(id);
+}
+
+const onChangeAgent = async (id: string) =>{
+   console.log("onChangeAgent: ", id);
+   setAgents(id);
+ }
+
+ const onChangeDate = async (start: Date, end: Date) => {
+    setStart(start);
+    setEnd(end);
+ }
+
   // Calculate grand total (sum of all values)
   const grandTotal = columnTotals.reduce((acc, val) => acc + val, 0);
 
   return (
     <div className="overflow-x-auto p-1 bg-white rounded-lg shadow-md">
+
+          <FilterBank  authority={authority || []} proprio={proprio} t={t}
+           onChangeRegion={onChangeRegion} 
+           onChangeAgent={onChangeAgent} 
+           onChangeDate = {onChangeDate}
+          >
+
+          </FilterBank> 
       <Table>
         <caption className="text-lg font-semibold text-gray-700 p-4">
           Rapport par agent immobilier

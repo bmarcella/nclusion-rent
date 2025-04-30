@@ -7,6 +7,7 @@ import { MdOutlineDeleteOutline } from "react-icons/md";
 import UserName from "./UserName";
 import Dialog from "@/components/ui/Dialog";
 import { useWindowSize } from "@/utils/hooks/useWindowSize";
+import ReadExifFromUrl from "./ReadExifFromUrl";
 
 export type BankImage = {
   id?: string;
@@ -27,9 +28,10 @@ interface ImageGalleryProps {
   onDelete?: (image: BankImage) => void;
   canDelete?: boolean;
   showPic?: boolean;
+  bankId?: string;
 }
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=>{} , userId, canDelete = true,  showPic=false}) => {
+const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=>{} , userId, canDelete = true,  showPic=false, bankId }) => {
     const [ image, setCImg] = useState() as any;
     const [dialogIsOpen, setIsOpen] = useState(false);
     const { width, height } = useWindowSize();
@@ -74,6 +76,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=>
                 onClick={() => onDelete(image)}
               >
               </Button> }
+
+             { image.imageUrl && bankId && <ReadExifFromUrl imageUrl={image.imageUrl} bankId={bankId}/> }
             </div>
           </div>
         ))}

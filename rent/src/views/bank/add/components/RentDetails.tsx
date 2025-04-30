@@ -28,7 +28,6 @@ function RentDetails({ nextStep, defaultValues, isEdit= false } : FormProps) {
 
   const [isSubmitting, setSubmitting] = useState(false);
   const { t } = useTranslation();
-  console.log("defaultValues", defaultValues);
     const {
         control,
         reset,
