@@ -105,7 +105,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           async (position) => {
             const { latitude, longitude } = position.coords;
             setLocation({ lat: latitude, lng: longitude });
-            console.log("Location:", { lat: latitude, lng: longitude });
+            // console.log("Location:", { lat: latitude, lng: longitude });
           },
           (err) => {
             onError(`Error: ${err.message}`);

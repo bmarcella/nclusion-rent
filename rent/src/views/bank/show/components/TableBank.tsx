@@ -15,9 +15,9 @@ import {
     Timestamp,
     getCountFromServer,
   } from 'firebase/firestore';
-  import  { useEffect, useMemo, useRef, useState } from 'react';
-  import { Bank, BankStep } from '@/views/Entity';
-  import { BankDoc, getLandlordDoc } from '@/services/Landlord';
+import  { useEffect, useMemo, useRef, useState } from 'react';
+import { Bank, BankStep } from '@/views/Entity';
+import { BankDoc, getLandlordDoc } from '@/services/Landlord';
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import Table from '@/components/ui/Table';
 import { Alert, Button, Dialog, Pagination, Select, Tabs, Tooltip } from '@/components/ui';
@@ -50,6 +50,7 @@ import FilterBank from '@/views/bank/show/components/FilterBank';
 import FilterMyBank from './FilterMyBank';
 import { hasAuthority } from '@/utils/RoleChecker';
 import GoogleMapWithMarkers from '../GoogleMapWithMarkers';
+import ChangeLocation from '../../add/components/changeLocation';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -91,6 +92,7 @@ const pageSizeOption = [
     const [steps, setSteps] = useState<string>();
     const [isMap, setMap] = useState<boolean>();
     const [mapData, setMapData] = useState<any[]>();
+    const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     // 
     const openDialog = (bank: Bank) => {
         setCBank(bank);
@@ -191,7 +193,7 @@ const pageSizeOption = [
                     </div>);
                  else return (
                     <div className="min-w-[200px]">
-                        { (hasAuthority(authority, 'admin'))&&
+                        { (hasAuthority(authority, 'admin')  || hasAuthority(authority, 'super_manager'))&&
                          <Button variant="solid"  shape="circle" size="xs" className='mr-1 '  onClick={() => openDialog(row.original)}>
                             <PiEyeLight />
                          </Button> }
@@ -419,6 +421,18 @@ const pageSizeOption = [
         console.log("onChangeStep: ", step);
         setSteps(step);
      }
+
+       useEffect(() => {
+             navigator.geolocation.getCurrentPosition(
+               async (position) => {
+                 const { latitude, longitude } = position.coords;
+                 setLocation({ lat: latitude, lng: longitude });
+               },
+               (err) => {
+                 console.error(`Error: ${err.message}`);
+               }
+             );
+           } , []);
     return (
       <div>
          <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
@@ -443,6 +457,7 @@ const pageSizeOption = [
            onChangeRegion={onChangeRegion} 
            onChangeAgent={onChangeAgent} 
            onChangeDate = {onChangeDate}
+           isMap = {true}
            onChangeMap={(value) => { 
             if (value) {
                 const data = banks.map((bank: any) => {
@@ -643,8 +658,8 @@ const pageSizeOption = [
                     </TabContent>
 
                     <TabContent value="tab4">
-            
-                    { cbank?.location && <GoogleMapApp position={cbank.location}  /> }
+                         { cbank?.id && location && <ChangeLocation location={location} bankId={cbank.id} ></ChangeLocation>}
+                         { cbank?.location &&  <GoogleMapApp position={cbank.location}  /> }
                     </TabContent>
                 </div>
             </Tabs>
