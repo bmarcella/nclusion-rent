@@ -70,8 +70,7 @@ function AddProprioForm( { done } : Props) {
     if (!authority || authority.length === 0) return;
     const auth = authority[0];
     const manage = async () => {
-     const { regions , roles } = await manageAuth(auth, proprio, t);
-      console.log("Roles", roles)
+    const { regions , roles } = await manageAuth(auth, proprio, t);
      setRegions(regions); // setRegions first
      if (regions.length === 1) {
        setValue("regions", [regions[0].value]); // safe to call here
@@ -137,7 +136,6 @@ function AddProprioForm( { done } : Props) {
                                 <Select isMulti placeholder="Please Select" 
                                     options={regions}    
                                     onChange={(option) => { 
-                                      console.log("Selected options:", option.map((opt: any) => opt.value));
                                       field.onChange(option.map((opt: any) => opt.value));
                                     } } /> 
                                 } />

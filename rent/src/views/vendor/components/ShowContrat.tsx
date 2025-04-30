@@ -99,7 +99,6 @@ function ShowContrat ( ) {
             }
             const snapshot = await getDocs(q);
             const t: RenovContract[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RenovContract));
-            console.log(t);
             setConts(t);
           } catch (err) {
             console.error("Error fetching landlords:", err);
@@ -265,7 +264,6 @@ function ShowContrat ( ) {
         return updateDoc(bankRef,data);
       });
       await Promise.all(updatePromises);
-      console.log("Banks updated successfully");
     
     } catch (error) {
       console.error("Error updating banks:", error);
@@ -286,7 +284,6 @@ function ShowContrat ( ) {
           return updateDoc(bankRef,data);
         });
         await Promise.all(updatePromises);
-        console.log("Banks updated successfully");
       } catch (error) {
         console.error("Error updating banks:", error);
         throw new Error("Failed to update banks");

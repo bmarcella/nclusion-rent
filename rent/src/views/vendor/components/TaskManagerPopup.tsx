@@ -72,7 +72,6 @@ function TaskManagerPopup() {
   });
   const renovStep = watch('renovStep');
   const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
-  console.log("Regions: ", ids);
   const fetchLandlords = async () => {
           try {
             let q = null;
@@ -87,14 +86,12 @@ function TaskManagerPopup() {
     };
 
  const fetchBanks = async (step : RenovStep) => {
-        console.log("Fetching banks for step: ", step);
         const q = query(BankDoc, orderBy("createdAt", "desc"), 
         where("step", "==", "bankSteps.needRenovation"), 
         where("id_region", "in", ids),
         where("renovStep", "==", step));
         const snapshot = await getDocs(q);
         const banks: Bank[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Bank));
-        console.log("Banks: ", banks);
         // Update state
         setBanks(banks);
     
@@ -102,7 +99,6 @@ function TaskManagerPopup() {
   
 
   const onSubmitContrat = async (data: TaskForm) => {
-    console.log("Selected data: ", data,  parseInt(data.montant_total) > parseInt(data.montant_initial));
     if (parseInt(data.montant_total) < parseInt(data.montant_initial)) {
       setAlert("danger");
       setMessage( 'Montant versé doit être inférieur ou egal au montant total' );
@@ -165,9 +161,7 @@ function TaskManagerPopup() {
         return updateDoc(bankRef,data);
       });
       await Promise.all(updatePromises);
-      console.log("Banks updated successfully");
     } catch (error) {
-      console.error("Error updating banks:", error);
       throw new Error("Failed to update banks");
     }
   }

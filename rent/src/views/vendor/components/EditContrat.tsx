@@ -128,7 +128,6 @@ function EditContrat(  { contrat } : Props) {
 
 
   const onSubmitContrat = async (data: TaskForm) => {
-    console.log("Selected data: ", data,  parseInt(data.montant_total) > parseInt(data.montant_initial));
     if (parseInt(data.montant_total) < parseInt(data.montant_initial)) {
       setAlert("danger");
       setMessage( 'Montant versé doit être inférieur ou egal au montant total' );

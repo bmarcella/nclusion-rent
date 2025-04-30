@@ -31,10 +31,8 @@ export function ViewContratBase() {
             if (contSnap.exists()) {
                 const data = contSnap.data() as RenovContract;
                 setProprio(data);
-                console.log("Document data:", data);
-            } else {
-                console.log("Document does not exist!");
-            }
+            
+            } 
         } catch (err) {
             console.error("Error fetching landlords:", err);
         }
@@ -48,9 +46,6 @@ export function ViewContratBase() {
           if (contSnap.exists()) {
               const data = contSnap.data() as RenovContract;
               setCont(data);
-              console.log("Document data:", data);
-          } else {
-              console.log("Document does not exist!");
           }
       } catch (err) {
           console.error("Error fetching landlords:", err);

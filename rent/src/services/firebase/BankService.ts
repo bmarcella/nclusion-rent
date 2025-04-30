@@ -146,12 +146,10 @@ export const uploadImageToStorage = async (file: File, path: string , where="ban
 export const deleteBank = async (bankId: string ) => {
   const docRef = getBankDoc(bankId);
   await deleteDoc(docRef);
-  console.log('Document deleted');
 };
 
 export const deleteLord = async (bankId: string ) => {
   const docRef = getLandlordDoc(bankId);
   await deleteDoc(docRef);
-  console.log('Document deleted');
 };
 

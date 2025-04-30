@@ -123,11 +123,9 @@ const nextStep = async (step: number, data: any ) => {
     if (Object.keys(payload).length > 0 &&  step!= 1) {
       await update(payload);
       setDocRef((prev: any) => ({ ...prev, ...payload }));
-      console.log(`Document updated with ID: ${docRef.id}`, docRef);
     }
     onNext();
   } catch (error: any) {
-    console.error("Error updating document:", error);
     setMessage(error.message);
     setAlert("danger");
   }

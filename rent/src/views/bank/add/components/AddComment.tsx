@@ -47,13 +47,11 @@ function AddComment( { onSubmitAfter, bankId, isEdit= false, userId , btnText='S
                           uploadedAt: Timestamp.now(),
                           updateBy: userId,
                       }         
-                      console.log("Submitted data:", doc)
                       await addDoc(bankCommentsDoc, doc );
                       reset();
                       onSubmitAfter(doc);
                       setTimeout(() => setLoading(false), 1000)
                   } catch (error){
-                      console.log("File error:", error);
                       setLoading(false)
                   }
           

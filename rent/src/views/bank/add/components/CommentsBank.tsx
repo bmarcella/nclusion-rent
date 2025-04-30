@@ -59,7 +59,6 @@ const CommentsBank = ( { bankId, isEdit = false, nextStep, userId, only=false } 
             });
             setTimeout(() => setLoading(false), 1000)
         } catch (error){
-            console.log("File error:", error);
             setLoading(false)
         }
 

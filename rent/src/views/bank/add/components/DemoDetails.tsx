@@ -83,7 +83,6 @@ function DemoDetails({ nextStep, defaultValues, isEdit= false }: FormProps) {
     reset();
     nextStep(3, data);
     setTimeout(() => setSubmitting(false), 1000);
-    console.log('Submitted data:', data);
   };
 
   return (

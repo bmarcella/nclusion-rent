@@ -357,12 +357,10 @@ const pageSizeOption = [
     }
 
     const onChangeRegion = async (id: number) => {
-        console.log("onChangeRegion: ", id);
         setRegions(id);
     }
 
     const onChangeAgent = async (id: string) =>{
-       console.log("onChangeAgent: ", id);
        setAgents(id);
      }
 
@@ -371,7 +369,6 @@ const pageSizeOption = [
         setEnd(end);
      }
      const onChangeStep = async (step: BankStep) => {
-        console.log("onChangeStep: ", step);
         setSteps(step);
      }
     return (
