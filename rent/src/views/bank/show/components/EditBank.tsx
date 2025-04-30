@@ -58,6 +58,7 @@ function EditBank( { docRef , onChangeBank , id , userId} : Props) {
             superficie: data.superficie,
             nombre_chambre: data.nombre_chambre,
             rentCost: data.rentCost,
+            final_rentCost: data.final_rentCost,
             reference: data.reference,
             landlord: data.landlord,
             isrefSameAsLandlord: data.isrefSameAsLandlord,

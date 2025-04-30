@@ -50,7 +50,8 @@ import FilterBank from '@/views/bank/show/components/FilterBank';
 import FilterMyBank from './FilterMyBank';
 import { hasAuthority } from '@/utils/RoleChecker';
 import GoogleMapWithMarkers from '../GoogleMapWithMarkers';
-import ChangeLocation from '../../add/components/changeLocation';
+import ChangeLocation from '../../add/components/ChangeLocation';
+import Currency from '@/views/shared/Currency';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -152,7 +153,10 @@ const pageSizeOption = [
                 header: 'Prix',
                 cell: ({ row }) => (
                     <div className="min-w-[160px]">
-                       <div className="font-medium">  HTG { row.original.rentCost}.00</div>
+                       <div className="font-medium"> Initial : <Currency amount={row.original.rentCost}></Currency></div>
+                        { (row.original?.final_rentCost && row.original?.final_rentCost>0) && 
+                       <div className="font-medium"> Final : <Currency amount={row.original.final_rentCost}></Currency>
+                       </div> }
                      </div>
                     ),
             },

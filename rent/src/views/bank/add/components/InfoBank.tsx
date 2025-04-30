@@ -34,6 +34,7 @@ const schema: ZodType<Partial<Bank>>  = z.object({
   yearCount: z.number().min(1, "Required").max(10, "Max 10 years"),
   date: z.string(),
   rentCost: z.number(),
+  final_rentCost: z.number().optional(),
   superficie: z.number().optional(),
   nombre_chambre: z.number().optional(),
   addresse: z.string().optional(),
@@ -154,6 +155,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           yearCount: defaultValues?.yearCount,
           date: defaultValues?.date,
           rentCost: defaultValues?.rentCost,
+          final_rentCost: defaultValues?.final_rentCost,
           addresse: defaultValues?.addresse,
           id_region: defaultValues?.id_region,
           reference: defaultValues?.reference,
@@ -166,6 +168,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
         try {
           setSubmitting(true)
           const bank: Bank =  getBlankBank(data, userId || '', location || { lat: 0, lng: 0 });
+          bank.final_rentCost = data.rentCost || 0;
           const docRef = await addDoc(BankDoc, bank);
           const snapshot = await getDoc(docRef);
           if (snapshot.exists()) {
@@ -187,7 +190,8 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
 
       
       const onSubmitInfo = async (data: FormValuesInfo) => {
-        setSubmitting(true)
+        setSubmitting(true);
+        setValue("BANK", data);
           if (isEdit) {
              nextStep(1, data);
            } else {
@@ -206,6 +210,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           nombre_chambre: defaultValues?.nombre_chambre,
           date: defaultValues?.date,
           rentCost: defaultValues?.rentCost,
+          final_rentCost: defaultValues?.final_rentCost,
           addresse: defaultValues?.addresse,
           id_region: defaultValues?.id_region,
           reference: defaultValues?.reference,
@@ -322,6 +327,14 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           />
         } />
       </FormItem>
+
+    {  isEdit && <FormItem label={t('bank.final_rentCost')} invalid={!!errors.final_rentCost} errorMessage={errors.final_rentCost?.message}>
+        <Controller name="final_rentCost" control={control} render={({ field }) =>
+          <Input type="number" prefix="HTG" suffix=".00" {...field}
+            onChange={(e) => field.onChange(Number(e.target.value))}
+          />
+        } />
+      </FormItem> }
 
       <FormItem label={t('bank.date')} invalid={!!errors.date} errorMessage={errors.date?.message}>
         <Controller name="date" control={control} render={({ field }) =>
