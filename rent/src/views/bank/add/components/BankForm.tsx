@@ -93,7 +93,6 @@ const nextStep = async (step: number, data: any ) => {
   try {
     switch (step) {
       case 1:
-        console.log("Bank Info", data);
          await setDocRef(data);
         break;
       case 2:
