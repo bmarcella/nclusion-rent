@@ -78,7 +78,6 @@ const UploadImgBank = ( { bankId, isEdit = false, nextStep, userId } : Props) =>
         if (isEdit) {
             setUploadedFiles([]);
             getBankImages(bankId).then((images) => {
-                console.log("Bank Images: ", images);
                 setImages(images);
             }); 
         }

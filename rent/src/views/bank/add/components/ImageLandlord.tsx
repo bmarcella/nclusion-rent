@@ -34,7 +34,6 @@ const ImageLandlord = ( { lordId, isEdit = false, nextStep, userId } : Props) =>
     });
 
     const handleFileChange = (newFiles: File[], previousFiles: File[]) => {
-        console.log('newFiles', newFiles);
       setUploadedFiles(newFiles);
     }
   

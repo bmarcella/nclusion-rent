@@ -91,14 +91,12 @@ function EditContrat(  { contrat } : Props) {
     };
 
  const fetchBanks = async (step : RenovStep) => {
-        console.log("Fetching banks for step: ", step);
         const q = query(BankDoc, orderBy("createdAt", "desc"), 
         where("step", "==", "bankSteps.needRenovation"), 
         where("id_region", "in", ids),
         where("renovStep", "==", step));
         const snapshot = await getDocs(q);
         const banks: Bank[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Bank));
-        console.log("Banks: ", banks);
         // Update state
         setBanks(banks);
     
@@ -155,7 +153,6 @@ function EditContrat(  { contrat } : Props) {
       };
 
   const onSubmitContrat = async (data: TaskForm) => {
-    console.log("Selected data: ", data,  parseInt(data.montant_total) > parseInt(data.montant_initial));
     if (parseInt(data.montant_total) < parseInt(data.montant_initial)) {
       setAlert("danger");
       setMessage( 'Montant versé doit être inférieur ou egal au montant total' );
