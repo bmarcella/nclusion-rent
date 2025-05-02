@@ -1,7 +1,8 @@
-import { ListBankSteps } from "@/views/Entity";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ListBankSteps, ReportSteps } from "@/views/demo/Entity";
 import { BankDoc } from "./Landlord";
 import { DocumentData, getDocs, orderBy, Query, query, QueryConstraint, Timestamp, where } from "firebase/firestore";
-import { getRegionIds } from "@/views/Entity/Regions";
+import { getRegionIds } from "@/views/demo/Entity/Regions";
 
 export interface ReportItem {
   name: string; // creator ID or name
@@ -56,7 +57,38 @@ export interface ReportItem {
             return filters.length > 0 ? query(q, ...filters) : q;
     }
 
-export const fetchReportPerCreator = async (q: Query<DocumentData>): Promise<ReportItem[]> => {
+    export const getQueryFiltersDate = (q: Query<DocumentData, DocumentData>, {  start, end }: any)  => {
+         
+      const filters: QueryConstraint[] = [];
+      if (start && end) {
+          const isSameDay =
+          start.toDateString() === end.toDateString();
+
+          if (isSameDay) {
+          const startOfDay = new Date(start);
+          startOfDay.setHours(0, 0, 0, 0);
+
+          const endOfDay = new Date(end);
+          endOfDay.setHours(23, 59, 59, 999);
+
+          filters.push(where('createdAt', '>=', Timestamp.fromDate(startOfDay)));
+          filters.push(where('createdAt', '<=', Timestamp.fromDate(endOfDay)));
+          } else {
+          filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
+          filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
+          }
+      } else {
+          if (start) {
+          filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
+          }
+          if (end) {
+          filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
+          }
+      }
+      return filters.length > 0 ? query(q, ...filters) : q;
+}
+
+export const fetchReportPerCreator = async (ReportSteps: [], q: Query<DocumentData>): Promise<ReportItem[]> => {
   const creatorsSet = new Set<string>();
   const allBanksSnapshot = await getDocs(q);
   // 1. Extract all unique creators
@@ -76,11 +108,11 @@ export const fetchReportPerCreator = async (q: Query<DocumentData>): Promise<Rep
         const values: number[] = [];
 
         await Promise.all(
-          ListBankSteps.map(async (step) => {
+          ReportSteps.map(async (step: any) => {
             const q = query(
               BankDoc,
               orderBy("createdAt", "desc"),
-              where("step", "==", step.key),
+              where("step", "in", step.key),
               where("createdBy", "==", creator)
             );
 

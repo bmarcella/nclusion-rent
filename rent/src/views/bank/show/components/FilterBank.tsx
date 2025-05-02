@@ -5,8 +5,8 @@ import Checkbox from '@/components/ui/Checkbox/Checkbox';
 import { Select } from '@/components/ui/Select';
 import { manageAuth } from '@/constants/roles.constant';
 import { Landlord } from '@/services/Landlord';
-import { Proprio } from '@/views/Entity';
-import {   RegionType } from '@/views/Entity/Regions';
+import { Proprio } from '@/views/demo/Entity';
+import {   RegionType } from '@/views/demo/Entity/Regions';
 import { Query, DocumentData, CollectionReference, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 

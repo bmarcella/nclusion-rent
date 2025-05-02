@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router';
 import { useSessionUser } from '@/store/authStore';
 import { BankDoc } from '@/services/Landlord';
 import { Query, DocumentData, query } from 'firebase/firestore';
+import ReportTypeFilter from './ReportTypeFilter';
+import { ListBankSteps, ReportSteps, ReportStepsFull } from '@/views/demo/Entity';
 function AIReport() {
   const [data, setData] = useState<any[]>([]);
   const [steps, setSteps] = useState<string[]>([]);
@@ -22,10 +24,12 @@ function AIReport() {
   const [agents, setAgents] = useState<string>();
   const [start, setStart] = useState<Date>();
   const [end, setEnd] = useState<Date>();
+  const [type_rep, setTypeRep] = useState<boolean>();
 
   useEffect(() => {
     const q: Query<DocumentData> = query(BankDoc);
-    fetchReportPerCreator(getQueryFilters(q, {
+    const steps = (type_rep) ? ReportSteps : ReportStepsFull ;
+    fetchReportPerCreator(steps, getQueryFilters(q, {
       regions: regions,
       agents: agents,
       start: start,
@@ -41,7 +45,7 @@ function AIReport() {
 
       setLoading(false);
     });
-  }, [regions, agents, start, end]);
+  }, [regions, agents, start, end, type_rep]);
 
   if (loading) return <p>Chargement du rapport...</p>;
 
@@ -50,8 +54,12 @@ function AIReport() {
     data.reduce((sum, item) => sum + (item.values[index] || 0), 0)
   );
 
-  const onChangeRegion = async (id: number) => {
+const onChangeRegion = async (id: number) => {
     setRegions(id);
+}
+
+const onChangeType = async (type_rep: boolean) => {
+  setTypeRep(type_rep);
 }
 
 const onChangeAgent = async (id: string) =>{
@@ -76,6 +84,8 @@ const onChangeAgent = async (id: string) =>{
           >
 
           </FilterBank> 
+
+          <ReportTypeFilter onChangeReportTypeA={onChangeType} ></ReportTypeFilter>
       <Table>
         <caption className="text-lg font-semibold text-gray-700 p-4">
           Rapport par agent immobilier
@@ -83,24 +93,27 @@ const onChangeAgent = async (id: string) =>{
         <THead>
           <tr>
             <th>Agents</th>
+            <th>Total</th>
             {steps.map((step) => (
               <th key={step} className="text-center capitalize">
                 {step}
               </th>
             ))}
-            <th>Total</th>
+            { type_rep && <th>Progression</th> }
           </tr>
         </THead>
         <TBody>
          <tr className="font-semibold bg-gray-100 border-t">
             <td className="p-2 text-left">Total</td>
-
+            <td className="text-center p-2">{grandTotal}</td>
             {columnTotals.map((val, idx) => (
               <td key={`col-total-${idx}`} className="text-center p-2">
                 {val}
               </td>
             ))}
-            <td className="text-center p-2">{grandTotal}</td>
+
+            { type_rep && <td className="text-center p-2"> { ((columnTotals[2]/grandTotal) * 100).toFixed(2) }%</td> }
+         
           </tr>
           {data.map(({ name, values }) => {
             const rowTotal = values.reduce((acc, val) => acc + val, 0);
@@ -110,12 +123,21 @@ const onChangeAgent = async (id: string) =>{
                 <td className="p-2">
                   <UserName userId={name} />
                 </td>
+                <td className="text-center font-semibold">{rowTotal}</td>
                 {values.map((value, index) => (
                   <td key={`${name}-${index}`} className="text-center">
                     {value || 0}
                   </td>
                 ))}
-                <td className="text-center font-semibold">{rowTotal}</td>
+                    {type_rep && (
+                    <th
+                      className={
+                        ((values[2] / rowTotal) * 100) < 50 ? 'text-red-600' : 'text-green-600'
+                      }
+                    >
+                      {((values[2] / rowTotal) * 100).toFixed(2)}%
+                    </th>
+                  )}
               </tr>
             );
           })}

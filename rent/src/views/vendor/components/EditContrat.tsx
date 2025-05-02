@@ -8,8 +8,8 @@ import { getDocs, updateDoc, doc, where, orderBy, query, getDoc, } from 'firebas
 import {  useEffect, useState } from 'react';
 import { BankDoc,  getBankDoc,  getContratDoc, Landlord } from '@/services/Landlord';
 import { useSessionUser } from '@/store/authStore';
-import { getRegionIds, getRegionsById } from '@/views/Entity/Regions';
-import { Bank, Proprio, RenovContract, RenovStep } from '@/views/Entity';
+import { getRegionIds, getRegionsById } from '@/views/demo/Entity/Regions';
+import { Bank, Proprio, RenovContract, RenovStep } from '@/views/demo/Entity';
 import { convertToSelectOptions } from '../../bank/add/components/InfoBank';
 import { formatRelative } from 'date-fns/formatRelative';
 import { fr } from 'date-fns/locale';
@@ -91,14 +91,12 @@ function EditContrat(  { contrat } : Props) {
     };
 
  const fetchBanks = async (step : RenovStep) => {
-        console.log("Fetching banks for step: ", step);
         const q = query(BankDoc, orderBy("createdAt", "desc"), 
         where("step", "==", "bankSteps.needRenovation"), 
         where("id_region", "in", ids),
         where("renovStep", "==", step));
         const snapshot = await getDocs(q);
         const banks: Bank[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Bank));
-        console.log("Banks: ", banks);
         // Update state
         setBanks(banks);
     

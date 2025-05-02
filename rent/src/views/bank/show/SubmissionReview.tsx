@@ -13,7 +13,7 @@ import ImageGallery, { BankImage } from "./components/ImageGallery";
 import ImageLordComp, { LordImage } from "./components/ImageLord";
 import BankInfo from "./components/BankInfo";
 import Rejected from "./reject/Rejected";
-import { Bank, ListBankStepsDetails } from "@/views/Entity";
+import { Bank, ListBankStepsDetails } from "@/views/demo/Entity";
 import generatePDF from 'react-to-pdf';
 import { PdfOps } from "./pdfOps";
 import { useReactToPrint } from "react-to-print";

@@ -7,7 +7,7 @@ import {
   currentSecurities,
   majorRenovations,
   minorRenovations,
-} from '@/views/Entity';
+} from '@/views/demo/Entity';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/utils/hooks/useTranslation';
 

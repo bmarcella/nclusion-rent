@@ -5,7 +5,7 @@ import Dialog from "@/components/ui/Dialog";
 import Button from "@/components/ui/Button";
 import { useEffect, useState } from "react";
 import { addBankLease, addBankTask, addDecisionHistory, addStepsHistory, getBankById, updateBankById } from "@/services/firebase/BankService";
-import {  Bank, BankLease, BankStep, BankTask, finalDecisionStatuses, getEndDateYear, HistoricDecision, RenovStep, renovSteps, StepDecision } from "@/views/Entity";
+import {  Bank, BankLease, BankStep, BankTask, finalDecisionStatuses, getEndDateYear, HistoricDecision, RenovStep, renovSteps, StepDecision } from "@/views/demo/Entity";
 import { useSessionUser } from "@/store/authStore";
 
 export const ShowBankDetailsBase= () => {
