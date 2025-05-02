@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Proprio } from '@/views/Entity';
+import { Proprio } from '@/views/demo/Entity';
 import  { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'

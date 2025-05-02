@@ -4,7 +4,7 @@ import { useTranslation } from '@/utils/hooks/useTranslation';
 import { deleteDoc, doc, DocumentData, DocumentSnapshot, getDoc, getDocs, limit, orderBy, Query, query, QueryConstraint, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import {  useEffect, useMemo, useState } from 'react';
 import { BankDoc, contractsDoc, getContratDoc } from '@/services/Landlord';
-import { Bank, BankStep,  RenovContract, RenovStep } from '@/views/Entity';
+import { Bank, BankStep,  RenovContract, RenovStep } from '@/views/demo/Entity';
 import { useSessionUser } from '@/store/authStore';
 import { ColumnDef } from '@/components/shared/DataTable';
 import Table from '@/components/ui/Table/Table';
@@ -92,8 +92,6 @@ function ShowContrat ( ) {
             } else {
               q = query(contractsDoc, where('createdBy', '==', userId), orderBy("createdAt", "desc"), limit(pageSizeOption[0].value));
             }
-            // q = getQueryDate(q);
-             // If we're not on the first page, we need to start after a document
             if (pageNum > 1 && pageDocs[pageNum - 2]) {
              q = query(q, startAfter(pageDocs[pageNum - 2]));
             }
