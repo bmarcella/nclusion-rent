@@ -1,6 +1,7 @@
+import { Bank, ReportSteps } from '@/views/demo/Entity';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BankDoc } from "@/services/Landlord";
-import { getDocs, orderBy, query, where } from "firebase/firestore";
+import { DocumentData, getDocs, orderBy, Query, query, where } from "firebase/firestore";
 import { ListBankSteps } from ".";
 
  
@@ -315,25 +316,30 @@ export type RegionType = {
     values: number[];
   }
 
-  export const fetchReportPerReport = async () => {
+  export const fetchReportPerReport = async (ReportSteps: [], hq: Query<DocumentData> ) => {
     
 const report: ReportItem[] = (
   await Promise.all(
     Regions.map(async (region) => {
       const steps: string[] = [];
       const values: number[] = [];
-
+      const listAgent: string[] = [];
       await Promise.all(
-        ListBankSteps.map(async (step) => {
+        ReportSteps.map(async (step: any) => {
           const q = query(
-            BankDoc,
+            hq,
             orderBy("createdAt", "desc"),
-            where("step", "==", step.key),
+            where("step", "in", step.key),
             where("id_region", "==", region.id)
           );
 
-          const snapshot = await getDocs(q);
-
+           const snapshot = await getDocs(q);
+           snapshot.docs.map(async (docSnap) => {
+                          const data = docSnap.data() as Bank;
+                          if(!listAgent.includes(data.createdBy)) 
+                            return listAgent.push(data.createdBy);
+                          return null;
+                      });
           steps.push(step.label);
           values.push(snapshot.size);
         })
@@ -346,6 +352,8 @@ const report: ReportItem[] = (
         name: region.label,
         steps,
         values,
+        agents: listAgent,
+        total_agents: listAgent.length,
       };
     })
   )

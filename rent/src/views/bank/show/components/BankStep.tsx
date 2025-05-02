@@ -4,7 +4,7 @@ import Tooltip from "@/components/ui/Tooltip";
 import { formatRelative } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import UserName from "./UserName";
-import { BankStep, RenovStep } from "@/views/Entity";
+import { BankStep, RenovStep } from "@/views/demo/Entity";
 
 export const stepColorClassMap: Record<
   string,

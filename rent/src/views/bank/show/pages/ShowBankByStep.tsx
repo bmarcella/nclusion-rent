@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BankStep } from "@/views/Entity";
+import { BankStep } from "@/views/demo/Entity";
 import TableBank from "../components/TableBank";
 import { Navigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";

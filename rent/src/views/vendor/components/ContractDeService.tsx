@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react";
 import ShowListBankName from "./ShowListBankName";
 import useTranslation from "@/utils/hooks/useTranslation";
-import { Proprio, RenovContract } from "@/views/Entity";
-import { getRegionsById } from "@/views/Entity/Regions";
+import { Proprio, RenovContract } from "@/views/demo/Entity";
+import { getRegionsById } from "@/views/demo/Entity/Regions";
 import n2words from 'n2words';
 import { useReactToPrint } from "react-to-print";
 import Currency from "@/views/shared/Currency";
@@ -86,8 +86,7 @@ const ContractDeService: React.FC<ContractDeServiceProps> = ({
 
       <h3 className="text-base font-semibold mt-6 uppercase">ARTICLE I - OBJET</h3>
       <p className="mb-2">
-        I.1 Le présent Contrat est un contrat de prestation de service ayant pour objet la mission de
-        { contract.renovStep }  locaux de nos banques situées dans la zone métropolitaine notamment à :
+        I.1 Le présent Contrat est un contrat de prestation de service ayant pour objet la mission de { ' '+t('bank.'+contract.renovStep) } pour les locaux de nos banques situées dans la zone métropolitaine notamment à :
       </p>
      
      <ShowListBankName bankIds={contract.banksId} link={false}></ShowListBankName>

@@ -1,7 +1,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { USER_ROLE } from "../shared/schema";
+import { USER_ROLE } from "../../shared/schema";
 
 export interface Document {
     id: string;
@@ -536,6 +536,80 @@ export const ListABankSteps = [
 ];
 
 export const ListBankSteps = ListABankSteps.concat(ListIBankSteps);
+
+
+export const ReportStepsSimple = [
+  {
+    key: ["bankSteps.rejected"],
+    label: "Rejeté",
+  },
+  {
+    key: [ "bankSteps.needApprobation", "bankSteps.needContract", "bankSteps.pending","bankSteps.notProceeded", "bankSteps.needRenovation"],
+    label: "Approuvée",
+  },
+  {
+    key: ["bankSteps.needApproval"],
+    label: "Non-Vues",
+  },
+];
+
+export const ReportSteps = [
+  {
+    key: ["bankSteps.rejected"],
+    label: "Rejeté",
+  },
+  {
+    key: ["bankSteps.needApproval"],
+    label: "Non-Vues",
+  },
+  {
+    key: [ "bankSteps.needApprobation", "bankSteps.needContract", "bankSteps.pending","bankSteps.notProceeded"],
+    label: "Approbation",
+  },
+  {
+    key: ["bankSteps.needRenovation"],
+    label: "Rénovation",
+  },
+  {
+    key: ["bankSteps.readyToUse"],
+    label: "Disponible",
+  },
+];
+
+export const ReportStepsFull = [
+  {
+    key: ["bankSteps.rejected"],
+    label: "Rejeté",
+  },
+  {
+    key: ["bankSteps.needApproval"],
+    label: "Validation",
+  },
+  {
+    key: ["bankSteps.needApprobation"],
+    label: "Approbation",
+  },
+  {
+    key: ["bankSteps.needContract"],
+    label: "Contrats",
+  },
+  {
+    key: ["bankSteps.needRenovation"],
+    label: "Rénovation",
+  },
+  {
+    key: ["bankSteps.readyToUse"],
+    label: "Disponible",
+  },
+  {
+    key: ["bankSteps.pending"],
+    label: "Attente",
+  },
+  {
+    key: ["bankSteps.notProceeded"],
+    label: "Non traité",
+  },
+];
 
 
 export const ListBankStepsDetails= [

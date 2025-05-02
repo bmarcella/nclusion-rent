@@ -8,8 +8,8 @@ import { addDoc, getDocs, updateDoc, doc, where, orderBy, query, } from 'firebas
 import {  useEffect, useState } from 'react';
 import { BankDoc, contractsDoc, Landlord } from '@/services/Landlord';
 import { useSessionUser } from '@/store/authStore';
-import { getRegionIds, getRegionsById } from '@/views/Entity/Regions';
-import { Bank, Proprio, RenovStep } from '@/views/Entity';
+import { getRegionIds, getRegionsById } from '@/views/demo/Entity/Regions';
+import { Bank, Proprio, RenovStep } from '@/views/demo/Entity';
 import { convertToSelectOptions } from '../../bank/add/components/InfoBank';
 import { formatRelative } from 'date-fns/formatRelative';
 import { fr } from 'date-fns/locale';

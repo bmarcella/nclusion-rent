@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormItem, Form,  Button, Checkbox, Radio } from '@/components/ui';
 import useTranslation from '@/utils/hooks/useTranslation';
-import { paymentMethods, paymentStructures, locationTypes, locationAreas, Bank, verifyOwners, whoReferreds } from '@/views/Entity';
+import { paymentMethods, paymentStructures, locationTypes, locationAreas, Bank, verifyOwners, whoReferreds } from '@/views/demo/Entity';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';

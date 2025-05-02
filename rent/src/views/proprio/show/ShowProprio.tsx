@@ -12,7 +12,7 @@ import {
     Query,
   } from 'firebase/firestore';
   import React, { useEffect, useMemo, useRef, useState } from 'react';
-  import { Proprio } from '@/views/Entity';
+  import { Proprio } from '@/views/demo/Entity';
   import { Landlord } from '@/services/Landlord';
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import Table from '@/components/ui/Table';
@@ -25,7 +25,7 @@ import UserName from '@/views/bank/show/components/UserName';
 import { formatRelative } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import useTranslation from '@/utils/hooks/useTranslation';
-import { getRegionsByValues } from '@/views/Entity/Regions';
+import { getRegionsByValues } from '@/views/demo/Entity/Regions';
 import { hasAuthority } from '@/utils/RoleChecker';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
 import { deleteLord } from '@/services/firebase/BankService';
@@ -221,15 +221,12 @@ const fetchPage = async (pageNumber: number) => {
       // Build conditional filters
       if (isUser !== undefined) {
         baseQuery = query(baseQuery, where('createBy', '==', isUser));
-        console.log('isUser:', isUser);
       }
   
       if (roles && regions.length === 0 ) {
         baseQuery = query(baseQuery, where('type_person', '==', roles));
-        console.log('roles:', roles);
       } else if (regions.length > 0 && !roles)  {
            baseQuery = query(baseQuery, where('regions', 'array-contains-any', regions));
-           console.log('regions:', regions);
       } else if (roles && regions.length > 0 )  {
         baseQuery = query(baseQuery, where('type_person', '==', roles), where('regions', 'array-contains-any', regions));
       }

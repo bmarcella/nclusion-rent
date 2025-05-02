@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Select } from '@/components/ui/Select';
 import { manageAuth } from '@/constants/roles.constant';
-import {  getRegionsLabelvalue, RegionType } from '@/views/Entity/Regions';
+import {  getRegionsLabelvalue, RegionType } from '@/views/demo/Entity/Regions';
 import { useEffect, useState } from 'react';
 
 interface OptionType {

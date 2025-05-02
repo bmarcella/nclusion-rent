@@ -16,7 +16,7 @@ import {
     getCountFromServer,
   } from 'firebase/firestore';
 import  { useEffect, useMemo, useRef, useState } from 'react';
-import { Bank, BankStep } from '@/views/Entity';
+import { Bank, BankStep } from '@/views/demo/Entity';
 import { BankDoc, getLandlordDoc } from '@/services/Landlord';
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import Table from '@/components/ui/Table';
@@ -40,7 +40,7 @@ import ImageLandlord from '../../add/components/ImageLandlord';
 import { useTranslation } from 'react-i18next';
 import BankStepBadge from './BankStep';
 import UserName from './UserName';
-import { getRegionIds } from '@/views/Entity/Regions';
+import { getRegionIds } from '@/views/demo/Entity/Regions';
 import classNames from 'classnames';
 import { HiHome } from 'react-icons/hi';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';

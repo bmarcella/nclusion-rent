@@ -10,7 +10,7 @@ import {
   bankEntrances,
   expectedRevenue,
   populationInAreas,
-} from '@/views/Entity';
+} from '@/views/demo/Entity';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';

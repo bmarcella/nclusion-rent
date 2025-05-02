@@ -12,7 +12,7 @@ import FirebaseAuth from './firebase/FirebaseAuth'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, updateProfile } from 'firebase/auth'
 import { Landlord, LandlordDoc } from './Landlord'
 import { addDoc, CollectionReference, getDocs, query, updateDoc, where } from 'firebase/firestore'
-import { Proprio } from '@/views/Entity'
+import { Proprio } from '@/views/demo/Entity'
 import {  getApp } from 'firebase/app'
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { USER_ROLE } from '@/views/shared/schema'
