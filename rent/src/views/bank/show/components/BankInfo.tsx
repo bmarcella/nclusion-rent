@@ -1,5 +1,5 @@
 import React from "react";
-import { Bank } from "@/views/demo/Entity";
+import { Bank } from "@/views/Entity";
 import { useTranslation } from "react-i18next";
 import UserName from "./UserName";
 import { formatRelative } from "date-fns/formatRelative";

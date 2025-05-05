@@ -2,7 +2,7 @@
 import { Alert } from '@/components/ui';
 import { getBankDoc } from '@/services/Landlord';
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage';
-import { Bank } from '@/views/demo/Entity';
+import { Bank } from '@/views/Entity';
 import { Timestamp, updateDoc } from 'firebase/firestore';
 import DemoDetails from '../../add/components/DemoDetails';
 import InfoBank from '../../add/components/InfoBank';

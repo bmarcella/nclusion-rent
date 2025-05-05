@@ -3,7 +3,7 @@ import Button from "@/components/ui/Button";
 import Dialog from "@/components/ui/Dialog";
 import React, { useState } from "react";
 import GoogleMapApp from "./Map";
-import { Bank } from "@/views/demo/Entity";
+import { Bank } from "@/views/Entity";
 
 
 interface MyMapProps {

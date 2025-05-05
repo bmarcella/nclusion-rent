@@ -5,7 +5,7 @@ import TabNav from '@/components/ui/Tabs/TabNav';
 import { getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { RenovContract } from '../demo/Entity';
+import { RenovContract } from '../Entity';
 import { getContratDoc, getLandlordDoc } from '@/services/Landlord';
 import ContractDeService from './components/ContractDeService';
 import { useSessionUser } from '@/store/authStore';

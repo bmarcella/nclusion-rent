@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react";
 import ShowListBankName from "./ShowListBankName";
 import useTranslation from "@/utils/hooks/useTranslation";
-import { Proprio, RenovContract } from "@/views/demo/Entity";
-import { getRegionsById } from "@/views/demo/Entity/Regions";
+import { Proprio, RenovContract } from "@/views/Entity";
+import { getRegionsById } from "@/views/Entity/Regions";
 import n2words from 'n2words';
 import { useReactToPrint } from "react-to-print";
 import Currency from "@/views/shared/Currency";

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { convertStringToSelectOptions } from "@/views/bank/add/components/InfoBank"
-import { getRegionsByValues, Regions } from "@/views/demo/Entity/Regions"
+import { getRegionsByValues, Regions } from "@/views/Entity/Regions"
 import { USER_ROLES } from "@/views/shared/schema"
 
 export const ADMIN = 'admin'

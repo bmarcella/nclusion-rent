@@ -4,7 +4,7 @@ import { useTranslation } from '@/utils/hooks/useTranslation';
 import { deleteDoc, doc, DocumentData, DocumentSnapshot, getDoc, getDocs, limit, orderBy, Query, query, QueryConstraint, startAfter, Timestamp, updateDoc, where } from 'firebase/firestore';
 import {  useEffect, useMemo, useState } from 'react';
 import { BankDoc, contractsDoc, getContratDoc } from '@/services/Landlord';
-import { Bank, BankStep,  RenovContract, RenovStep } from '@/views/demo/Entity';
+import { Bank, BankStep,  RenovContract, RenovStep } from '@/views/Entity';
 import { useSessionUser } from '@/store/authStore';
 import { ColumnDef } from '@/components/shared/DataTable';
 import Table from '@/components/ui/Table/Table';

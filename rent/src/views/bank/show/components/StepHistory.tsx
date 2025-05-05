@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Avatar, type AvatarProps } from '@/components/ui/Avatar'
 import Timeline from '@/components/ui/Timeline';
 import { Badge } from '@/components/ui';
-import { StepDecision } from '@/views/demo/Entity';
+import { StepDecision } from '@/views/Entity';
 import UserName from './UserName';
 import useTranslation from '@/utils/hooks/useTranslation';
 import { formatRelative } from 'date-fns/formatRelative';

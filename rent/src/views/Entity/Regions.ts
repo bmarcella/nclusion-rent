@@ -1,4 +1,4 @@
-import { Bank, ReportSteps } from '@/views/demo/Entity';
+import { Bank, ReportSteps } from '@/views/Entity';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BankDoc } from "@/services/Landlord";
 import { DocumentData, getDocs, orderBy, Query, query, where } from "firebase/firestore";
