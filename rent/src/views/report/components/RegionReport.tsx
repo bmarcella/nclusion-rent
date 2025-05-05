@@ -87,6 +87,11 @@ function RegionReport() {
 
           {data.map(({ name, values, total_agents }) => {
             const rowTotal = values.reduce((acc, val) => acc + val, 0);
+            const perc = ((values[1] / rowTotal) * 100);
+            let colorClass = '';
+            if (perc <= 50) colorClass = 'text-red-500';
+            else if (perc < 80) colorClass = 'text-orange-500';
+            else if (perc >= 80) colorClass = 'text-green-500';
 
             return (
               <tr key={name} className="border-t">
@@ -104,11 +109,9 @@ function RegionReport() {
                 ))}
                 {type_rep && (
                 <th
-                  className={
-                    ((values[1] / rowTotal) * 100) < 50 ? 'text-red-600' : 'text-green-600'
-                  }
+                  className={colorClass}
                 >
-                  {((values[1] / rowTotal) * 100).toFixed(2)}%
+                  {perc.toFixed(2)}%
                 </th>
               )}
               </tr>
