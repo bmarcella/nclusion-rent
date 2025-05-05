@@ -12,7 +12,7 @@ import {  useEffect, useState } from 'react';
 import { deleteImageFromStorage, getBankImages, getLordImages, uploadImageToStorage } from '@/services/firebase/BankService';
 import FormItem from '@/components/ui/Form/FormItem';
 import Select from '@/components/ui/Select';
-import { DocTypeValues, Regions } from '@/views/demo/Entity/Regions';
+import { DocTypeValues, Regions } from '@/views/Entity/Regions';
 import ImageLordComp, { LordImage } from '../../show/components/ImageLord';
 
 interface Props {

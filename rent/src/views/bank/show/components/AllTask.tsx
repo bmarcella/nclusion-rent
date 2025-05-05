@@ -4,7 +4,7 @@ import { useTranslation } from '@/utils/hooks/useTranslation';
 import { getDocs, where, orderBy, query, updateDoc } from 'firebase/firestore';
 import {  useEffect, useState } from 'react';
 import { getBankTask, taskCollection } from '@/services/Landlord';
-import { BankTask } from '@/views/demo/Entity';
+import { BankTask } from '@/views/Entity';
 
 
 

@@ -4,7 +4,7 @@ import TabList from "@/components/ui/Tabs/TabList";
 import TabNav from "@/components/ui/Tabs/TabNav";
 import AllFreeTask from "./components/AllFreeTask";
 import Contrats from "./components/Contrats";
-import { BankStep } from "../demo/Entity";
+import { BankStep } from "../Entity";
 
 
 export function VendorManagementBase() {

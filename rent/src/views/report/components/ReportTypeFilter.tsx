@@ -3,8 +3,8 @@
 
 import Checkbox from '@/components/ui/Checkbox/Checkbox';
 import { DatePicker } from '@/components/ui/DatePicker';
-import { Proprio } from '@/views/demo/Entity';
-import {   RegionType } from '@/views/demo/Entity/Regions';
+import { Proprio } from '@/views/Entity';
+import {   RegionType } from '@/views/Entity/Regions';
 import { useState, useEffect } from 'react';
 
 

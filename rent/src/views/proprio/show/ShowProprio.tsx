@@ -12,7 +12,7 @@ import {
     Query,
   } from 'firebase/firestore';
   import React, { useEffect, useMemo, useRef, useState } from 'react';
-  import { Proprio } from '@/views/demo/Entity';
+  import { Proprio } from '@/views/Entity';
   import { Landlord } from '@/services/Landlord';
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import Table from '@/components/ui/Table';
@@ -25,7 +25,7 @@ import UserName from '@/views/bank/show/components/UserName';
 import { formatRelative } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import useTranslation from '@/utils/hooks/useTranslation';
-import { getRegionsByValues } from '@/views/demo/Entity/Regions';
+import { getRegionsByValues } from '@/views/Entity/Regions';
 import { hasAuthority } from '@/utils/RoleChecker';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
 import { deleteLord } from '@/services/firebase/BankService';

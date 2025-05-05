@@ -11,7 +11,7 @@ import { useSessionUser } from '@/store/authStore';
 import { BankDoc } from '@/services/Landlord';
 import { Query, DocumentData, query } from 'firebase/firestore';
 import ReportTypeFilter from './ReportTypeFilter';
-import { ListBankSteps, ReportSteps, ReportStepsFull } from '@/views/demo/Entity';
+import {  ReportSteps, ReportStepsFull } from '@/views/Entity';
 function AIReport() {
   const [data, setData] = useState<any[]>([]);
   const [steps, setSteps] = useState<string[]>([]);

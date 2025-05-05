@@ -4,7 +4,7 @@ import { BankDoc, BankLeaseDoc, bankPicturesDoc, getBankDoc, getLandlordDoc, hdD
 import { BankImage } from "@/views/bank/show/components/ImageGallery";
 import { ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 import { storage } from "./FirebaseStorage";
-import { BankStep, StepDecision } from "@/views/demo/Entity";
+import { BankStep, StepDecision } from "@/views/Entity";
 
 export const getBankById = async (bankId: string) => {
     const bankRef = getBankDoc(bankId);
