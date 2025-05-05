@@ -117,7 +117,7 @@ const onChangeAgent = async (id: string) =>{
           </tr>
           {data.map(({ name, values }) => {
             const rowTotal = values.reduce((acc, val) => acc + val, 0);
-            const perc = ((values[2] / rowTotal) * 100);
+            const perc = (((values[2] + values[3]+ values[4]) / rowTotal) * 100);
             let colorClass = '';
             if (perc <= 50) colorClass = 'text-red-500';
             else if (perc < 80) colorClass = 'text-orange-500';
