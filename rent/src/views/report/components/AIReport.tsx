@@ -117,7 +117,11 @@ const onChangeAgent = async (id: string) =>{
           </tr>
           {data.map(({ name, values }) => {
             const rowTotal = values.reduce((acc, val) => acc + val, 0);
-
+            const perc = ((values[2] / rowTotal) * 100);
+            let colorClass = '';
+            if (perc <= 50) colorClass = 'text-red-500';
+            else if (perc < 80) colorClass = 'text-orange-500';
+            else if (perc >= 80) colorClass = 'text-green-500';
             return (
               <tr key={name} className="border-t">
                 <td className="p-2">
@@ -131,11 +135,9 @@ const onChangeAgent = async (id: string) =>{
                 ))}
                     {type_rep && (
                     <th
-                      className={
-                        ((values[2] / rowTotal) * 100) < 50 ? 'text-red-600' : 'text-green-600'
-                      }
+                      className={colorClass}
                     >
-                      {((values[2] / rowTotal) * 100).toFixed(2)}%
+                      {perc.toFixed(2)}%
                     </th>
                   )}
               </tr>
