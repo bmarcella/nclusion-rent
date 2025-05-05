@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DatePicker } from '@/components/ui';
 import { Select } from '@/components/ui/Select';
-import { bankSteps, Proprio } from '@/views/demo/Entity';
-import {   RegionType } from '@/views/demo/Entity/Regions';
+import { bankSteps, Proprio } from '@/views/Entity';
+import {   RegionType } from '@/views/Entity/Regions';
 import { useEffect, useState } from 'react';
 
 interface OptionType {

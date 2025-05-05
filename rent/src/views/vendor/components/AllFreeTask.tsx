@@ -13,7 +13,7 @@ import {
     Timestamp,
   } from 'firebase/firestore';
   import  { useEffect, useMemo, useRef, useState } from 'react';
-  import { Bank, BankStep } from '@/views/demo/Entity';
+  import { Bank, BankStep } from '@/views/Entity';
   import { BankDoc, getLandlordDoc } from '@/services/Landlord';
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import Table from '@/components/ui/Table';
@@ -26,7 +26,7 @@ import { formatRelative } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getRegionIds } from '@/views/demo/Entity/Regions';
+import { getRegionIds } from '@/views/Entity/Regions';
 import classNames from 'classnames';
 import { HiHome } from 'react-icons/hi';
 import { deleteBank } from '@/services/firebase/BankService';

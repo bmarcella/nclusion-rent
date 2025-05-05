@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Proprio } from "@/views/demo/Entity"
+import { Proprio } from "@/views/Entity"
 
 export type SignInCredential = {
     email: string

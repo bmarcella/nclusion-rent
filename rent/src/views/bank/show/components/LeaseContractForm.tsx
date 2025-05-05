@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Bank, Proprio } from '@/views/demo/Entity';
+import { Bank, Proprio } from '@/views/Entity';
 import React, { useEffect, useState } from 'react';
 import UserName from './UserName';
 import { getLandlordById } from '@/services/firebase/LandlordService';
-import { getRegionsById, RegionType } from '@/views/demo/Entity/Regions';
+import { getRegionsById, RegionType } from '@/views/Entity/Regions';
 import n2words from 'n2words';
 import FrenchDate from './FrenchDate ';
 import useTranslation from '@/utils/hooks/useTranslation';

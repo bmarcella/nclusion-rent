@@ -37,12 +37,12 @@ interface Props {
   t: (key: string) => string;
   onChangeRegion: (id:  number) => void;
   onChangeAgent: (d: string ) => void;
-  onChangeDate: (start:  Date, end? : Date) => void;
+  onChangeDate: (start:  Date) => void;
   onChangeMap?: (value: boolean) => void;
   isMap?: boolean;
 }
 
-function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onChangeDate, isMap,  onChangeMap = (value: any)=>{}  }: Props) {
+function FilterBankWeek({ authority, proprio, t, onChangeRegion, onChangeAgent, onChangeDate, isMap,  onChangeMap = (value: any)=>{}  }: Props) {
   const [regions, setRegions] = useState<OptionType[]>([]);
   const [agents, setAgents] = useState<OptionType[]>([]);
 
@@ -51,8 +51,8 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
   const [selectedRegions, setSelectedRegions] = useState<number>();
   const [selectedAgents, setSelectedAgents] = useState<string>();
   //
-  const [start, setStart] = useState<Date>();
-  const [end, setEnd] = useState<Date>();
+  const [start, setStart] = useState<Date>(new Date());
+
   useEffect(() => {
     if (!authority?.length) return;
       const fetchData = async () => {
@@ -74,8 +74,8 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
  }, [selectedRegions]);
 
  useEffect(() => {
-  onChangeDate(start, end);
-}, [start, end]);
+  onChangeDate(start);
+}, [start]);
 
  useEffect(() => {
   console.log('selectedAgents:', selectedAgents);
@@ -145,25 +145,19 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
         />
       )}
 
-      <DatePicker placeholder="Date debut"  onChange={(date) => {
+      <DatePicker placeholder="Date"  
+       value={start} 
+      onChange={(date) => {
             setStart(undefined);
             if (!date) {
                  setStart(undefined);
-                return;
+                 return;
               }
              console.log('start:', date);
              setStart(new Date(date));
           }} />
 
-       <DatePicker placeholder="Date fin" onChange={(date) => {
-            setEnd(undefined);
-            if (!date) {
-                 setEnd(undefined);
-                return;
-              }
-             console.log('start:', date);
-             setEnd(new Date(date));
-          }}  />
+    
 
         
 
@@ -172,4 +166,4 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
   );
 }
 
-export default FilterBank;
+export default FilterBankWeek;

@@ -9,7 +9,7 @@ import {
   closeHours,
   currentSecurities,
   roofTypes
-} from '@/views/demo/Entity';
+} from '@/views/Entity';
 import { useEffect, useState } from 'react';
 import useTranslation from '@/utils/hooks/useTranslation';
 

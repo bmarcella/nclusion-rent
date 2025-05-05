@@ -1,4 +1,4 @@
-import { Proprio } from '@/views/demo/Entity';
+import { Proprio } from '@/views/Entity';
 import  { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'

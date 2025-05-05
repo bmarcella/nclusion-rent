@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BankStep,  ListIBankSteps } from "@/views/demo/Entity";
+import { BankStep,  ListIBankSteps } from "@/views/Entity";
 import TableBank from "./components/TableBank";
 import Tabs from "@/components/ui/Tabs";
 import TabList from "@/components/ui/Tabs/TabList";

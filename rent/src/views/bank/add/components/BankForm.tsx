@@ -9,7 +9,7 @@ import { Timestamp, updateDoc } from 'firebase/firestore';
 import InfoBank from './InfoBank';
 import DemoDetails from './DemoDetails';
 import SecurityDetails from './SecDetails';
-import { Bank, getEmptyPartialBank } from '@/views/demo/Entity';
+import { Bank, getEmptyPartialBank } from '@/views/Entity';
 import RenovationDetails from './RenovDetails';
 import UploadImgBank from './ImageBank';
 import { useSessionUser } from '@/store/authStore';

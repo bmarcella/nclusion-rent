@@ -1,7 +1,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { USER_ROLE } from "../../shared/schema";
+import { USER_ROLE } from "../shared/schema";
 
 export interface Document {
     id: string;
@@ -567,13 +567,28 @@ export const ReportSteps = [
     label: "Approbation",
   },
   {
-    key: ["bankSteps.needRenovation"],
+    key: [ "bankSteps.needRenovation"],
     label: "Rénovation",
   },
   {
     key: ["bankSteps.readyToUse"],
     label: "Disponible",
   },
+];
+
+export const ReportStepsWeek = [
+  {
+    key: ["bankSteps.rejected"],
+    label: "Rejeté",
+  },
+  {
+    key: ["bankSteps.needApproval"],
+    label: "Non-Vues",
+  },
+  {
+    key: [ "bankSteps.needApprobation", "bankSteps.needContract", "bankSteps.pending","bankSteps.notProceeded", "bankSteps.needRenovation", "bankSteps.readyToUse"],
+    label: "Approbation",
+  }
 ];
 
 export const ReportStepsFull = [

@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useSessionUser } from "@/store/authStore";
 import { useEffect, useState } from "react";
-import { fetchReportPerReport, getBankCountsByRegion } from "./demo/Entity/Regions";
+import { fetchReportPerReport, getBankCountsByRegion } from "./Entity/Regions";
 import SimplePie from "./Charts/SimplePie";
 import classNames from "classnames";
 

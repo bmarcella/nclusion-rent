@@ -2,7 +2,7 @@ import { Tabs } from '@/components/ui/Tabs';
 import TabContent from '@/components/ui/Tabs/TabContent';
 import TabList from '@/components/ui/Tabs/TabList';
 import TabNav from '@/components/ui/Tabs/TabNav';
-import { Proprio } from '@/views/demo/Entity';
+import { Proprio } from '@/views/Entity';
 import EntEditForm from './EntEditForm';
 import ImageLandlord from '@/views/bank/add/components/ImageLandlord';
 import SecEnt from './SecEnt';
