@@ -10,7 +10,7 @@ import {   RegionType } from '@/views/Entity/Regions';
 import { Query, DocumentData, CollectionReference, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 
-interface OptionType {
+export interface OptionType {
   label: string;
   value: string | number;
 }

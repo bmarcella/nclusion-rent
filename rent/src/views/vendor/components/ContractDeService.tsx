@@ -77,12 +77,12 @@ const ContractDeService: React.FC<ContractDeServiceProps> = ({
         en sa qualité de { proprio.type_person }, ci-après dénommé « L’Employeur », d’une part,
       </p>
 
-      <p className="mt-4">
+      <p className="mt-2">
         Et <strong>{employee.fullName}</strong>, demeurant et domicilié(e) à <em>{employee.address}</em>,
         identifié(e) au NIF : <em>{employee.nif}</em>, ci-après désigné(e) par « L’Employé(e) », d’autre part.
       </p>
 
-      <p className="mt-4 font-semibold">Il a été convenu ce qui suit :</p>
+      <p className="mt-2 font-semibold">Il a été convenu ce qui suit :</p>
 
       <h3 className="text-base font-semibold mt-6 uppercase">ARTICLE I - OBJET</h3>
       <p className="mb-2">
@@ -91,7 +91,7 @@ const ContractDeService: React.FC<ContractDeServiceProps> = ({
      
      <ShowListBankName bankIds={contract.banksId} link={false}></ShowListBankName>
 
-      <h3 className="text-base font-semibold mt-6 uppercase">ARTICLE II - DURÉE</h3>
+      <h3 className="text-base font-semibold mt-4 uppercase">ARTICLE II - DURÉE</h3>
       <p>
         II.1 Le Contrat entre en vigueur en date du <strong>{formatDate(contract.startDate)}</strong>.
         <br />
@@ -105,7 +105,7 @@ const ContractDeService: React.FC<ContractDeServiceProps> = ({
         réaliser sa mission.
       </p>
 
-      <h3 className="text-base font-semibold mt-6 uppercase">ARTICLE III – REMUNERATION ET MODALITÉS DE PAIEMENT</h3>
+      <h3 className="text-base font-semibold mt-4 uppercase">ARTICLE III – REMUNERATION ET MODALITÉS DE PAIEMENT</h3>
       <p>III.1 En contrepartie de la réalisation des prestations définies à l’Article premier ci-dessus, le client versera au prestataire :</p>
       <ol className="list-decimal ml-8 mt-2">
         <li>
@@ -118,16 +118,16 @@ const ContractDeService: React.FC<ContractDeServiceProps> = ({
         </li>}
       </ol>
 
-      <p className="mt-4">
+      <p className="mt-2">
         Les sommes prévues ci-dessus en Gourdes seront payées sous forme de monnaie scripturale,
         Chèque, avant les prestations du prestataire.
       </p>
 
-      <p className="mt-4">
+      <p className="mt-2">
         Fait à <strong>{ getRegionsById(contract.regionsId[0]).label }</strong>, en date du <strong>{'..../..../.......'}</strong>, en double original.
       </p>
 
-      <div className="flex justify-between mt-8">
+      <div className="flex justify-between mt-6">
         <div>
           <p className="font-semibold">{ proprio.fullName }</p>
           <p className="text-sm">Signature du prestataire</p>
