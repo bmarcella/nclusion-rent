@@ -1,4 +1,45 @@
 {
+    "request": {
+      "cash": "Espèces",
+      "check": "Chèque",
+      "wire_transfer": "Virement bancaire",
+      "proformat": "Facture proforma",
+      "contrat": "Contrat",
+      "leaseContract": "Contrat de bail",
+      "employee": "Justificatif employé",
+      "receipt": "Reçu",
+      "invoice_voucher": "Facture / Bon",
+      "addendum": "Avenant",
+      "id_card": "Carte d'identité",
+      "inventory": "Inventaire",
+      "report_checklist": "Rapport / Liste de contrôle",
+      "other": "Autre",
+      "modePayment": "Mode de paiement",
+      "amount": "Montant",
+      "description": "Description",
+      "support_docs": "Documents de support",
+      "general_admin_memo": "Mémo administratif général",
+      "account": "Compte",
+      "exp_category": "Type de dépenses",
+      "currency": "Devise",
+      "beneficiary_name_check": "Nom du bénéficiaire sur le chèque",
+      "beneficiary_name_wire": "Nom du bénéficiaire sur le virement bancaire",
+      "beneficiary_name": "Nom du bénéficiaire",
+      "expense": {
+        "lease": "Loyer",
+        "bank_improvement": "Amélioration de la banque",
+        "equipment": "Équipement",
+        "monthly_reccurring": "Dépense mensuelle récurrente",
+        "materials": "Matériaux",
+        "operations": "Opérations",
+        "logistics": "Logistique",
+        "maintenance_repair": "Entretien et réparation",
+        "payroll": "Paie",
+        "marketing": "Marketing",
+        "hr": "Ressources humaines",
+        "other": "Autre"
+      }
+    },
     "nav": {
         "home": "Dashboard",
         "bankMenu": {
@@ -16,6 +57,12 @@
             "vendor": "Rénovation",
             "report": "Rapport"
         },
+        "reqMenu": {
+          "name": "Requêtes",
+          "add": "Ajouter",
+          "myShow": "Mes requêtes",
+          "show": "Voir"
+         },
         "proprioMenu": {
             "proprio": "Entités",
             "add": "Ajouter",
@@ -37,7 +84,7 @@
       "superficie": "Superficie (m2)",
       "nombre_chambre": "Nombre de chambres",
       "date": "Date",
-      "rentCost": "Coût du loyer Iniatial",
+      "rentCost": "Coût du loyer Initial",
       "final_rentCost": "Coût du loyer Final",
       "reference": "Référence",
       "landlord": "Propriétaire",
@@ -305,7 +352,9 @@
       "operation": "Opérations",
       "admin": "Administrateur",
       "fields_ops": "Opérations terrain",
-      "vendor_management" : "Géstion des vendeurs"
+      "vendor_management" : "Géstion des vendeurs",
+      "assist_accoutant": "Assistant comptable",
+      "accountant": "Comptable"
     },
     "steps": {
       "stepName": "Etape",
@@ -319,6 +368,7 @@
       "termine": "Terminé"
      },
      "common": {
+      "submit": "Soumettre",
       "next": "Suivant",
       "update": "Editer",
       "add": "Ajouter",

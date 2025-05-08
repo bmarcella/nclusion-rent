@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { fetchReportPerReport, getBankCountsByRegion } from "./Entity/Regions";
 import SimplePie from "./Charts/SimplePie";
 import classNames from "classnames";
+import { ReportSteps } from "./Entity";
+import { DocumentData, query, Query } from "@firebase/firestore";
+import { BankDoc } from "@/services/Landlord";
 
 const Home = () => {
   const { userId, authority } = useSessionUser((state) => state.user);
@@ -15,7 +18,8 @@ const Home = () => {
   useEffect(() => {
     const regs = async () => { 
         const { regions, values } = await getBankCountsByRegion();
-        const report = await fetchReportPerReport();
+        const q: Query<DocumentData> = query(BankDoc);
+        const report = await fetchReportPerReport(ReportSteps, q );
         setRegions(regions);
         setValues(values);
         setReport(report);

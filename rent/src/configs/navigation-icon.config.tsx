@@ -9,7 +9,7 @@ import {
     PiUsers,
 } from 'react-icons/pi'
 import type { JSX } from 'react'
-import { BiCog } from 'react-icons/bi'
+import { BiCog, BiMoney } from 'react-icons/bi'
 
 export type NavigationIcons = Record<string, JSX.Element>
 
@@ -18,6 +18,7 @@ const navigationIcon: NavigationIcons = {
     bankMenu: <PiBankDuotone />,
     proprioMenu: <PiUsers />,
     configMenu: <BiCog />,
+    reqMenu: <BiMoney />,
     singleMenu: <PiAcornDuotone />,
     collapseMenu: <PiArrowsInDuotone />,
     groupSingleMenu: <PiBookOpenUserDuotone />,

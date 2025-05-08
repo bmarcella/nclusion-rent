@@ -1,8 +1,7 @@
-import { Bank, ReportSteps } from '@/views/Entity';
+import { Bank } from '@/views/Entity';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BankDoc } from "@/services/Landlord";
 import { DocumentData, getDocs, orderBy, Query, query, where } from "firebase/firestore";
-import { ListBankSteps } from ".";
 
  
 export type RegionType = {
@@ -13,7 +12,24 @@ export type RegionType = {
     value: number | string;
     cities: string[];
     isTest?: boolean;
+    accounts? : string[];
   };
+  export const account = [
+    "BUH OPS HTG-PAP55485",
+    "BUH OPS USD-PAP55507",
+
+    "BUH OPS HTG-CAP65103",
+    "BUH OPS USD-CAP65111",
+
+    "BUH OPS HTG-OUA81262",
+    "BUH OPS USD-OUA81278",
+
+    "BUH OPS HTG-CAY80521",
+    "BUH OPS USD-CAY8053",
+
+    "SAFEBOX",
+    "OTHER",
+  ] as const;
   export type DocType = Partial<RegionType>;
   export const DocTypeValues: DocType[] = [
     {
@@ -36,6 +52,7 @@ export type RegionType = {
       capital: "Gonaives",
       label: "Gonaives",
       value: 1,
+      accounts: [],
       cities: [
         "Dessalines",
         "Desdunes",
@@ -63,6 +80,9 @@ export type RegionType = {
       capital: "Hinche",
       label: "Hinche",
       value: 2,
+      accounts: [ "BUH OPS HTG-OUA81262",
+        "BUH OPS USD-OUA81278","SAFEBOX",
+        "OTHER" ],
       cities:  [
         "Cerca-la-Source",
         "Thomassique",
@@ -85,6 +105,7 @@ export type RegionType = {
       capital: "Jeremie",
       label: "Jeremie",
       value: 3,
+      accounts: [ ],
       cities: [
         "Anse-d'Hainault",
         "Dame-Marie",
@@ -107,6 +128,11 @@ export type RegionType = {
       capital: "Cap-Haïtien",
       label: "Cap-Haïtien",
       value: 4,
+      accounts: [ 
+        "BUH OPS HTG-CAP65103",
+        "BUH OPS USD-CAP65111",
+        "SAFEBOX",
+        "OTHER" ],
       cities:[
         "Acul-du-Nord",
         "Milot",
@@ -135,6 +161,11 @@ export type RegionType = {
       capital: "Ouanaminthe",
       label: "Ouanaminthe",
       value: 5,
+      accounts: [ 
+        "BUH OPS HTG-OUA81262",
+        "BUH OPS USD-OUA81278","SAFEBOX",
+        "OTHER" 
+      ],
       cities: [
         "Fort-Liberté",
         "Perches",
@@ -158,6 +189,12 @@ export type RegionType = {
       capital: "Port-de-Paix",
       label: "Port-de-Paix",
       value: 6,
+      accounts: [ 
+        "BUH OPS HTG-CAP65103",
+        "BUH OPS USD-CAP65111",
+        "SAFEBOX",
+        "OTHER" 
+      ],
       cities: [
         "Môle-Saint-Nicolas",
         "Baie-de-Henne",
@@ -178,6 +215,12 @@ export type RegionType = {
       capital: "Port-au-Prince",
       label: "Port-au-Prince",
       value: 7,
+      accounts: [ 
+        "BUH OPS HTG-PAP55485",
+        "BUH OPS USD-PAP55507",
+        "SAFEBOX",
+        "OTHER" 
+      ],
       cities: [
         "Arcahaie",
         "Cabaret",
@@ -207,6 +250,12 @@ export type RegionType = {
       capital: "Les Cayes",
       label: "Les Cayes",
       value: 8,
+      accounts:[
+        "BUH OPS HTG-CAY80521",
+        "BUH OPS USD-CAY8053",
+        "SAFEBOX",
+        "OTHER"
+      ],
       cities: [
         "Aquin",
         "Cavaillon",
@@ -234,6 +283,12 @@ export type RegionType = {
       name: "Sud-Est",
       capital: "Jacmel",
       label: "Jacmel",
+      accounts:[
+        "BUH OPS HTG-CAY80521",
+        "BUH OPS USD-CAY8053",
+        "SAFEBOX",
+        "OTHER"
+      ],
       value: 9,
       cities: [
         "Bainet",
@@ -255,6 +310,12 @@ export type RegionType = {
       label: "Test",
       value: 10,
       isTest: true,
+      accounts:[
+        "BUH OPS HTG-CAY80521",
+        "BUH OPS USD-CAY8053",
+        "SAFEBOX",
+        "OTHER"
+      ],
       cities: [
         "Ville 1",
         "Ville 2",
@@ -281,7 +342,7 @@ export type RegionType = {
   };
 
   export const getRegionsLabelvalue = (Regions: any): number[] => {
-    return Regions.map(region => region.value);
+    return Regions.map((region:any) => region.value);
   };
 
   export async function getBankCountsByRegion() {
@@ -316,7 +377,7 @@ export type RegionType = {
     values: number[];
   }
 
-  export const fetchReportPerReport = async (ReportSteps: [], hq: Query<DocumentData> ) => {
+export const fetchReportPerReport = async (ReportSteps: [], hq: Query<DocumentData> ) => {
     
 const report: ReportItem[] = (
   await Promise.all(
