@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { addDoc, CollectionReference, deleteDoc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
-import { BankDoc, BankLeaseDoc, bankPicturesDoc, getBankDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc, TaskDoc } from "../Landlord";
+import { BankDoc, BankLeaseDoc, bankPicturesDoc, getBankDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc, ReqPicturesDoc, TaskDoc } from "../Landlord";
 import { BankImage } from "@/views/bank/show/components/ImageGallery";
 import { ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 import { storage } from "./FirebaseStorage";
 import { BankStep, StepDecision } from "@/views/Entity";
+import { ReqImage } from "@/views/request/components/ImageReqComp";
 
 export const getBankById = async (bankId: string) => {
     const bankRef = getBankDoc(bankId);
@@ -103,6 +104,22 @@ export const getBankById = async (bankId: string) => {
               return imgBank;
           });
           return images; 
+};
+
+export  const getReqImages = async (reqId: string) => {
+  const picturesRef = ReqPicturesDoc as CollectionReference<ReqImage>;
+  const q = query(picturesRef, where('reqId', '==', reqId));
+  const querySnapshot = await getDocs(q);
+  const images = querySnapshot.docs.map(doc => {
+      const id = doc.id;
+      const img = {
+          id,
+      ...doc.data(),
+      } as ReqImage;
+      img.id = id;
+      return img;
+  });
+  return images; 
 };
 
 export  const getLordImages = async (lordId: string) => {

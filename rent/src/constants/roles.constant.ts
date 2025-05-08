@@ -5,6 +5,8 @@ import { getRegionsByValues, Regions } from "@/views/Entity/Regions"
 import { USER_ROLES } from "@/views/shared/schema"
 
 export const ADMIN = 'admin'
+export const ASSIST_ACCOUNTANT = 'assist_accoutant'
+export const ACCOUNTANT = 'accoutant'
 export const SUPER_MANAGER = 'super_manager'
 export const AGENT_IMMOBILLIER= 'agent_immobilier'
 export const COORDONATOR = 'coordonator'
@@ -60,7 +62,7 @@ export const getRolesByAhth = (auth: string ) => {
             roles = roles.concat(["vendeur"]);
           break;
           case "super_manager":
-            roles= roles.concat(["vendeur","agent_immobilier","assist_manager", "assist_coordonator", "coordonator"]);  
+            roles = roles.concat(["vendeur","agent_immobilier","assist_manager", "assist_coordonator", "coordonator"]);  
          break;
           default:
             roles  = [...USER_ROLES];

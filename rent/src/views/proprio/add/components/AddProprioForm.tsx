@@ -38,7 +38,7 @@ function AddProprioForm( { done } : Props) {
   const [alert, setAlert] = useState("success") as any;
   const [ typeOptions, setTypeOptions] = useState([]) as any;
   const [ regions, setRegions] = useState([]) as any;
-  const [hideReg, setHideReg] = useState(false);
+  const [ hideReg, setHideReg] = useState(false);
   const { userId, authority, proprio } = useSessionUser((state) => state.user);
   const {
     handleSubmit,

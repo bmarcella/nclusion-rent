@@ -37,6 +37,7 @@ function ReportTypeFilter({  t, onChangeReportTypeA = (value: any)=>{}, onChange
    useEffect(() => {
     if(onChangeDate) onChangeDate(start, end);
   }, [start, end]);
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded">
      { onChangeDate && <>
