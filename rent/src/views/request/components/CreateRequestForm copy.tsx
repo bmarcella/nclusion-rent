@@ -2,20 +2,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
-import { Form, FormItem, Input, Select, Button, Alert } from '@/components/ui';
+import { Form, FormItem, Input, Select, Button } from '@/components/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/utils/hooks/useTranslation';
-import { modePayments, support_docs, exp_categories, RequestType } from '@/views/Entity/Request';
+import { modePayments, support_docs, account, exp_categories } from '@/views/Entity/Request';
 import { useSessionUser } from '@/store/authStore';
 import { manageAuth } from '@/constants/roles.constant';
-import { BankDoc, getLandlordDoc, Landlord, ReqPicturesDoc } from '@/services/Landlord';
+import { BankDoc, getLandlordDoc, Landlord } from '@/services/Landlord';
 import { Proprio } from '@/views/Entity';
 import { convertToSelectOptionsProprio } from '@/views/report/components/ReportTypeFilter';
-import { Query, DocumentData, CollectionReference, query, where, getDocs, orderBy, getDoc, addDoc, updateDoc } from 'firebase/firestore';
+import { Query, DocumentData, CollectionReference, query, where, getDocs, orderBy, getDoc } from 'firebase/firestore';
 import { OptionType } from '@/views/report/components/FilterBankWeek';
 import { getBankImages } from '@/services/firebase/BankService';
-import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage';
-import ImageReq from './ImageReq';
 
 const schema = z.object({
   modePayment: z.enum(modePayments),
@@ -23,13 +21,11 @@ const schema = z.object({
   id_region: z.number().optional(),
   objectId: z.string().optional(),
   beneficiary_name_check: z.string().optional(),
-  beneficiary_name_wire: z.string().optional(),
   beneficiary_name: z.string().min(3),
   currency: z.string().min(1),
   confirmationFrom: z.string().min(1),
-  description: z.string().optional(),
-  support_docs: z.array(z.enum(support_docs)),
-  general_admin_memo: z.string().optional(),
+  description: z.string().min(1),
+  account: z.enum(account),
   exp_category: z.enum(exp_categories),
 });
 
@@ -38,6 +34,7 @@ type RequestFormValues = z.infer<typeof schema>;
 const CreateRequestForm = () => {
   const { t } = useTranslation();
   const [isSubmitting, setSubmitting] = useState(false);
+  const [ typeOptions, setTypeOptions] = useState([]) as any;
   const [ regions, setRegions] = useState([]) as any;
   const [ hideReg, setHideReg] = useState(false);
   const { userId, authority, proprio } = useSessionUser((state) => state.user);
@@ -45,30 +42,23 @@ const CreateRequestForm = () => {
   const [agents, setAgents] = useState<OptionType[]>([]);
   const [ sregion, setsRegion] = useState() as any;
   const [ banks, setBanks] = useState([]) as any;
-  const [ cbank, setCBank] = useState() as any;
-  const [ request, setRequest] = useState() as any;
-  const [step, setStep] = useState(0);
-  const [message, setMessage] = useTimeOutMessage()
-  const [alert, setAlert] = useState("success") as any;
-  
+  const [ cbank, setCBank] = useState([]) as any;
   const {
     control,
     handleSubmit,
     setValue,
     watch,
-    reset,
     formState: { errors },
   } = useForm<RequestFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       modePayment: modePayments[0],
-      support_docs: [],
+      account: account[0],
       currency: 'HTG',
-      id_region : undefined,
+      id_region : 0,
       exp_category: exp_categories[0],
       description: '',
-      amount: undefined,
-      general_admin_memo: '',
+      amount: undefined
     },
   });
 
@@ -96,36 +86,10 @@ const CreateRequestForm = () => {
     fetchProprio();
   }, [sregion]);
 
-  const FrenchDate = (dateString: any, y = 0 ) => {
-    const date = new Date(dateString);
-  
-    // Add y years if y > 0
-    if (y > 0) {
-      date.setFullYear(date.getFullYear() + y);
-    }
-  
-    const formatted = new Intl.DateTimeFormat('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(date);
-  
-    return formatted;
-  };
-
   useEffect(() => {
-    if (!cbank) { setValue('description',''); return;}
     if (cbank) {
-      setValue('beneficiary_name', cbank?.landlord?.fullName || "");
+      setValue('confirmationFrom', cbank.landlord.fullName);
       setValue('objectId', cbank.id);
-      setValue('amount', cbank.final_rentCost || 0);
-      setValue('description', ` Location pour une nouvelle bank : ${cbank.bankName} \n Nom du proprietaire :  ${cbank?.landlord?.fullName || ""} 
-        \n Adresse : ${cbank.city || ''} ${cbank.address || ''}
-        \n Montant:  HTG ${ cbank.final_rentCost || 0}
-        \n Durée : ${cbank.yearCount}
-        \n Date de debut: ${FrenchDate(cbank.date)} \n Date de fin: ${FrenchDate(cbank.date, cbank.yearCount)}
-        \n Description : ${cbank.description || 'Pas de description'} 
-        `);
     }
   }, [cbank]);
 
@@ -157,7 +121,7 @@ const CreateRequestForm = () => {
       };
 
     const fetchProprio = async () => {
-      if (!sregion) return;
+  
       try {
       const baseQuery: Query<DocumentData> = Landlord as CollectionReference<DocumentData>;
       const q: Query<DocumentData> = query(baseQuery, orderBy('fullName'), where("regions",'array-contains-any',[sregion]),
@@ -179,47 +143,17 @@ const CreateRequestForm = () => {
 
   const submit = async (data: RequestFormValues) => {
     setSubmitting(true);
-    try { 
-      const request = {
-        ...data,
-        createdBy: userId,
-        createdAt: new Date(),
-        updatedBy: userId,
-        updatedAt: new Date()
-      } as RequestType;
-      const docRef = await addDoc(ReqPicturesDoc, data);
-      console.log('Request Details:', request);
-      reset();
-      setStep(1);
-      await updateDoc(docRef, {id: docRef.id});
-      setRequest(docRef.id);
-      setMessage("Requête enregistrée avec success");
-      setAlert("success")
-      setTimeout(() => setSubmitting(false), 1000);
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      setMessage("Erreur lors de l'enregistrement de la requete");
-      setAlert("danger")
-    }
+    setTimeout(() => setSubmitting(false), 1000);
   };
 
   const isRegionSelected = watch('id_region');
   const cat = watch('exp_category');
-  const modePayment = watch('modePayment');
-  const nextStep = (step: number, data: any ) => {
-    setStep(step);
-  }
 
   return (
     <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
-       {message && (
-                <Alert showIcon className="mb-4" type={alert}>
-                    <span className="break-all">{message}</span>
-                </Alert>
-            )}
-  { step == 0 && (<Form onSubmit={handleSubmit(submit)}>
+    <Form onSubmit={handleSubmit(submit)}>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">  
-      <FormItem label={t('request.exp_category')} invalid={!!errors.exp_category} errorMessage={errors.exp_category?.message}>
+    <FormItem label={t('request.exp_category')} invalid={!!errors.exp_category} errorMessage={errors.exp_category?.message}>
         <Controller
           name="exp_category"
           control={control}
@@ -228,7 +162,7 @@ const CreateRequestForm = () => {
           )}
         />
       </FormItem>
-      { !hideReg && <FormItem label="Région" invalid={!!errors.id_region} errorMessage={errors.id_region?.message}>
+    { !hideReg && <FormItem label="Région" invalid={!!errors.id_region} errorMessage={errors.id_region?.message}>
                               <Controller name="id_region" control={control} render={({ field }) => 
                                 <Select placeholder="Please Select" 
                                     options={regions.map((region: any) => ({ value: region.value, label: region.label, accounts: region.accounts }))}    
@@ -253,7 +187,7 @@ const CreateRequestForm = () => {
         </FormItem>
       )}
 
-       { (banks.length > 0 && cat == 'request.expense.lease' ) && (
+  { (banks.length > 0 && cat == 'request.expense.lease' ) && (
           <>
           <FormItem label="Bank" invalid={!!errors.objectId} errorMessage={errors.objectId?.message}>
                   <Controller name="objectId" control={control} render={({ field }) => 
@@ -269,7 +203,7 @@ const CreateRequestForm = () => {
                     } />
               </FormItem>
           </>
-       )}
+      )}
     
       <FormItem label={t('request.modePayment')} invalid={!!errors.modePayment} errorMessage={errors.modePayment?.message}>
         <Controller
@@ -289,19 +223,12 @@ const CreateRequestForm = () => {
       </FormItem>
 
       
-      { modePayment =="request.check" && <FormItem label={t('request.beneficiary_name_check')} invalid={!!errors.beneficiary_name_check} errorMessage={errors.beneficiary_name_check?.message}>
+      <FormItem label={t('request.beneficiary_name_check')} invalid={!!errors.beneficiary_name_check} errorMessage={errors.beneficiary_name_check?.message}>
         <Controller
           name="beneficiary_name_check"
           control={control}
           render={({ field }) => <Input type="text" {...field} onChange={e => field.onChange(e.target.value)} />} />
-      </FormItem> }
-
-      { modePayment =="request.wire_transfer" && <FormItem label={t('request.beneficiary_name_wire')} invalid={!!errors.beneficiary_name_wire} errorMessage={errors.beneficiary_name_wire?.message}>
-        <Controller
-          name="beneficiary_name_wire"
-          control={control}
-          render={({ field }) => <Input type="text" {...field} onChange={e => field.onChange(e.target.value)} />} />
-      </FormItem> }
+      </FormItem>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">  
       <FormItem label={t('request.amount')} invalid={!!errors.amount} errorMessage={errors.amount?.message}>
@@ -324,7 +251,7 @@ const CreateRequestForm = () => {
         </div>
 
       <FormItem label={t('request.description')} invalid={!!errors.description} errorMessage={errors.description?.message}>
-        <Controller name="description" control={control} render={({ field }) => <textarea className='w-full h-50 bg-gray-100'  {...field} />} />
+        <Controller name="description" control={control} render={({ field }) => <textarea className='w-full bg-gray-100' {...field} />} />
       </FormItem>
 
       {/* <FormItem label={t('request.support_docs')} invalid={!!errors.support_docs} errorMessage={errors.support_docs?.message}>
@@ -346,7 +273,7 @@ const CreateRequestForm = () => {
         <Controller name="general_admin_memo" control={control} render={({ field }) => <textarea className='w-full bg-gray-100' {...field} />} />
       </FormItem> */}
 
-    {/* {  isRegionSelected && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">  
+    {  isRegionSelected && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">  
         <FormItem label={t('request.account')} invalid={!!errors.account} errorMessage={errors.account?.message}>
             <Controller
             name="account"
@@ -357,7 +284,7 @@ const CreateRequestForm = () => {
             />
         </FormItem>
 
-    </div> } */}
+    </div> }
      
 
       <div className="mt-6">
@@ -365,10 +292,7 @@ const CreateRequestForm = () => {
           {t('common.submit')}
         </Button>
       </div>
-    </Form>) }
-    { step == 1 && (
-      <ImageReq nextStep={nextStep} reqId={request} userId={userId || ''} ></ImageReq>
-    )}
+    </Form>
     </div>
   );
 };

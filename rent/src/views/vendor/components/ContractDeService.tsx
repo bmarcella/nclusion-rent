@@ -84,14 +84,14 @@ const ContractDeService: React.FC<ContractDeServiceProps> = ({
 
       <p className="mt-2 font-semibold">Il a été convenu ce qui suit :</p>
 
-      <h3 className="text-base font-semibold mt-6 uppercase">ARTICLE I - OBJET</h3>
+      <h3 className="text-base font-semibold mt-4 uppercase">ARTICLE I - OBJET</h3>
       <p className="mb-2">
         I.1 Le présent Contrat est un contrat de prestation de service ayant pour objet la mission de { ' '+t('bank.'+contract.renovStep) } pour les locaux de nos banques situées dans la zone métropolitaine notamment à :
       </p>
      
      <ShowListBankName bankIds={contract.banksId} link={false}></ShowListBankName>
 
-      <h3 className="text-base font-semibold mt-4 uppercase">ARTICLE II - DURÉE</h3>
+      <h3 className="text-base font-semibold mt-2 uppercase">ARTICLE II - DURÉE</h3>
       <p>
         II.1 Le Contrat entre en vigueur en date du <strong>{formatDate(contract.startDate)}</strong>.
         <br />
@@ -105,7 +105,7 @@ const ContractDeService: React.FC<ContractDeServiceProps> = ({
         réaliser sa mission.
       </p>
 
-      <h3 className="text-base font-semibold mt-4 uppercase">ARTICLE III – REMUNERATION ET MODALITÉS DE PAIEMENT</h3>
+      <h3 className="text-base font-semibold mt-2 uppercase">ARTICLE III – REMUNERATION ET MODALITÉS DE PAIEMENT</h3>
       <p>III.1 En contrepartie de la réalisation des prestations définies à l’Article premier ci-dessus, le client versera au prestataire :</p>
       <ol className="list-decimal ml-8 mt-2">
         <li>
@@ -129,11 +129,11 @@ const ContractDeService: React.FC<ContractDeServiceProps> = ({
 
       <div className="flex justify-between mt-6">
         <div>
-          <p className="font-semibold">{ proprio.fullName }</p>
+        <p className="font-semibold">{employee.fullName}</p>
           <p className="text-sm">Signature du prestataire</p>
         </div>
-        <div style={{ marginBottom: "50px" }}>
-          <p className="font-semibold">{employee.fullName}</p>
+        <div style={{ marginBottom: "25px" }}>
+        <p className="font-semibold">{ proprio.fullName }</p>
           <p className="text-sm">Signature du client</p>
         </div>
 

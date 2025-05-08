@@ -42,23 +42,23 @@ const ShowListBankName: React.FC<ShowListBankNameProps> = ({ bankIds , link = tr
   }
 
   return (
-    <ul className="list-decimal pl-5 space-y-1">
-    {banks.map((bank) => (
-      <li key={bank.id}>
-        {link ? (
-          <Link
-            to={`/bank/${bank.id}`}
-            className="text-blue-600 hover:underline"
-          >
-            {bank.bankName}
-          </Link>
-        ) : (
-          bank.bankName
-        )}
-      </li>
-    ))}
-  </ul>
-  
+  <ul className={link ? 'list-decimal pl-5' : 'grid grid-cols-3 gap-2 list-decimal pl-5'}>
+  {banks.map((bank) => (
+    <li key={bank.id}>
+      {link ? (
+        <Link
+          to={`/bank/${bank.id}`}
+          className="text-blue-600 hover:underline"
+        >
+          {bank.bankName}
+        </Link>
+      ) : (
+        bank.bankName
+      )}
+    </li>
+  ))}
+</ul>
+
   );
 };
 

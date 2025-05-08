@@ -20,8 +20,11 @@
       "support_docs": "Documents de support",
       "general_admin_memo": "Mémo administratif général",
       "account": "Compte",
-      "exp_category": "Catégorie de dépenses",
+      "exp_category": "Type de dépenses",
       "currency": "Devise",
+      "beneficiary_name_check": "Nom du bénéficiaire sur le chèque",
+      "beneficiary_name_wire": "Nom du bénéficiaire sur le virement bancaire",
+      "beneficiary_name": "Nom du bénéficiaire",
       "expense": {
         "lease": "Loyer",
         "bank_improvement": "Amélioration de la banque",
@@ -365,6 +368,7 @@
       "termine": "Terminé"
      },
      "common": {
+      "submit": "Soumettre",
       "next": "Suivant",
       "update": "Editer",
       "add": "Ajouter",

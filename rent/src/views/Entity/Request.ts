@@ -67,14 +67,16 @@ export const modePayments = [
   export type ReqSteps = typeof reqSteps[number];
 
 
- interface  Request  {
-    id: string;
+ export interface  RequestType {
+    id?: string;
     objectId: string;
-    beneficiary: string;
+    beneficiary_name: string;
+    beneficiary_name_check?: string;
+    beneficiary_name_wire?: string;
     modePayment: ModePayment;
     amount: number;
-    description: string;
-    status: string;
+    description?: string;
+    status?: string;
     createdAt: Date;
     step: ReqSteps;
     updatedAt: Date;
@@ -82,21 +84,22 @@ export const modePayments = [
     id_region: number;
     support_docs: SupportDoc[];
     currency: string;
-    general_admin_memo: string;
-    confirmationFrom : string;
-    confirmedBy: string;
-    confirmedAt: Date;
+    general_admin_memo?: string;
+    confirmationFrom?: string;
+    confirmedBy?: string;
+    confirmedAt?: Date;
 
-    approvedBy: string;
-    approvedAt: Date;
+    approvedBy?: string;
+    approvedAt?: Date;
 
-   
+    rejectedBy?: string;
+    rejectedAt?: Date;
 
-    rejectedBy: string;
-    rejectedAt: Date;
+    account?: Account;
+    exp_category?: ExpCategory;
 
-    account: Account;
-    exp_category: ExpCategory;
+
+    updatedBy: string;
 
     
    
