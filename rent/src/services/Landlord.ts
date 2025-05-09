@@ -28,10 +28,10 @@ export const bankPicturesDoc = collection(db, bankImage);
 export const LandlordPicturesDoc = collection(db, landlordPictures);
 export const bankCommentsDoc = collection(db, bankComments);
 export const taskCollection = collection(db, task);
-export const ExpenserequestDoc = collection(db, Expenserequest)
+export const ExpenseRequestDoc = collection(db, Expenserequest)
 export const ReqPicturesDoc = collection(db, reqPictures);
 
-export const getExpenserequestDoc = (id: string ) => {
+export const getExpenseRequestDoc = (id: string ) => {
      return doc(db, Expenserequest, id);
 }
 

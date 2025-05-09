@@ -5,13 +5,14 @@ import Button from '@/components/ui/Button'
 import { HiOutlineInboxIn } from 'react-icons/hi'
 import { FcImageFile } from 'react-icons/fc'
 import { addDoc,  deleteDoc,  Timestamp } from 'firebase/firestore'
-import {  getLandlordPicturesRef, getReqPicturesRef, LandlordPicturesDoc } from '@/services/Landlord'
+import {  getReqPicturesRef, LandlordPicturesDoc, ReqPicturesDoc } from '@/services/Landlord'
 import {  useEffect, useState } from 'react';
 import { deleteImageFromStorage, getReqImages, uploadImageToStorage } from '@/services/firebase/BankService';
 import FormItem from '@/components/ui/Form/FormItem';
 import Select from '@/components/ui/Select';
-import { DocTypeValues } from '@/views/Entity/Regions';
 import ImageReqComp, { ReqImage } from './ImageReqComp';
+import { support_docs } from '@/views/Entity/Request'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   nextStep: (step: number, data: any) => void;
@@ -26,6 +27,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
     const [loading, setLoading] = useState(false);
     const [images, setImages] = useState<any[]>([]);
     const [typeDoc, setTypeDoc] = useState<any>();
+    const { t } = useTranslation();
     const [error, setError] = useState<any>({
         is: false,
         message: ''
@@ -65,7 +67,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
         setLoading(true)    
         const pics  = await Promise.all(
              uploadedFiles.map(async (file) => {
-                    const { url , fileName } = await uploadImageToStorage(file, reqId, 'landlords');
+                    const { url , fileName } = await uploadImageToStorage(file, reqId, 'requests');
                     const doc : ReqImage = {
                         id: '',
                         reqId,
@@ -79,14 +81,14 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
                         createBy: userId || '',
                         updateBy: userId || ''
                     }
-                    await addDoc(LandlordPicturesDoc, doc );
+                    await addDoc(ReqPicturesDoc, doc);
                     return doc;
                 })
         );
         setLoading(false)
         setDocFiles(pics);
         // was nextStep(6, pics);
-        nextStep(0, pics);
+        nextStep(2, pics);
         if (isEdit) {
             setUploadedFiles([]);
             getReqImages(reqId).then((images) => {
@@ -115,7 +117,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
         <div>
             <div  className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow" >
                 <FormItem label="Type document" invalid={!!error.is} errorMessage={error.message}>
-                    <Select placeholder="Please Select" options={DocTypeValues} 
+                    <Select placeholder="Please Select" options={ support_docs.map((doc) => ({ label: t(doc), value: doc }))} 
                         onChange={(option) => { 
                         setError({ is: false, message: '' });
                         setTypeDoc(option?.value);
@@ -127,7 +129,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
                 beforeUpload={validateBeforeUpload}
                 accept=".png,.jpg,.jpeg,.pdf"
                 multiple={false}
-                tip={<p className="text-xs text-gray-500 mt-2">Max file size: 2MB</p>}
+                tip={<p className="text-xs text-gray-500 mt-2">Max file size: 50MB</p>}
                 uploadLimit={1}
                 onChange={handleFileChange}
                 onFileRemove={handleFileRemove}>
