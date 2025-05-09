@@ -5,10 +5,10 @@ import { z } from 'zod';
 import { Form, FormItem, Input, Select, Button, Alert } from '@/components/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/utils/hooks/useTranslation';
-import { modePayments, support_docs, exp_categories, RequestType } from '@/views/Entity/Request';
+import { modePayments, support_docs, exp_categories, RequestType, ReqSteps } from '@/views/Entity/Request';
 import { useSessionUser } from '@/store/authStore';
 import { manageAuth } from '@/constants/roles.constant';
-import { BankDoc, getLandlordDoc, Landlord, ReqPicturesDoc } from '@/services/Landlord';
+import { BankDoc, ExpenseRequestDoc, getLandlordDoc, Landlord } from '@/services/Landlord';
 import { Proprio } from '@/views/Entity';
 import { convertToSelectOptionsProprio } from '@/views/report/components/ReportTypeFilter';
 import { Query, DocumentData, CollectionReference, query, where, getDocs, orderBy, getDoc, addDoc, updateDoc } from 'firebase/firestore';
@@ -16,6 +16,7 @@ import { OptionType } from '@/views/report/components/FilterBankWeek';
 import { getBankImages } from '@/services/firebase/BankService';
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage';
 import ImageReq from './ImageReq';
+import EndBank from '@/views/bank/add/components/EndBank';
 
 const schema = z.object({
   modePayment: z.enum(modePayments),
@@ -119,11 +120,13 @@ const CreateRequestForm = () => {
       setValue('beneficiary_name', cbank?.landlord?.fullName || "");
       setValue('objectId', cbank.id);
       setValue('amount', cbank.final_rentCost || 0);
-      setValue('description', ` Location pour une nouvelle bank : ${cbank.bankName} \n Nom du proprietaire :  ${cbank?.landlord?.fullName || ""} 
+      setValue('description', ` Location pour une nouvelle bank : ${cbank.bankName} 
+        \n Nom du proprietaire :  ${cbank?.landlord?.fullName || ""} 
         \n Adresse : ${cbank.city || ''} ${cbank.address || ''}
         \n Montant:  HTG ${ cbank.final_rentCost || 0}
         \n Durée : ${cbank.yearCount}
-        \n Date de debut: ${FrenchDate(cbank.date)} \n Date de fin: ${FrenchDate(cbank.date, cbank.yearCount)}
+        \n Date de debut: ${FrenchDate(cbank.date)}
+        \n Date de fin: ${FrenchDate(cbank.date, cbank.yearCount)}
         \n Description : ${cbank.description || 'Pas de description'} 
         `);
     }
@@ -182,12 +185,13 @@ const CreateRequestForm = () => {
     try { 
       const request = {
         ...data,
+        step: "reqSteps.needConfirmation" as ReqSteps,
         createdBy: userId,
         createdAt: new Date(),
         updatedBy: userId,
         updatedAt: new Date()
       } as RequestType;
-      const docRef = await addDoc(ReqPicturesDoc, data);
+      const docRef = await addDoc(ExpenseRequestDoc, data);
       console.log('Request Details:', request);
       reset();
       setStep(1);
@@ -369,6 +373,16 @@ const CreateRequestForm = () => {
     { step == 1 && (
       <ImageReq nextStep={nextStep} reqId={request} userId={userId || ''} ></ImageReq>
     )}
+     {step === 2 && (
+            <div className="text-gray-700 dark:text-white">
+             <EndBank message={t("entity.submitSuccess")} btnText="Nouvelle requête" onRestart={(): void => {
+                setStep(0);
+                setRequest(null);
+                reset();
+              } } ></EndBank>
+            </div>
+        )}
+
     </div>
   );
 };
