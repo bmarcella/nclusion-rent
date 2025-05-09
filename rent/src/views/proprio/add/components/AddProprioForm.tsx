@@ -114,7 +114,7 @@ function AddProprioForm( { done } : Props) {
 
       <div className="flex w-full justify-center ">
       <div className="bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
-      {message && (
+       {message && (
                 <Alert showIcon className="mb-4" type={alert}>
                     <span className="break-all">{message}</span>
                 </Alert>
