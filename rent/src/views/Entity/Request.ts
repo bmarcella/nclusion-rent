@@ -82,7 +82,6 @@ export const modePayments = [
     updatedAt: Date;
     createdBy: string;
     id_region: number;
-    support_docs: SupportDoc[];
     currency: string;
     general_admin_memo?: string;
     confirmationFrom?: string;

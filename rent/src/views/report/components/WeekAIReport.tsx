@@ -1,20 +1,23 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import Table from '@/components/ui/Table';
 import THead from '@/components/ui/Table/THead';
 import TBody from '@/components/ui/Table/TBody';
-import {  fetchReportPerCreatorPerWeek, getLast4Weeks, getQueryFiltersWeek } from '@/services/Report';
+import {  fetchReportPerCreatorPerWeek, getLast4Weeks, getQueryFiltersDate, getQueryFiltersWeek } from '@/services/Report';
 import UserName from '@/views/bank/show/components/UserName';
 import useTranslation from '@/utils/hooks/useTranslation';
 import { useSessionUser } from '@/store/authStore';
 import { BankDoc } from '@/services/Landlord';
 import { Query, DocumentData, query } from 'firebase/firestore';
 
-import {  ReportStepsWeek } from '@/views/Entity';
+import {  ReportStepsSimple, ReportStepsWeek } from '@/views/Entity';
 import FilterBankWeek from './FilterBankWeek';
 import { StepDateRange } from './StepDateRange';
+import { fetchReportPerReportWeek } from '@/views/Entity/Regions';
 function WeekAIReport() {
   const [data, setData] = useState<any[]>([]);
+  const [datab, setDatab] = useState<any[]>([]);
   const [steps, setSteps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
@@ -27,6 +30,11 @@ function WeekAIReport() {
   const [type_rep, setTypeRep] = useState<boolean>();
 
   useEffect(() => {
+   if (!type_rep) simpleReport();
+   else advencedReport();
+  }, [regions, agents, start, type_rep]);
+
+  const simpleReport = async () => {
     const now =  (!start) ? new Date() : start;
     const weeks = getLast4Weeks(now);
     const q: Query<DocumentData> = query(BankDoc);
@@ -36,21 +44,46 @@ function WeekAIReport() {
       authority: authority,
       proprio: proprio
     }), ReportStepsWeek, weeks).then((result) => {
-      console.log("result", result);
+     
       setData(result);
       if (result.length > 0) {
         setSteps(result[0].steps);
       }
       setLoading(false);
     });
-  }, [regions, agents, start]);
+  }
+
+  const advencedReport = async () => {
+      const now =  (!start) ? new Date() : start;
+      const weeks = getLast4Weeks(now);
+      const steps =  ReportStepsSimple  ;
+      fetchReportPerReportWeek(weeks, steps).then((result) => {
+      console.log("result", result);
+      setDatab(result);
+      if (result.length > 0) {
+        setSteps(result[0].steps);
+      }
+      setLoading(false);
+    });
+    
+  }
 
   if (loading) return <p>Chargement du rapport...</p>;
 
   // Calculate total per column (step)
+  // const columnTotals = steps.map((_, index) =>
+  //   data.reduce((sum, item) => sum + (item.values[index].value || 0), 0)
+  // );
+
+   // Calculate total per column (step)
   const columnTotals = steps.map((_, index) =>
-    data.reduce((sum, item) => sum + (item.values[index].value || 0), 0)
+    datab.reduce((sum, item) => sum + (item.values[index] || 0), 0)
   );
+
+  // Calculate grand total (sum of all values)
+  const grandTotal = columnTotals.reduce((acc, val) => acc + val, 0);
+  const grandTotalAgent = datab.reduce((acc, item) => acc + item.total_agents, 0);
+
 
 const onChangeRegion = async (id: number) => {
     setRegions(id);
@@ -68,6 +101,7 @@ const onChangeAgent = async (id: string) =>{
     setStart(start);
  }
 
+
   // Calculate grand total (sum of all values)
   // const grandTotal = columnTotals.reduce((acc, val) => acc + val, 0);
 
@@ -78,11 +112,15 @@ const onChangeAgent = async (id: string) =>{
            onChangeRegion={onChangeRegion} 
            onChangeAgent={onChangeAgent} 
            onChangeDate = {onChangeDate}
+           onChangeMap={onChangeType}
+           message = {t('report.weekAIReport.message')}
+           isMap={true}
           >
 
           </FilterBankWeek> 
 
       
+      { !type_rep && (<>
       <Table>
         <caption className="text-lg font-semibold text-gray-700 p-4">
           Rapport par agent immobilier par semaine
@@ -139,6 +177,78 @@ const onChangeAgent = async (id: string) =>{
          
         </TBody>
       </Table>
+      </>) }
+
+     { type_rep && datab.length>0 && (<>
+      <Table>
+        <caption className="text-lg font-semibold text-gray-700 p-4">
+          Rapport par agent immobilier par semaine & status
+        </caption>
+        <THead>
+          <tr>
+            <th>Week</th>
+            { !type_rep && <th>Agents</th> }
+            <th className="text-center p-2">Total</th>
+            {steps.map((step, idx) => (
+              <th key={typeof step === 'string' ? step : step.name ?? idx} className="text-center capitalize">
+                       {typeof step === 'string' ? step : step.name}
+              </th>
+            ))}
+            { type_rep && <th className="text-center p-2">Progression</th> }
+          </tr>
+        </THead>
+        <TBody>
+         <tr className="font-semibold bg-gray-100 border-t">
+            <td className="p-2 text-left">Total</td>
+            { !type_rep && <td className="text-center p-2">{grandTotalAgent}</td> }
+            <td className="text-center p-2">{grandTotal}</td>
+            {columnTotals.map((val, idx) => (
+              <td key={`col-total-${idx}`} className="text-center p-2">
+                {val}
+              </td>
+            ))}
+          { type_rep && <td className="text-center p-2"> { ((columnTotals[1]/grandTotal) * 100).toFixed(2) }%</td> }
+          </tr>
+
+          {datab.map(({ week, values, total_agents, index }) => {
+            const rowTotal = values.reduce((acc, val) => acc + val, 0);
+            const perc = ((values[1] / rowTotal) * 100);
+            let colorClass = '';
+            if (perc <= 50) colorClass = 'text-red-500';
+            else if (perc < 80) colorClass = 'text-orange-500';
+            else if (perc >= 80) colorClass = 'text-green-500';
+
+            return (
+              <tr key={index} className="border-t">
+                <td className="p-2 text-left font-semibold" >
+                 { week.name}
+                <StepDateRange start={week.start} end={week.end} key={index}> </StepDateRange>
+                </td>
+                { !type_rep && <td className="text-center font-semibold">
+                  {total_agents}
+                </td> }
+                <td className="text-center font-semibold">{rowTotal}</td>
+                {values.map((value, i) => (
+                  <td key={`${i}`} className="text-center">
+                    {value || 0}
+                  </td>
+                ))}
+                {type_rep && (
+                <th
+                  className={colorClass}
+                >
+                  {perc.toFixed(2)}%
+                </th>
+              )}
+              </tr>
+            );
+          })}
+
+          {/* Total Row */}
+         
+        </TBody>
+      </Table>
+      </>) }
     </div>
   );
 }
