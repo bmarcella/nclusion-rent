@@ -36,7 +36,7 @@ interface Props {
   proprio: any;
   t: (key: string) => string;
   onChangeRegion: (id:  number) => void;
-  onChangeAgent: (d: string ) => void;
+  onChangeAgent?: (d: string ) => void;
   onChangeDate: (start:  Date, end? : Date) => void;
   onChangeMap?: (value: boolean) => void;
   isMap?: boolean;
@@ -67,6 +67,7 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
   }, [authority, proprio, t]);
 
   useEffect(() => {
+    if (!onChangeAgent) return;
     const fetchData = async () => {
       await fetchProprio();
    };
@@ -79,7 +80,7 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
 
  useEffect(() => {
   console.log('selectedAgents:', selectedAgents);
-  if(selectedAgents) onChangeAgent(selectedAgents);
+  if(selectedAgents && onChangeAgent) onChangeAgent(selectedAgents);
 }, [setSelectedAgents]);
 
   const fetchProprio = async () => {
@@ -108,7 +109,7 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded">
- { isMap && <Checkbox  onChange={(options: any) => {
+    { isMap && <Checkbox  onChange={(options: any) => {
              onChangeMap(options);
           }}>
       Show on Map 
@@ -123,13 +124,13 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
                 onChangeRegion(0);
                 return;
               }
-            onChangeAgent(undefined);
+            if(onChangeAgent) onChangeAgent(undefined);
             setSelectedRegions(options.value as number);
             onChangeRegion(options.value as number);
           }}
         />
       )}
-      { (agents.length > 0) && (
+      { (agents.length > 0) && onChangeAgent && (
         <Select
           placeholder="Agent"
           options={agents}

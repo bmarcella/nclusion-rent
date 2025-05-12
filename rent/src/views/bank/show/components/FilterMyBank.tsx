@@ -12,8 +12,9 @@ interface OptionType {
 }
 
 interface Props {
-  onChangeDate: (start:  Date, end? : Date) => void;
+  onChangeDate?: (start:  Date, end? : Date) => void;
   onChangeStep: (d: string ) => void;
+  inBankSteps?: string[];
   t : (key: string) => string;
   all : boolean;
 }
@@ -42,14 +43,15 @@ export const convertToSelectOptionsSteps = (items: string[], t: any) => {
 }
 
 
-function FilterMyBank({ onChangeDate, onChangeStep, t, all }: Props) {
+function FilterMyBank({ onChangeDate, onChangeStep, t, all, inBankSteps  }: Props) {
+  const bs  =   (inBankSteps) ? inBankSteps : bankSteps;
   const [start, setStart] = useState<Date>();
   const [end, setEnd] = useState<Date>();
-  const [steps, setSteps] = useState<OptionType[]>(convertToSelectOptionsSteps(bankSteps, t));
+  const [steps, setSteps] = useState<OptionType[]>(convertToSelectOptionsSteps(bs, t));
    // bankSteps
 
  useEffect(() => {
-   onChangeDate(start, end);
+  if(onChangeDate) onChangeDate(start, end);
 }, [start, end]);
 
 
@@ -62,7 +64,7 @@ function FilterMyBank({ onChangeDate, onChangeStep, t, all }: Props) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded">
-       {steps.length > 1 && (
+       {steps.length > 1 && onChangeStep && (
               <Select
                 placeholder="Etape"
                 options={steps}

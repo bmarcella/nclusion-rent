@@ -1,5 +1,10 @@
 {
-    "request": {
+  "report" : {
+    "weekAIReport" : {
+      "message": "Changer de type de rapport"
+    }
+},
+"request": {
       "cash": "Espèces",
       "check": "Chèque",
       "wire_transfer": "Virement bancaire",
@@ -353,8 +358,9 @@
       "admin": "Administrateur",
       "fields_ops": "Opérations terrain",
       "vendor_management" : "Géstion des vendeurs",
-      "assist_accoutant": "Assistant comptable",
+      "assist_accountant": "Assistant comptable",
       "accountant": "Comptable"
+
     },
     "steps": {
       "stepName": "Etape",
@@ -387,7 +393,7 @@
       "addBank": "Ajouter Banque",
       "thankyou": "Merci"
      },
-     "upload": {
+    "upload": {
     "maxSize": "Taille maximale : 15 Mo",
     "dropHere": "Déposez votre image ici, ou",
     "browse": "parcourir",

@@ -29,8 +29,6 @@ const schema = z.object({
   currency: z.string().min(1),
   confirmationFrom: z.string().min(1),
   description: z.string().optional(),
-  support_docs: z.array(z.enum(support_docs)),
-  general_admin_memo: z.string().optional(),
   exp_category: z.enum(exp_categories),
 });
 
@@ -63,12 +61,11 @@ const CreateRequestForm = () => {
     resolver: zodResolver(schema),
     defaultValues: {
       modePayment: modePayments[0],
-      support_docs: [],
       currency: 'HTG',
-      id_region : undefined,
+      id_region : 0,
       exp_category: exp_categories[0],
       description: '',
-      amount: undefined,
+      amount: '',
       general_admin_memo: '',
     },
   });
@@ -115,7 +112,12 @@ const CreateRequestForm = () => {
   };
 
   useEffect(() => {
-    if (!cbank) { setValue('description',''); return;}
+    if (!cbank) {
+       setValue('description',''); 
+       setValue('beneficiary_name',  "");
+       setValue('objectId', '');
+       setValue('amount', '');
+       return;}
     if (cbank) {
       setValue('beneficiary_name', cbank?.landlord?.fullName || "");
       setValue('objectId', cbank.id);
@@ -134,6 +136,7 @@ const CreateRequestForm = () => {
 
 
   const fetchBanks = async () => {
+          if (!sregion) return;
           const q: Query<DocumentData> =  query(BankDoc, orderBy("createdAt", "desc"), 
           where("id_region", "==", sregion),
           where ("approve", "==" ,true),
@@ -190,7 +193,7 @@ const CreateRequestForm = () => {
         createdAt: new Date(),
         updatedBy: userId,
         updatedAt: new Date()
-      } as RequestType;
+      } as Partial<RequestType>;
       const docRef = await addDoc(ExpenseRequestDoc, data);
       console.log('Request Details:', request);
       reset();
