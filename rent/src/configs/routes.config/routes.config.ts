@@ -94,7 +94,13 @@ export const protectedRoutes: Routes = [
         key: 'reqMenu.show',
         path: '/request/show',
         component: lazy(() => import('@/views/request')),
-        authority: [],
+        authority: ['admin', 'super_manager'],
+    },
+    {
+        key: 'reqMenu.myShow',
+        path: '/request/myRequest',
+        component: lazy(() => import('@/views/request/MyRequest')),
+        authority: ['admin', 'coordonator', 'assist_coordonator', 'manager', 'assist_manager', 'super_manager', 'operation'],
     },
 
     ...othersRoute,

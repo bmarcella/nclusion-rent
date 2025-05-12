@@ -2,6 +2,7 @@ import { Bank } from '@/views/Entity';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BankDoc } from "@/services/Landlord";
 import { DocumentData, getDocs, orderBy, Query, query, where } from "firebase/firestore";
+import { getQueryFiltersDate } from '@/services/Report';
 
  
 export type RegionType = {
@@ -422,5 +423,53 @@ const report: ReportItem[] = (
           return    report;
         
         };
+export const fetchReportPerReportWeek = async (weeks: [], ReportSteps: [], ) => {
+
+  
+    
+          const report: ReportItem[] = (
+            await Promise.all(
+              weeks.map(async (week: any, index) => {
+                const steps: string[] = [];
+                const values: number[] = [];
+                const listAgent: string[] = [];
+                await Promise.all(
+                  ReportSteps.map(async (step: any) => {
+                    const q = query(
+                      BankDoc,
+                      orderBy("createdAt", "desc"),
+                      where("step", "in", step.key),
+                      where("createdAt", ">=", week.start),
+                      where("createdAt", "<=", week.end)
+                    );
+          
+                     const snapshot = await getDocs(q);
+                     snapshot.docs.map(async (docSnap) => {
+                                    const data = docSnap.data() as Bank;
+                                    if(!listAgent.includes(data.createdBy)) 
+                                      return listAgent.push(data.createdBy);
+                                    return null;
+                                });
+                    steps.push(step.label);
+                    values.push(snapshot.size);
+                  })
+                );
+          
+                // Skip region if all values are 0
+                if (values.every((v) => v === 0)) return null;
+          
+                return {
+                  week: week,
+                  steps,
+                  values,
+                  agents: listAgent,
+                  total_agents: listAgent.length,
+                  index: index,
+                };
+              })
+            )
+          ).filter((item): item is ReportItem => item !== null); // Remove nulls and narrow the type
+                    return    report;
+                  };
 
   

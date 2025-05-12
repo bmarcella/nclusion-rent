@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { addDoc, CollectionReference, deleteDoc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
-import { BankDoc, BankLeaseDoc, bankPicturesDoc, getBankDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc, ReqPicturesDoc, TaskDoc } from "../Landlord";
+import { BankDoc, BankLeaseDoc, bankPicturesDoc, getBankDoc, getExpenseRequestDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc, ReqPicturesDoc, TaskDoc } from "../Landlord";
 import { BankImage } from "@/views/bank/show/components/ImageGallery";
 import { ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 import { storage } from "./FirebaseStorage";
@@ -162,6 +162,11 @@ export const uploadImageToStorage = async (file: File, path: string , where="ban
 
 export const deleteBank = async (bankId: string ) => {
   const docRef = getBankDoc(bankId);
+  await deleteDoc(docRef);
+};
+
+export const deleteReqType = async (id: string ) => {
+  const docRef = getExpenseRequestDoc(id);
   await deleteDoc(docRef);
 };
 

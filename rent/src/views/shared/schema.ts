@@ -4,7 +4,7 @@ export const USER_ROLES = ["super_manager","vendeur",
      "proprietaire", 'vendor_management', 
       "reference", "agent_immobilier", "coordonator", 
       "assist_coordonator", "manager", "assist_manager",
-       "operation", "admin", "fields_ops", 'accoutant', 'assist_accoutant'] as const;
+       "operation", "admin", "fields_ops", 'accountant', 'assist_accountant'] as const;
 export type  USER_ROLE = typeof USER_ROLES[number];
 export const ProprioSchema = z.object({
     id: z.string().optional(),

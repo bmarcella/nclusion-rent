@@ -140,8 +140,7 @@ export const fetchReportPerCreator = async ( ReportSteps: [], q: Query<DocumentD
 
 export const fetchReportPerCreatorPerWeek  = async ( q: Query<DocumentData>, ReportSteps: [], weeks:[]): Promise<ReportItem[]> => {
   const creatorsSet = new Set<string>();
-  
-  console.log("weeks", weeks);
+  // 1. Extract all unique creators
   const allBanksSnapshot = await getDocs(q);
   // 1. Extract all unique creators
   allBanksSnapshot.forEach(doc => {
