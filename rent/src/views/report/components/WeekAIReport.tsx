@@ -35,6 +35,7 @@ function WeekAIReport() {
   }, [regions, agents, start, type_rep]);
 
   const simpleReport = async () => {
+    setSteps([]);
     const now =  (!start) ? new Date() : start;
     const weeks = getLast4Weeks(now);
     const q: Query<DocumentData> = query(BankDoc);
@@ -54,10 +55,19 @@ function WeekAIReport() {
   }
 
   const advencedReport = async () => {
+    setSteps([]);
       const now =  (!start) ? new Date() : start;
       const weeks = getLast4Weeks(now);
-      const steps =  ReportStepsSimple  ;
-      fetchReportPerReportWeek(weeks, steps).then((result) => {
+      const steps =  ReportStepsSimple;
+      const q: Query<DocumentData> = query(BankDoc);
+      const filters = getQueryFiltersWeek(q,
+        {
+        regions: regions,
+        agents: agents,
+        authority: authority,
+        proprio: proprio
+      });
+      fetchReportPerReportWeek(weeks, steps, filters).then((result) => {
       console.log("result", result);
       setDatab(result);
       if (result.length > 0) {

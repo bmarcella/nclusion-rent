@@ -3,8 +3,7 @@
     "weekAIReport" : {
       "message": "Changer de type de rapport"
     }
-},
-"request": {
+},"request": {
       "cash": "Espèces",
       "check": "Chèque",
       "wire_transfer": "Virement bancaire",
