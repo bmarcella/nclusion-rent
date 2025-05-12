@@ -423,7 +423,7 @@ const report: ReportItem[] = (
           return    report;
         
         };
-export const fetchReportPerReportWeek = async (weeks: [], ReportSteps: [], ) => {
+export const fetchReportPerReportWeek = async (weeks: [], ReportSteps: [], q: Query<DocumentData>) => {
 
   
     
@@ -435,15 +435,15 @@ export const fetchReportPerReportWeek = async (weeks: [], ReportSteps: [], ) => 
                 const listAgent: string[] = [];
                 await Promise.all(
                   ReportSteps.map(async (step: any) => {
-                    const q = query(
-                      BankDoc,
+                     const nq = query(
+                      q,
                       orderBy("createdAt", "desc"),
-                      where("step", "in", step.key),
                       where("createdAt", ">=", week.start),
-                      where("createdAt", "<=", week.end)
+                      where("createdAt", "<=", week.end),
+                      where("step", "in", step.key)
                     );
           
-                     const snapshot = await getDocs(q);
+                     const snapshot = await getDocs(nq);
                      snapshot.docs.map(async (docSnap) => {
                                     const data = docSnap.data() as Bank;
                                     if(!listAgent.includes(data.createdBy)) 
