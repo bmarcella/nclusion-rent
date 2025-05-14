@@ -67,6 +67,10 @@ const onChangeAgent = async (id: string) =>{
  }
 
  const onChangeDate = async (start: Date, end: Date) => {
+     // Check if start date is after end date
+    console.log("start =>", start);
+    console.log("end   =>", end);
+    // 
     setStart(start);
     setEnd(end);
  }
@@ -112,12 +116,12 @@ const onChangeAgent = async (id: string) =>{
               </td>
             ))}
 
-            { type_rep && <td className="text-center p-2"> { ((columnTotals[2]/grandTotal) * 100).toFixed(2) }%</td> }
+            { type_rep && <td className="text-center p-2"> { (((columnTotals[2]+ columnTotals[3]+ columnTotals[4] + columnTotals[5])/grandTotal) * 100).toFixed(2) }%</td> }
          
           </tr>
           {data.map(({ name, values }) => {
             const rowTotal = values.reduce((acc, val) => acc + val, 0);
-            const perc = (((values[2] + values[3]+ values[4]) / rowTotal) * 100);
+            const perc = (((values[2] + values[3]+ values[4] + values[5]) / rowTotal) * 100);
             let colorClass = '';
             if (perc <= 50) colorClass = 'text-red-500';
             else if (perc < 80) colorClass = 'text-orange-500';

@@ -8,6 +8,9 @@ interface StepDateRangeProps {
 }
 
 export const StepDateRange: React.FC<StepDateRangeProps> = ({ start, end }) => {
+  if (!start || !end) {
+    return null;
+  }
   const sameMonth = start.getMonth() === end.getMonth();
   const sameYear = start.getFullYear() === end.getFullYear();
 

@@ -424,9 +424,6 @@ const report: ReportItem[] = (
         
         };
 export const fetchReportPerReportWeek = async (weeks: [], ReportSteps: [], q: Query<DocumentData>) => {
-
-  
-    
           const report: ReportItem[] = (
             await Promise.all(
               weeks.map(async (week: any, index) => {
