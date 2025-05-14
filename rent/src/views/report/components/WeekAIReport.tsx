@@ -11,7 +11,7 @@ import { useSessionUser } from '@/store/authStore';
 import { BankDoc } from '@/services/Landlord';
 import { Query, DocumentData, query } from 'firebase/firestore';
 
-import {  ReportStepsSimple, ReportStepsWeek } from '@/views/Entity';
+import {  ReportStepsFullX, ReportStepsSimple, ReportStepsWeek } from '@/views/Entity';
 import FilterBankWeek from './FilterBankWeek';
 import { StepDateRange } from './StepDateRange';
 import { fetchReportPerReportWeek } from '@/views/Entity/Regions';
@@ -55,10 +55,10 @@ function WeekAIReport() {
   }
 
   const advencedReport = async () => {
-    setSteps([]);
+      setSteps([]);
       const now =  (!start) ? new Date() : start;
       const weeks = getLast4Weeks(now);
-      const steps =  ReportStepsSimple;
+      const steps =  ReportStepsFullX;
       const q: Query<DocumentData> = query(BankDoc);
       const filters = getQueryFiltersWeek(q,
         {
@@ -197,7 +197,7 @@ const onChangeAgent = async (id: string) =>{
         <THead>
           <tr>
             <th>Week</th>
-            { !type_rep && <th>Agents</th> }
+            {  <th>Agents</th> }
             <th className="text-center p-2">Total</th>
             {steps.map((step, idx) => (
               <th key={typeof step === 'string' ? step : step.name ?? idx} className="text-center capitalize">
@@ -210,7 +210,7 @@ const onChangeAgent = async (id: string) =>{
         <TBody>
          <tr className="font-semibold bg-gray-100 border-t">
             <td className="p-2 text-left">Total</td>
-            { !type_rep && <td className="text-center p-2">{grandTotalAgent}</td> }
+            { <td className="text-center p-2">{grandTotalAgent}</td> }
             <td className="text-center p-2">{grandTotal}</td>
             {columnTotals.map((val, idx) => (
               <td key={`col-total-${idx}`} className="text-center p-2">
@@ -222,7 +222,7 @@ const onChangeAgent = async (id: string) =>{
 
           {datab.map(({ week, values, total_agents, index }) => {
             const rowTotal = values.reduce((acc, val) => acc + val, 0);
-            const perc = ((values[1] / rowTotal) * 100);
+            const perc = ((values[2] / rowTotal) * 100);
             let colorClass = '';
             if (perc <= 50) colorClass = 'text-red-500';
             else if (perc < 80) colorClass = 'text-orange-500';
@@ -234,7 +234,7 @@ const onChangeAgent = async (id: string) =>{
                  { week.name}
                 <StepDateRange start={week.start} end={week.end} key={index}> </StepDateRange>
                 </td>
-                { !type_rep && <td className="text-center font-semibold">
+                {  <td className="text-center font-semibold">
                   {total_agents}
                 </td> }
                 <td className="text-center font-semibold">{rowTotal}</td>
