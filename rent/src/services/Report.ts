@@ -33,24 +33,24 @@ export interface ReportItem {
                 start.toDateString() === end.toDateString();
 
                 if (isSameDay) {
-                const startOfDay = new Date(start);
-                startOfDay.setHours(0, 0, 0, 0);
-
-                const endOfDay = new Date(end);
-                endOfDay.setHours(23, 59, 59, 999);
-
-                filters.push(where('createdAt', '>=', Timestamp.fromDate(startOfDay)));
-                filters.push(where('createdAt', '<=', Timestamp.fromDate(endOfDay)));
+                  const startOfDay = new Date(start);
+                  startOfDay.setHours(0, 0, 0, 0);
+  
+                  const endOfDay = new Date(end);
+                  endOfDay.setHours(23, 59, 59, 999);
+  
+                  filters.push(where('createdAt', '>=', Timestamp.fromDate(startOfDay)));
+                  filters.push(where('createdAt', '<=', Timestamp.fromDate(endOfDay)));
                 } else {
-                filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
-                filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
+                  filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
+                  filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
                 }
             } else {
                 if (start) {
-                filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
+                   filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
                 }
                 if (end) {
-                filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
+                   filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
                 }
             }
             return filters.length > 0 ? query(q, ...filters) : q;
@@ -94,7 +94,7 @@ export const fetchReportPerCreator = async ( ReportSteps: [], q: Query<DocumentD
   allBanksSnapshot.forEach(doc => {
     const data = doc.data();
     if (data.createdBy) {
-      creatorsSet.add(data.createdBy);
+        creatorsSet.add(data.createdBy);
     }
   });
 
@@ -108,14 +108,13 @@ export const fetchReportPerCreator = async ( ReportSteps: [], q: Query<DocumentD
 
         await Promise.all(
           ReportSteps.map(async (step: any) => {
-            const q = query(
-              BankDoc,
+            const nq = query(
+              q,
               orderBy("createdAt", "desc"),
               where("step", "in", step.key),
               where("createdBy", "==", creator)
             );
-
-            const snapshot = await getDocs(q);
+            const snapshot = await getDocs(nq);
 
             steps.push(step.label);
             values.push(snapshot.size);

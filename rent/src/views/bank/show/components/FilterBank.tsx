@@ -152,7 +152,6 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
                  setStart(undefined);
                 return;
               }
-             console.log('start:', date);
              setStart(new Date(date));
           }} />
 
@@ -162,7 +161,6 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
                  setEnd(undefined);
                 return;
               }
-             console.log('start:', date);
              setEnd(new Date(date));
           }}  />
 
