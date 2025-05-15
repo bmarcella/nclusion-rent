@@ -30,6 +30,12 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/bank/show/NeedApproval')),
         authority: ["coordonator", "assist_coordonator", "admin", "manager", "assist_manager", 'super_manager'],
     },
+     {
+        key: 'bankMenu.ops',
+        path: '/bank/ops',
+        component: lazy(() => import('@/views/bank/show/ops')),
+        authority: ["coordonator", "assist_coordonator", "admin", "manager", "assist_manager", 'super_manager'],
+    },
     {
         key: 'bankMenu.icurrent',
         path: '/bank/inactive',

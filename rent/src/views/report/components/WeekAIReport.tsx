@@ -4,14 +4,14 @@ import React, { useEffect, useState } from 'react';
 import Table from '@/components/ui/Table';
 import THead from '@/components/ui/Table/THead';
 import TBody from '@/components/ui/Table/TBody';
-import {  fetchReportPerCreatorPerWeek, getLast4Weeks, getQueryFiltersDate, getQueryFiltersWeek } from '@/services/Report';
+import {  fetchReportPerCreatorPerWeek, getLast4Weeks, getQueryFiltersWeek } from '@/services/Report';
 import UserName from '@/views/bank/show/components/UserName';
 import useTranslation from '@/utils/hooks/useTranslation';
 import { useSessionUser } from '@/store/authStore';
 import { BankDoc } from '@/services/Landlord';
 import { Query, DocumentData, query } from 'firebase/firestore';
 
-import {  ReportStepsFullX, ReportStepsSimple, ReportStepsWeek } from '@/views/Entity';
+import {  ReportStepsFullX, ReportStepsWeek } from '@/views/Entity';
 import FilterBankWeek from './FilterBankWeek';
 import { StepDateRange } from './StepDateRange';
 import { fetchReportPerReportWeek } from '@/views/Entity/Regions';
@@ -57,7 +57,7 @@ function WeekAIReport() {
   const advencedReport = async () => {
       setSteps([]);
       const now =  (!start) ? new Date() : start;
-      const weeks = getLast4Weeks(now);
+      const weeks = getLast4Weeks(now, 12);
       const steps =  ReportStepsFullX;
       const q: Query<DocumentData> = query(BankDoc);
       const filters = getQueryFiltersWeek(q,
