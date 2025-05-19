@@ -223,7 +223,7 @@ export const getQueryFiltersWeek = (q: Query<DocumentData, DocumentData>, { regi
 
 
 
-export function getLast4Weeks(dateInput: Date | string): { name: string; start: string; end: string }[] {
+export function getLast4Weeks(dateInput: Date | string, week: number = 4): { name: string; start: string; end: string }[] {
   const result = [];
   const date = new Date(dateInput);
   // Go to end of current week (Saturday)
@@ -231,7 +231,7 @@ export function getLast4Weeks(dateInput: Date | string): { name: string; start: 
   const day = endOfWeek.getDay(); // Sunday = 0
   endOfWeek.setDate(endOfWeek.getDate() - day + 6); // Saturday
 
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < week; i++) {
     const end = new Date(endOfWeek);
     end.setHours(23, 59, 59, 999); // Set to 11:59:59 PM
 
@@ -239,8 +239,8 @@ export function getLast4Weeks(dateInput: Date | string): { name: string; start: 
     start.setDate(end.getDate() - 6);
     start.setHours(0, 0, 0, 0); // Set to midnight
 
-    result.unshift({
-      name: `Week ${4 - i}`,
+    result.push({
+      name: `Week ${week - i}`,
       start: start,
       end: end,
     });

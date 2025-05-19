@@ -50,6 +50,7 @@
             "bankMenu": "Gestion Bank",
             "add": "Ajouter",
             "show": "Mes banks",
+            "ops":"Opérationelles",
             "current": "Banks Actives",
             "icurrent": "Banks Inactives",
             "approved": "Approbation",

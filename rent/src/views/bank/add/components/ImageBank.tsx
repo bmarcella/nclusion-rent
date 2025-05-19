@@ -2,16 +2,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Upload from '@/components/ui/Upload'
 import Button from '@/components/ui/Button'
-import { HiOutlineCloudUpload, HiOutlineInboxIn } from 'react-icons/hi'
 import { FcImageFile } from 'react-icons/fc'
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { storage }  from '@/services/firebase/FirebaseStorage'
 import { addDoc, CollectionReference, deleteDoc, getDocs, query, Timestamp, where } from 'firebase/firestore'
 import { bankPicturesDoc, getBankPictureRef } from '@/services/Landlord'
 import {  useEffect, useState } from 'react';
 import ImageGallery, { BankImage } from '../../show/components/ImageGallery';
 import { deleteImageFromStorage, getBankImages, uploadImageToStorage } from '@/services/firebase/BankService';
 import useTranslation from '@/utils/hooks/useTranslation';
+import { HiOutlineInboxIn } from 'react-icons/hi'
 
 interface Props {
   nextStep: (step: number, data: any) => void;
