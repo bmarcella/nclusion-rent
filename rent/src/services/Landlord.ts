@@ -15,6 +15,7 @@ const task = "BankTasks";
 const contracts = "contracts";
 const reqPictures = "RequetePictures";
 const Expenserequest = "ExpenseRequest";
+const otherBankPictures = "OtherBankPictures";
 // 
 export const contractsDoc  = collection(db, contracts);
 export const TaskDoc  = collection(db, task);
@@ -25,11 +26,16 @@ export const BankDoc   = collection(db, bank);
 export const BankLeaseDoc   = collection(db, bankLease);
 export const hdDoc   = collection(db, historicDecision);
 export const bankPicturesDoc = collection(db, bankImage);
+export const otherBankPicturesDoc = collection(db, otherBankPictures);
 export const LandlordPicturesDoc = collection(db, landlordPictures);
 export const bankCommentsDoc = collection(db, bankComments);
 export const taskCollection = collection(db, task);
 export const ExpenseRequestDoc = collection(db, Expenserequest)
 export const ReqPicturesDoc = collection(db, reqPictures);
+
+export const getOtherBankPicturesRef = (id: string ) => {
+     return doc(db, otherBankPictures, id);
+}
 
 export const getExpenseRequestDoc = (id: string ) => {
      return doc(db, Expenserequest, id);
