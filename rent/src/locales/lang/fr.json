@@ -1,7 +1,7 @@
 {
   "report" : {
     "weekAIReport" : {
-      "message": "Changer de type de rapport"
+      "message": "Rapport hebdomadaire et etat"
     }
 },"request": {
       "cash": "Espèces",
