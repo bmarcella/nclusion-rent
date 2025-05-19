@@ -1,7 +1,7 @@
 {
   "report" : {
     "weekAIReport" : {
-      "message": "Rapport hebdomadaire et etat"
+      "message": "Rapport hebdomadaire par etat"
     }
 },"request": {
       "cash": "Espèces",
