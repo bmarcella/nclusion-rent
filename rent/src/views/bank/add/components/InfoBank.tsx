@@ -67,7 +67,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
     const { authority, proprio } = useSessionUser((state) => state.user);
     const [ploading, setPloading] = useState(false);
     const { t } = useTranslation();
-       const fetchLandlords = async () => {
+    const fetchLandlords = async () => {
         
         try {
           setPloading(true);
@@ -191,7 +191,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
       
       const onSubmitInfo = async (data: FormValuesInfo) => {
         setSubmitting(true);
-        setValue("BANK", data);
+        setValue("bank", data);
           if (isEdit) {
              nextStep(1, data);
            } else {

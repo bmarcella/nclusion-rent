@@ -45,6 +45,16 @@ const navigationConfig: NavigationTree[] = [
                 authority: ["agent_immobilier", "admin", 'super_manager'],
                 subMenu: [],
             },
+             {
+                key: 'bankMenu.ops',
+                path: '/bank/ops',
+                title: 'Operationelles',
+                translateKey: 'nav.bankMenu.ops',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager", 'super_manager'],
+                subMenu: [],
+            },
             {
                 key: 'bankMenu.current',
                 path: '/bank/approval',

@@ -632,26 +632,39 @@ export const ReportStepsFullX = [
   {
     key: ["bankSteps.rejected"],
     label: "Rejeté",
+    sub: false
   },
   {
     key: ["bankSteps.needApproval"],
     label: "Non-Vues",
+    sub: false
   },
   {
     key: ["bankSteps.needApprobation", "bankSteps.needContract"],
     label: "Approuvée",
+    sub: false
   },
   {
     key: ["bankSteps.needRenovation"],
-    label: "Rénovation",
+    label: "Comptoire",
+    sub: true,
+    subKey: ["renovSteps.comptoire"]
+  },
+   {
+    key: ["bankSteps.needRenovation"],
+    label: "Peinture",
+    sub: true,
+    subKey: ["bankSteps.needRenovation"]
   },
   {
     key: ["bankSteps.readyToUse"],
     label: "Disponible",
+    sub: false
   },
   {
     key: ["bankSteps.notProceeded", "bankSteps.pending"],
     label: "Non traité",
+    sub: false
   },
 ];
 

@@ -46,6 +46,14 @@ export type RegionType = {
       value: "Permis de conduire",
     }
   ] as const;
+    export const DocTypeLeasedValues: DocType[] = [
+    {
+      id: 1,
+      name: "Contrat de bail " ,
+      label: "Contrat de bail signé",
+      value: "Contrat_de_bail",
+    },
+  ] as const;
   export const Regions: RegionType[] = [
     {
       id: 1,
@@ -432,12 +440,15 @@ export const fetchReportPerReportWeek = async (weeks: [], ReportSteps: [], q: Qu
                 const listAgent: string[] = [];
                 await Promise.all(
                   ReportSteps.map(async (step: any) => {
+                  
+                     const w =  (!step.sub) ?  where("step", "in", step.key) : where("renovStep", "in" , step.subKey);
+                  
                      const nq = query(
                       q,
                       orderBy("createdAt", "desc"),
                       where("createdAt", ">=", week.start),
                       where("createdAt", "<=", week.end),
-                      where("step", "in", step.key)
+                      w
                     );
           
                      const snapshot = await getDocs(nq);

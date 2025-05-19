@@ -52,6 +52,7 @@ import { hasAuthority } from '@/utils/RoleChecker';
 import GoogleMapWithMarkers from '../GoogleMapWithMarkers';
 import ChangeLocation from '../../add/components/ChangeLocation';
 import Currency from '@/views/shared/Currency';
+import ImageSignedContract from '../../add/components/ImageSignedContract';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -585,10 +586,10 @@ const pageSizeOption = [
             <Tabs defaultValue="tab1">
                 <TabList>
                     <TabNav value="tab1" icon={<BiEdit />}>
-                        Informations generales
+                        Informations générales
                     </TabNav>
                     <TabNav value="tab2" icon={<BiImage />}>
-                        Images
+                        Documents & Images
                     </TabNav>
                     <TabNav value="tab3" icon={<BiConversation />}>
                         Commentaires
@@ -624,6 +625,9 @@ const pageSizeOption = [
                                     <TabNav value="2tab2" icon={<BiImage />}>
                                         Proprietaires
                                     </TabNav>
+                                    <TabNav value="2tab3" icon={<BiImage />}>
+                                       Autres
+                                    </TabNav>
                                 </TabList>
                                 <div className="p-4">
                                 
@@ -634,6 +638,19 @@ const pageSizeOption = [
                                         </Alert>
                                         )}
                                         { cbank?.id && <ImageBank nextStep={nextStep} bankId={cbank.id}  userId={userId || ''} isEdit={true}></ImageBank> }
+                                    </TabContent>
+
+                                    <TabContent value="2tab3">
+                                        {message && (
+                                        <Alert showIcon className="mt-6 mb-6" type={alert}>
+                                            <span className="break-all ">{message}</span>
+                                        </Alert>
+                                        )}
+                                        { cbank?.id && 
+                                        <ImageSignedContract nextStep={nextStep}
+                                          bankId={cbank.id} 
+                                          userId={userId || ''} 
+                                          isEdit={true}></ImageSignedContract> }
                                     </TabContent>
 
                                     <TabContent value="2tab2">

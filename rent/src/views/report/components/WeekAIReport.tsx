@@ -4,14 +4,14 @@ import React, { useEffect, useState } from 'react';
 import Table from '@/components/ui/Table';
 import THead from '@/components/ui/Table/THead';
 import TBody from '@/components/ui/Table/TBody';
-import {  fetchReportPerCreatorPerWeek, getLast4Weeks, getQueryFiltersDate, getQueryFiltersWeek } from '@/services/Report';
+import {  fetchReportPerCreatorPerWeek, getLast4Weeks, getQueryFiltersWeek } from '@/services/Report';
 import UserName from '@/views/bank/show/components/UserName';
 import useTranslation from '@/utils/hooks/useTranslation';
 import { useSessionUser } from '@/store/authStore';
-import { BankDoc } from '@/services/Landlord';
-import { Query, DocumentData, query } from 'firebase/firestore';
+import { BankDoc, LandlordDoc } from '@/services/Landlord';
+import { Query, DocumentData, query, getCountFromServer, orderBy, where } from 'firebase/firestore';
 
-import {  ReportStepsFullX, ReportStepsSimple, ReportStepsWeek } from '@/views/Entity';
+import {  ReportStepsFullX, ReportStepsWeek } from '@/views/Entity';
 import FilterBankWeek from './FilterBankWeek';
 import { StepDateRange } from './StepDateRange';
 import { fetchReportPerReportWeek } from '@/views/Entity/Regions';
@@ -28,10 +28,49 @@ function WeekAIReport() {
   const [start, setStart] = useState<Date>();
   const [end, setEnd] = useState<Date>();
   const [type_rep, setTypeRep] = useState<boolean>();
+  const [ totalData, setTotalData] = useState<any[]>([]);
+  const [ div, setDiv] = useState<number>(0);
+
+   const fetchTotalCount = async (regions: number, weeks: []) => {
+          let prev = 0;
+          weeks = weeks.reverse();
+          const new_val = await Promise.all(
+              weeks.map(async (week: any) => {
+              let q: Query<DocumentData>;
+              if (regions) {
+                   q = query(LandlordDoc, 
+                    where("regions", 'array-contains', regions),  
+                    where('type_person','==','agent_immobilier'),
+                    where("createdAt", ">=", week.start),
+                    where("createdAt", "<=", week.end),
+                  );
+              } else{
+                 q = query(LandlordDoc, 
+                    where('type_person','==','agent_immobilier'),
+                    where("createdAt", ">=", week.start),
+                    where("createdAt", "<=", week.end),
+                  );
+              }
+          const snapshot = await getCountFromServer(q);  // 🚀 NOT getDocs!
+          const np = prev;
+          prev += snapshot.data().count;
+          return  {
+            week: week,
+            new: snapshot.data().count,
+            old: np,
+            total: prev,
+          }
+                          })
+                        );
+           setTotalData(new_val.reverse());
+           console.log('totalData', new_val);
+      };
 
   useEffect(() => {
    if (!type_rep) simpleReport();
    else advencedReport();
+   
+
   }, [regions, agents, start, type_rep]);
 
   const simpleReport = async () => {
@@ -57,7 +96,7 @@ function WeekAIReport() {
   const advencedReport = async () => {
       setSteps([]);
       const now =  (!start) ? new Date() : start;
-      const weeks = getLast4Weeks(now);
+      const weeks = getLast4Weeks(now, 12);
       const steps =  ReportStepsFullX;
       const q: Query<DocumentData> = query(BankDoc);
       const filters = getQueryFiltersWeek(q,
@@ -68,10 +107,11 @@ function WeekAIReport() {
         proprio: proprio
       });
       fetchReportPerReportWeek(weeks, steps, filters).then((result) => {
-      console.log("result", result);
+      setDiv(result.length);
       setDatab(result);
       if (result.length > 0) {
         setSteps(result[0].steps);
+        fetchTotalCount(regions, weeks);
       }
       setLoading(false);
     });
@@ -118,7 +158,7 @@ const onChangeAgent = async (id: string) =>{
   return (
     <div className="overflow-x-auto p-1 bg-white rounded-lg shadow-md">
 
-          <FilterBankWeek  authority={authority || []} proprio={proprio} t={t}
+         <FilterBankWeek  authority={authority || []} proprio={proprio} t={t}
            onChangeRegion={onChangeRegion} 
            onChangeAgent={onChangeAgent} 
            onChangeDate = {onChangeDate}
@@ -210,7 +250,7 @@ const onChangeAgent = async (id: string) =>{
         <TBody>
          <tr className="font-semibold bg-gray-100 border-t">
             <td className="p-2 text-left">Total</td>
-            { <td className="text-center p-2">{grandTotalAgent}</td> }
+            { totalData && totalData.length>0 &&  <td className="text-center p-2">{(grandTotalAgent/div).toFixed(2) } / { totalData[0].total } ({(((grandTotalAgent/div)/ totalData[0].total)*100).toFixed(2)}%) </td> }
             <td className="text-center p-2">{grandTotal}</td>
             {columnTotals.map((val, idx) => (
               <td key={`col-total-${idx}`} className="text-center p-2">
@@ -220,7 +260,7 @@ const onChangeAgent = async (id: string) =>{
           { type_rep && <td className="text-center p-2"> { ((columnTotals[1]/grandTotal) * 100).toFixed(2) }%</td> }
           </tr>
 
-          {datab.map(({ week, values, total_agents, index }) => {
+          {datab.map(({ week, values, total_agents, index }, i) => {
             const rowTotal = values.reduce((acc, val) => acc + val, 0);
             const perc = ((values[2] / rowTotal) * 100);
             let colorClass = '';
@@ -231,11 +271,11 @@ const onChangeAgent = async (id: string) =>{
             return (
               <tr key={index} className="border-t">
                 <td className="p-2 text-left font-semibold" >
-                 { week.name}
+              
                 <StepDateRange start={week.start} end={week.end} key={index}> </StepDateRange>
                 </td>
-                {  <td className="text-center font-semibold">
-                  {total_agents}
+                { totalData && totalData.length>0 && <td className="text-center font-semibold">
+                  { total_agents} / { totalData[i].total || 0 } ( {(total_agents/(totalData[i].total || 0) * 100).toFixed(2)} %)
                 </td> }
                 <td className="text-center font-semibold">{rowTotal}</td>
                 {values.map((value, i) => (
