@@ -15,6 +15,16 @@ import {  ReportStepsFullX, ReportStepsWeek } from '@/views/Entity';
 import FilterBankWeek from './FilterBankWeek';
 import { StepDateRange } from './StepDateRange';
 import { fetchReportPerReportWeek } from '@/views/Entity/Regions';
+
+
+interface WeekResult {
+  week: any;
+  new: number;
+  old: number;
+  total: number;
+}
+
+
 function WeekAIReport() {
   const [data, setData] = useState<any[]>([]);
   const [datab, setDatab] = useState<any[]>([]);
@@ -30,41 +40,56 @@ function WeekAIReport() {
   const [type_rep, setTypeRep] = useState<boolean>();
   const [ totalData, setTotalData] = useState<any[]>([]);
   const [ div, setDiv] = useState<number>(0);
+ 
 
-   const fetchTotalCount = async (regions: number, weeks: []) => {
-          let prev = 0;
-          weeks = weeks.reverse();
-          const new_val = await Promise.all(
-              weeks.map(async (week: any) => {
-              let q: Query<DocumentData>;
-              if (regions) {
-                   q = query(LandlordDoc, 
-                    where("regions", 'array-contains', regions),  
-                    where('type_person','==','agent_immobilier'),
-                    where("createdAt", ">=", week.start),
-                    where("createdAt", "<=", week.end),
-                  );
-              } else{
-                 q = query(LandlordDoc, 
-                    where('type_person','==','agent_immobilier'),
-                    where("createdAt", ">=", week.start),
-                    where("createdAt", "<=", week.end),
-                  );
-              }
-          const snapshot = await getCountFromServer(q);  // 🚀 NOT getDocs!
-          const np = prev;
-          prev += snapshot.data().count;
-          return  {
-            week: week,
-            new: snapshot.data().count,
-            old: np,
-            total: prev,
-          }
-                          })
-                        );
-           setTotalData(new_val.reverse());
-           console.log('totalData', new_val);
-      };
+
+
+const fetchTotalCount = async (regions: number, weeks: []): Promise<void> => {
+  let prev = 0;
+
+  const reversedWeeks = [...weeks].reverse(); // Avoid mutating original array
+
+  const results: WeekResult[] = [];
+
+  for (const week of reversedWeeks) {
+    let q: Query<DocumentData>;
+
+    if (regions) {
+      q = query(
+        LandlordDoc,
+        where("regions", "array-contains", regions),
+        where("type_person", "==", "agent_immobilier"),
+        where("createdAt", ">=", week.start),
+        where("createdAt", "<=", week.end)
+      );
+    } else {
+      q = query(
+        LandlordDoc,
+        where("type_person", "==", "agent_immobilier"),
+        where("createdAt", ">=", week.start),
+        where("createdAt", "<=", week.end)
+      );
+    }
+
+    const snapshot = await getCountFromServer(q);
+    const currentCount = snapshot.data().count;
+
+    results.push({
+      week,
+      new: currentCount,
+      old: prev,
+      total: prev + currentCount
+    });
+
+    prev += currentCount;
+  }
+
+  setTotalData(results.reverse());
+  console.log("totalData", results);
+};
+
+
+  
 
   useEffect(() => {
    if (!type_rep) simpleReport();
@@ -154,7 +179,7 @@ const onChangeAgent = async (id: string) =>{
 
   // Calculate grand total (sum of all values)
   // const grandTotal = columnTotals.reduce((acc, val) => acc + val, 0);
-
+  const totalAgents = totalData.reduce((acc, val) => acc + val.new, 0);
   return (
     <div className="overflow-x-auto p-1 bg-white rounded-lg shadow-md">
 
@@ -237,7 +262,8 @@ const onChangeAgent = async (id: string) =>{
         <THead>
           <tr>
             <th>Week</th>
-            {  <th>Agents</th> }
+            {  <th>Nouveau Agent</th> }
+            {  <th>Total Agents</th> }
             <th className="text-center p-2">Total</th>
             {steps.map((step, idx) => (
               <th key={typeof step === 'string' ? step : step.name ?? idx} className="text-center capitalize">
@@ -250,7 +276,8 @@ const onChangeAgent = async (id: string) =>{
         <TBody>
          <tr className="font-semibold bg-gray-100 border-t">
             <td className="p-2 text-left">Total</td>
-            { totalData && totalData.length>0 &&  <td className="text-center p-2">{(grandTotalAgent/div).toFixed(2) } / { totalData[0].total } ({(((grandTotalAgent/div)/ totalData[0].total)*100).toFixed(2)}%) </td> }
+             { totalData && totalData.length>0 &&  <td className="text-center p-2"> { totalAgents } </td> }
+            { totalData && totalData.length>0 &&  <td className="text-center p-2">{(grandTotalAgent/div).toFixed(2) } / { totalAgents } ({(((grandTotalAgent/div) / totalAgents )*100).toFixed(2)}%) </td> }
             <td className="text-center p-2">{grandTotal}</td>
             {columnTotals.map((val, idx) => (
               <td key={`col-total-${idx}`} className="text-center p-2">
@@ -274,8 +301,11 @@ const onChangeAgent = async (id: string) =>{
               
                 <StepDateRange start={week.start} end={week.end} key={index}> </StepDateRange>
                 </td>
+                 { totalData && totalData.length>0 && <td className="text-center font-semibold">
+                    { totalData[i].new || 0 }
+                </td> }
                 { totalData && totalData.length>0 && <td className="text-center font-semibold">
-                  { total_agents} / { totalData[i].total || 0 } ( {(total_agents/(totalData[i].total || 0) * 100).toFixed(2)} %)
+                  { total_agents} / { (totalData[i].total) || 0 } ( {(total_agents/(totalData[i].total || 0) * 100).toFixed(2)} %)
                 </td> }
                 <td className="text-center font-semibold">{rowTotal}</td>
                 {values.map((value, i) => (

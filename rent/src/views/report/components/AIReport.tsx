@@ -96,7 +96,7 @@ const onChangeAgent = async (id: string) =>{
         </caption>
         <THead>
           <tr>
-            <th>Agents</th>
+            <th>Agents ({data.length})</th>
             <th>Total</th>
             {steps.map((step) => (
               <th key={step} className="text-center capitalize">
