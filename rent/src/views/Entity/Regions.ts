@@ -53,6 +53,12 @@ export type RegionType = {
       label: "Contrat de bail signé",
       value: "Contrat_de_bail",
     },
+     {
+      id: 1,
+      name: "Contrat de Renouvellement ",
+      label: "Contrat de renouvellement de bail signé",
+      value: "Contrat_de_renouvellement_bail",
+    },
   ] as const;
   export const Regions: RegionType[] = [
     {
