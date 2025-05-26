@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Button from "@/components/ui/Button";
 import React, { useState } from "react";
-import { MdOutlineDeleteOutline } from "react-icons/md";
+import { MdFileDownload, MdOutlineDeleteOutline } from "react-icons/md";
 import UserName from "./UserName";
 import { TbPdf } from "react-icons/tb";
 import Dialog from "@/components/ui/Dialog";
@@ -31,13 +31,14 @@ interface ImageGalleryProps {
   onDelete?: (image: ContractSignedImage) => void;
   canDelete?: boolean;
   showPic?: boolean;
+  canDownload?: boolean;
 }
 
 const openPDF = (url: string ) => {
   window.open(url, '_blank');
 };
 
-const ContractSignedImageComp : React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=>{} , userId, canDelete = true, showPic=false}) => {
+const ContractSignedImageComp : React.FC<ImageGalleryProps> = ({ images, canDownload=true, onDelete=(i: any)=>{} , userId, canDelete = true, showPic=false}) => {
   const [ image, setCImg] = useState() as any;
   const [dialogIsOpen, setIsOpen] = useState(false)
   const { width, height } = useWindowSize();
@@ -52,6 +53,18 @@ const ContractSignedImageComp : React.FC<ImageGalleryProps> = ({ images, onDelet
       setCImg(undefined);
       setIsOpen(false)
   }
+
+  const handleDownload = (image: ContractSignedImage) => {
+    const link = document.createElement('a');
+    link.href = image.imageUrl;
+    link.download = image.fileName || 'downloaded-file';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
 
   
   return (
@@ -93,6 +106,13 @@ const ContractSignedImageComp : React.FC<ImageGalleryProps> = ({ images, onDelet
           icon={<MdOutlineDeleteOutline />}
           className="text-sm text-red-600 hover:underline mr-4"
           onClick={() => onDelete(image)}
+        />
+      )}
+      {canDownload && (
+        <Button
+          icon={<MdFileDownload />}
+          className="text-sm text-green-600 hover:underline mr-4"
+          onClick={() => handleDownload(image)}
         />
       )}
       {image.file_type === "application/pdf" && (
