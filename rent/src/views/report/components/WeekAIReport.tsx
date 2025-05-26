@@ -40,17 +40,20 @@ function WeekAIReport() {
   const [type_rep, setTypeRep] = useState<boolean>();
   const [ totalData, setTotalData] = useState<any[]>([]);
   const [ div, setDiv] = useState<number>(0);
+   const [ prevTotal, setPrevTotal] = useState<number>(0);
  
 
 
 
-const fetchTotalCount = async (regions: number, weeks: []): Promise<void> => {
+const fetchTotalCount = async (regions: number, weeks: [], i: number): Promise<void> => {
   let prev = 0;
+
+  await fetchPrevTotalCount(regions, weeks, i );
 
   const reversedWeeks = [...weeks].reverse(); // Avoid mutating original array
 
   const results: WeekResult[] = [];
-
+  let w = 0;
   for (const week of reversedWeeks) {
     let q: Query<DocumentData>;
 
@@ -73,6 +76,7 @@ const fetchTotalCount = async (regions: number, weeks: []): Promise<void> => {
 
     const snapshot = await getCountFromServer(q);
     const currentCount = snapshot.data().count;
+    if (w==0) currentCount + prevTotal;
 
     results.push({
       week,
@@ -82,6 +86,7 @@ const fetchTotalCount = async (regions: number, weeks: []): Promise<void> => {
     });
 
     prev += currentCount;
+    w++;
   }
 
   setTotalData(results.reverse());
@@ -89,9 +94,43 @@ const fetchTotalCount = async (regions: number, weeks: []): Promise<void> => {
 };
 
 
+
+
+const fetchPrevTotalCount = async (regions: number, weeks: [], i: number): Promise<void> => {
+
+
+    let week = weeks[i];
+    let q: Query<DocumentData>;
+    if (week === undefined) {
+      console.log("week is undefined");
+      return;
+    }
+    if (regions) {
+      q = query(
+        LandlordDoc,
+        where("regions", "array-contains", regions),
+        where("type_person", "==", "agent_immobilier"),
+        where("createdAt", "<", week.start),
+      );
+    } else {
+      q = query(
+        LandlordDoc,
+        where("type_person", "==", "agent_immobilier"),
+        where("createdAt", "<", week.start),
+      );
+    }
+
+    const snapshot = await getCountFromServer(q);
+    const currentCount = snapshot.data().count;
+    setPrevTotal(currentCount);
+    console.log("prevTotal", currentCount, week.start);
+};
+
+
   
 
   useEffect(() => {
+    setPrevTotal(0);
    if (!type_rep) simpleReport();
    else advencedReport();
    
@@ -136,7 +175,8 @@ const fetchTotalCount = async (regions: number, weeks: []): Promise<void> => {
       setDatab(result);
       if (result.length > 0) {
         setSteps(result[0].steps);
-        fetchTotalCount(regions, weeks);
+        fetchTotalCount(regions, weeks, (result.length -1));
+       
       }
       setLoading(false);
     });
@@ -179,7 +219,7 @@ const onChangeAgent = async (id: string) =>{
 
   // Calculate grand total (sum of all values)
   // const grandTotal = columnTotals.reduce((acc, val) => acc + val, 0);
-  const totalAgents = totalData.reduce((acc, val) => acc + val.new, 0);
+  const totalAgents = totalData.reduce((acc, val) => acc + val.new, 0) ;
   return (
     <div className="overflow-x-auto p-1 bg-white rounded-lg shadow-md">
 
@@ -276,7 +316,7 @@ const onChangeAgent = async (id: string) =>{
         <TBody>
          <tr className="font-semibold bg-gray-100 border-t">
             <td className="p-2 text-left">Total</td>
-             { totalData && totalData.length>0 &&  <td className="text-center p-2"> { totalAgents } </td> }
+             { totalData && totalData.length>0 &&  <td className="text-center p-2"> { totalAgents  } </td> }
             { totalData && totalData.length>0 &&  <td className="text-center p-2">{(grandTotalAgent/div).toFixed(2) } / { totalAgents } ({(((grandTotalAgent/div) / totalAgents )*100).toFixed(2)}%) </td> }
             <td className="text-center p-2">{grandTotal}</td>
             {columnTotals.map((val, idx) => (
@@ -305,7 +345,7 @@ const onChangeAgent = async (id: string) =>{
                     { totalData[i].new || 0 }
                 </td> }
                 { totalData && totalData.length>0 && <td className="text-center font-semibold">
-                  { total_agents} / { (totalData[i].total) || 0 } ( {(total_agents/(totalData[i].total || 0) * 100).toFixed(2)} %)
+                  { total_agents} / { (totalData[i].total ) || 0 } ( {(total_agents/ ((totalData[i].total ) || 0) * 100).toFixed(2)} %)
                 </td> }
                 <td className="text-center font-semibold">{rowTotal}</td>
                 {values.map((value, i) => (
