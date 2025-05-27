@@ -4,7 +4,7 @@ import Upload from '@/components/ui/Upload'
 import Button from '@/components/ui/Button'
 import { HiOutlineInboxIn } from 'react-icons/hi'
 import { FcImageFile } from 'react-icons/fc'
-import { addDoc,  deleteDoc,  Timestamp } from 'firebase/firestore'
+import { addDoc,  deleteDoc,  Timestamp, updateDoc } from 'firebase/firestore'
 import { getOtherBankPicturesRef, otherBankPicturesDoc } from '@/services/Landlord'
 import {  useEffect, useState } from 'react';
 import { deleteImageFromStorage, getLordImages, getOtherImages, uploadImageToStorage } from '@/services/firebase/BankService';
@@ -66,7 +66,7 @@ const ImageSignedContract = ( { bankId, isEdit = false, nextStep, userId } : Pro
         setLoading(true)    
         const pics  = await Promise.all(
              uploadedFiles.map(async (file) => {
-                    const { url , fileName } = await uploadImageToStorage(file, bankId, 'banks');
+                    const { url , fileName } = await uploadImageToStorage(file, bankId, 'signed-contracts');
                     const doc : ContractSignedImage = {
                         id: '',
                         bankId,
@@ -80,7 +80,9 @@ const ImageSignedContract = ( { bankId, isEdit = false, nextStep, userId } : Pro
                         createBy: userId || '',
                         updateBy: userId || ''
                     }
-                    await addDoc(otherBankPicturesDoc, doc );
+                    const docRef = await addDoc(otherBankPicturesDoc, doc );
+                    await updateDoc(docRef, {id: docRef.id});
+                    doc.id = docRef.id;
                     return doc;
                 })
         );

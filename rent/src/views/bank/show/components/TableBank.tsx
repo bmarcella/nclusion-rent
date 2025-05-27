@@ -74,7 +74,7 @@ const pageSizeOption = [
     const [page, setPage] = useState(1);
     const [hasNext, setHasNext] = useState(true);
     const [banks, setBanks] = useState<Bank[]>([]);
-    const [currentPage, setCurrentPage] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     const [pageDocs, setPageDocs] = useState<DocumentSnapshot[]>([]);
     const fetchedRef = useRef(false);
     const [totalData, setTotalData] = useState(1);
@@ -334,24 +334,14 @@ const pageSizeOption = [
     
     useEffect(() => {
         if (fetchedRef.current) return;
-         fetchBanks(1); // load first page
+         fetchBanks(currentPage); // load first page
       }, []);
 
     useEffect(() => {
-        fetchBanks(1);
+        fetchBanks(currentPage);
      }, [start, end, regions, agents, steps]);
 
-    // const handlePrev = () => {
-    //     if (page > 1) {
-    //         fetchBanks(page - 1);
-    //     }
-    //   };
-    
-    //   const handleNext = () => {
-    //     if (hasNext) {
-    //         fetchBanks(page + 1);
-    //     }
-    //   };
+
 
     const table = useReactTable({
         data: banks,
@@ -362,14 +352,17 @@ const pageSizeOption = [
     })
 
     const onPaginationChange = (page: number) => {
-        if (page > currentPage) {
-            fetchBanks(page); // fetch next page when needed
-        }
-        table.setPageIndex(page - 1);
+            console.log("onPaginationChange: ", page);
+            if (page !== currentPage) {
+                fetchBanks(page); // ✅ Use the new value directly
+                setCurrentPage(page);
+                setCurrentPage(page);
+            }
+            table.setPageIndex(page - 1);
     }
 
     const onSelectChange = (value = 0) => {
-        table.setPageSize(Number(value))
+          table.setPageSize(Number(value))
     }
     const onChangeBank = (payload: any, step:number) => {
     if(step != 1) {
@@ -394,7 +387,6 @@ const pageSizeOption = [
     }
 
     const nextStep = async (step: number, data: any ) => {
-     console.log(`Step Data (${step}) =>`, data);
      switch (step) {
         case 6:
             setMessage("Images saved successfully.");
@@ -411,7 +403,6 @@ const pageSizeOption = [
     }
 
     const onChangeRegion = async (id: number) => {
-        console.log("onChangeRegion: ", id);
         setRegions(id);
     }
 
@@ -548,7 +539,8 @@ const pageSizeOption = [
             <div className="flex items-center justify-between mt-4">
                 <Pagination
                     pageSize={table.getState().pagination.pageSize}
-                    currentPage={table.getState().pagination.pageIndex + 1}
+                    // currentPage={table.getState().pagination.pageIndex + 1}
+                    currentPage={currentPage}
                     total={totalData}
                     onChange={onPaginationChange}
                 />
@@ -650,7 +642,8 @@ const pageSizeOption = [
                                         <ImageSignedContract nextStep={nextStep}
                                           bankId={cbank.id} 
                                           userId={userId || ''} 
-                                          isEdit={true}></ImageSignedContract> }
+                                          isEdit={true}>
+                                          </ImageSignedContract> }
                                     </TabContent>
 
                                     <TabContent value="2tab2">
