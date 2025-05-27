@@ -69,7 +69,7 @@ const ContractSignedImageComp : React.FC<ImageGalleryProps> = ({ images, canDown
   
   return (
     <div className="mt-6">
-    { canDelete && <h6 className="text-2xl font-semibold mb-4">Contrat signés</h6> }
+    { canDelete && <h6 className="text-2xl font-semibold mb-4">Autres documents</h6> }
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 gap-4">
       {images.map((image, index) => (
   <div
