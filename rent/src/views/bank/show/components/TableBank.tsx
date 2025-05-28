@@ -317,7 +317,8 @@ const pageSizeOption = [
             })
         );
         // Instead of replacing, accumulate
-        setBanks((prevBanks: any) => (pageNum === 1 ? newBanks : [...prevBanks, ...newBanks]));
+        // setBanks((prevBanks: any) => (pageNum === 1 ? newBanks : [...prevBanks, ...newBanks]));
+        setBanks(newBanks);
         setCurrentPage(pageNum);
     
         // Important: set the last doc for next page
@@ -346,12 +347,14 @@ const pageSizeOption = [
         columns,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        // getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true, // ✅ Add this
+        pageCount: Math.ceil(totalData / pageSize), // ✅ Optional
     })
 
 
       useEffect(() => {
-        table.setPageSize(Number(pageSize))
+        //table.setPageSize(Number(pageSize))
         setCurrentPage(1); // reset first
         fetchBanks(1); 
      }, [start, end, regions, agents, steps]);
@@ -364,12 +367,14 @@ const pageSizeOption = [
     // }
 
     const onPaginationChange = async (page: number) => {
-        if (page !== currentPage) {
-            await fetchBanks(page); // wait until data is fetched and state is correct
-            setCurrentPage(page);
+        // if (page !== currentPage) {
+        //     await fetchBanks(page); // wait until data is fetched and state is correct
+        //     setCurrentPage(page);
            
-        }
-         table.setPageIndex(page - 1);
+        // }
+        //  table.setPageIndex(page - 1);
+
+          await fetchBanks(page);
   };
 
     const onSelectChange = (value = 0) => {
@@ -550,9 +555,11 @@ const pageSizeOption = [
              }
             <div className="flex items-center justify-between mt-4">
                 <Pagination
-                    pageSize={table.getState().pagination.pageSize}
-                    currentPage={table.getState().pagination.pageIndex + 1}
+                    // pageSize={table.getState().pagination.pageSize}
+                    // currentPage={table.getState().pagination.pageIndex + 1}
                     // currentPage={currentPage}
+                    pageSize={pageSize}
+                    currentPage={currentPage}
                     total={totalData}
                     // total={banks.length}
                     onChange={onPaginationChange}
