@@ -56,6 +56,8 @@ import ImageSignedContract from '../../add/components/ImageSignedContract';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
+    { value: 10, label:  '10 / page' },
+    { value: 50, label:  '50 / page' },
     { value: 100, label: '100 / page' },
     { value: 200, label: '200 / page' },
 ]
@@ -72,9 +74,10 @@ const pageSizeOption = [
    }
   export function TableBank ( { step , isAgent = false, all = false  }: Props) { 
     const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(pageSizeOption[0].value);
     const [hasNext, setHasNext] = useState(true);
     const [banks, setBanks] = useState<Bank[]>([]);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(0);
     const [pageDocs, setPageDocs] = useState<DocumentSnapshot[]>([]);
     const fetchedRef = useRef(false);
     const [totalData, setTotalData] = useState(1);
@@ -281,12 +284,12 @@ const pageSizeOption = [
         let q: Query<DocumentData>;
         if (!step) {
             if (!all) {
-                q = query(BankDoc, orderBy("createdAt", "desc"), where("createdBy", "==", userId), limit(pageSizeOption[0].value));
+                q = query(BankDoc, orderBy("createdAt", "desc"), where("createdBy", "==", userId), limit(pageSize));
             } else {
-                q = query(BankDoc, orderBy("createdAt", "desc"), limit(pageSizeOption[0].value));
+                q = query(BankDoc, orderBy("createdAt", "desc"), limit(pageSize));
             }
         } else {
-            q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step), limit(pageSizeOption[0].value));
+            q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step), limit(pageSize));
         }
     
         q = getQueryDate(q);
@@ -313,11 +316,9 @@ const pageSizeOption = [
                 return { id: docSnap.id, ...data, landlord, images };
             })
         );
-
-        console.log("Banks: ", newBanks);
-    
         // Instead of replacing, accumulate
-        setBanks((prevBanks: any) => (pageNum === 1 ? newBanks : [...prevBanks, ...newBanks]));
+        // setBanks((prevBanks: any) => (pageNum === 1 ? newBanks : [...prevBanks, ...newBanks]));
+        setBanks(newBanks);
         setCurrentPage(pageNum);
     
         // Important: set the last doc for next page
@@ -332,38 +333,55 @@ const pageSizeOption = [
         // (optional) update totalData properly if you fetched total separately
     };
     
-    useEffect(() => {
-        if (fetchedRef.current) return;
-         fetchBanks(currentPage); // load first page
-      }, []);
+    // useEffect(() => {
+    //     if (fetchedRef.current) return;
+    //      fetchBanks(currentPage); // load first page
+    //   }, []);
 
-    useEffect(() => {
-        fetchBanks(currentPage);
-     }, [start, end, regions, agents, steps]);
+  
 
 
 
-    const table = useReactTable({
+    const table: any = useReactTable({
         data: banks,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        // getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true, // ✅ Add this
+        pageCount: Math.ceil(totalData / pageSize), // ✅ Optional
     })
 
-    const onPaginationChange = (page: number) => {
-            console.log("onPaginationChange: ", page);
-            if (page !== currentPage) {
-                fetchBanks(page); // ✅ Use the new value directly
-                setCurrentPage(page);
-                setCurrentPage(page);
-            }
-            table.setPageIndex(page - 1);
-    }
+
+      useEffect(() => {
+        //table.setPageSize(Number(pageSize))
+        setCurrentPage(1); // reset first
+        fetchBanks(1); 
+     }, [start, end, regions, agents, steps]);
+
+    // const onPaginationChange = (page: number) => {
+    //         if (page !== currentPage) {
+    //             fetchBanks(page); // ✅ Use the new value directly
+    //         }
+    //         table.setPageIndex(page - 1);
+    // }
+
+    const onPaginationChange = async (page: number) => {
+        // if (page !== currentPage) {
+        //     await fetchBanks(page); // wait until data is fetched and state is correct
+        //     setCurrentPage(page);
+           
+        // }
+        //  table.setPageIndex(page - 1);
+
+          await fetchBanks(page);
+  };
 
     const onSelectChange = (value = 0) => {
           table.setPageSize(Number(value))
+          setPageSize(Number(value));
     }
+
     const onChangeBank = (payload: any, step:number) => {
     if(step != 1) {
         setCBank((prev: any) => {
@@ -483,8 +501,7 @@ const pageSizeOption = [
 
           </FilterBank> }
 
-              { !step && <FilterMyBank 
-             onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t} all={all} ></FilterMyBank> } 
+          { !step && <FilterMyBank onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t} all={all} ></FilterMyBank> } 
       
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
           { !isMap &&  <>
@@ -535,13 +552,16 @@ const pageSizeOption = [
                     // zoom={8} // optional
                   />
                   )
-            }
+             }
             <div className="flex items-center justify-between mt-4">
                 <Pagination
-                    pageSize={table.getState().pagination.pageSize}
+                    // pageSize={table.getState().pagination.pageSize}
                     // currentPage={table.getState().pagination.pageIndex + 1}
+                    // currentPage={currentPage}
+                    pageSize={pageSize}
                     currentPage={currentPage}
                     total={totalData}
+                    // total={banks.length}
                     onChange={onPaginationChange}
                 />
                 <div style={{ minWidth: 130 }}>
