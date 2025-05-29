@@ -94,6 +94,7 @@ const pageSizeOption = [
     const [agents, setAgents] = useState<string>();
     const [start, setStart] = useState<Date>();
     const [end, setEnd] = useState<Date>();
+    const [name, setName] = useState<string>();
     const [steps, setSteps] = useState<string>();
     const [isMap, setMap] = useState<boolean>();
     const [mapData, setMapData] = useState<any[]>();
@@ -231,6 +232,11 @@ const pageSizeOption = [
                 filters.push(where('createdBy', '==', agents));
             }
 
+            if (name) {
+                filters.push(where('bankName', '>=', name));
+                filters.push(where('bankName', '<=', name + '\uf8ff' ));
+            }
+
             if (steps) {
                 filters.push(where('step', '==', steps));
             }
@@ -357,7 +363,7 @@ const pageSizeOption = [
         //table.setPageSize(Number(pageSize))
         setCurrentPage(1); // reset first
         fetchBanks(1); 
-     }, [start, end, regions, agents, steps]);
+     }, [start, end, regions, agents, steps, name]);
 
     // const onPaginationChange = (page: number) => {
     //         if (page !== currentPage) {
@@ -427,6 +433,10 @@ const pageSizeOption = [
     const onChangeAgent = async (id: string) =>{
        console.log("onChangeAgent: ", id);
        setAgents(id);
+     }
+
+    const onChangeName = async (name: string) =>{
+       setName(name);
      }
 
      const onChangeDate = async (start: Date, end: Date) => {
@@ -501,7 +511,9 @@ const pageSizeOption = [
 
           </FilterBank> }
 
-          { !step && <FilterMyBank onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t} all={all} ></FilterMyBank> } 
+          { !step && <FilterMyBank onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t} all={all} 
+          onChangeName={onChangeName}
+          ></FilterMyBank> } 
       
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
           { !isMap &&  <>
