@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DatePicker } from '@/components/ui';
+import { DatePicker, Input } from '@/components/ui';
 import { Select } from '@/components/ui/Select';
 import { bankSteps, Proprio } from '@/views/Entity';
 import {   RegionType } from '@/views/Entity/Regions';
@@ -17,6 +17,8 @@ interface Props {
   inBankSteps?: string[];
   t : (key: string) => string;
   all : boolean;
+
+  onChangeName?: (d: string ) => void;
 }
 
 export const convertToSelectOptionsRegion = (items: RegionType[]) => {
@@ -43,7 +45,7 @@ export const convertToSelectOptionsSteps = (items: string[], t: any) => {
 }
 
 
-function FilterMyBank({ onChangeDate, onChangeStep, t, all, inBankSteps  }: Props) {
+function FilterMyBank({ onChangeDate, onChangeStep, t, all, inBankSteps , onChangeName }: Props) {
   const bs  =   (inBankSteps) ? inBankSteps : bankSteps;
   const [start, setStart] = useState<Date>();
   const [end, setEnd] = useState<Date>();
@@ -77,6 +79,17 @@ function FilterMyBank({ onChangeDate, onChangeStep, t, all, inBankSteps  }: Prop
                 }}
               />
             )}
+       { onChangeName && (
+              <Input
+                type="text"
+                placeholder={t('bank.search')}
+                className="border p-2 rounded w-full"
+                onChange={(e) => {
+                  console.log('name:', e.target.value);
+                  onChangeName(e.target.value);
+                }}
+              />
+            )} 
         { !all && (<>
               <DatePicker placeholder="Date debut"  onChange={(date) => {
                           setStart(undefined);
