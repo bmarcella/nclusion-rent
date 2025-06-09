@@ -235,6 +235,9 @@ const pageSizeOption = [
             if (name) {
                 filters.push(where('bankName', '>=', name));
                 filters.push(where('bankName', '<=', name + '\uf8ff' ));
+
+                filters.push(where('bankName', '>=', cfl(name)));
+                filters.push(where('bankName', '<=', cfl(name) + '\uf8ff' ));
             }
 
             if (steps) {
@@ -267,6 +270,10 @@ const pageSizeOption = [
                 }
             }
             return filters.length > 0 ? query(q, ...filters) : q;
+    }
+
+    const cfl = (val: string) =>{
+     return String(val).charAt(0).toUpperCase() + String(val).slice(1);
     }
 
     const fetchTotalCount = async () => {
