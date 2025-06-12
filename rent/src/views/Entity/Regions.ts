@@ -319,6 +319,31 @@ export type RegionType = {
       ]
     },
     {
+    id: 11,
+    name: "Nippes",
+    capital: "Miragoâne",
+    label: "Miragoâne",
+    accounts: [
+      "BUH OPS HTG-CAY80531",
+      "BUH OPS USD-CAY8054",
+      "SAFEBOX",
+      "OTHER"
+    ],
+    value: 11,
+    cities: [
+      "Miragoâne",
+      "Anse-à-Veau",
+      "Petit-Trou-de-Nippes",
+      "Baradères",
+      "Arnaud",
+      "Plaisance-du-Sud",
+      "Paillant",
+      "Petit-Goâve (partie)",
+      "L'Asile",
+      "Fonds-des-Nègres"
+    ]
+    },
+    {
       id: 10,
       name: "Test",
       capital: "For-test",
@@ -338,7 +363,8 @@ export type RegionType = {
         "Ville 4",
         "Ville 5",
       ]
-    }
+    },
+
   ];
 
   export const getRegionsById = (values: number): RegionType => {
