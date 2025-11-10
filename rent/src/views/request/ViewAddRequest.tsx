@@ -1,16 +1,16 @@
-import RequestForm from "./components/RequestForm";
 
+import { Request } from "./components/forms/Request";
 
 export function ViewAddRequestBase() {
   return (
     <div>
-        <RequestForm/>
+      <Request />
     </div>
   )
 }
 
-const ViewAddRequest = () =>{
- return <ViewAddRequestBase/>;
+const ViewAddRequest = () => {
+  return <ViewAddRequestBase />;
 }
 
 export default ViewAddRequest
