@@ -1,13 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/Button"
 import Dialog from '@/components/ui/Dialog'
 import { useState } from "react"
 import type { MouseEvent } from 'react'
 import AuthRequestForm from "./AuthRequestForm"
+import useTimeOutMessage from "@/utils/hooks/useTimeOutMessage"
+import { useSessionUser } from "@/store/authStore"
+import { AuthRequest } from "../entities/AuthRequest"
+import { AuthRequestDoc } from "@/services/Landlord"
+import { addDoc, updateDoc } from "@firebase/firestore"
+import { Alert } from "@/components/ui/Alert"
 
 export const AddAuthRequest = () => {
 
-    const [dialogIsOpen, setIsOpen] = useState(false)
-
+    const [dialogIsOpen, setIsOpen] = useState(false);
+    const [isSubmitting, setSubmitting] = useState(false);
+    const [message, setMessage] = useTimeOutMessage()
+    const [alert, setAlert] = useState("success") as any;
+    const { userId } = useSessionUser((state) => state.user);
     const openDialog = () => {
         setIsOpen(true)
     }
@@ -20,8 +30,29 @@ export const AddAuthRequest = () => {
     const onDialogOk = (e?: MouseEvent) => {
         setIsOpen(false)
     }
-    const onSubmitForm = (data: any) => {
-        setIsOpen(false);
+
+    const onSubmitForm = async  (data: any) => {
+         setIsOpen(false);
+         setSubmitting(true);
+            try {
+              const request = {
+                ...data,
+                created_by: userId,
+                created_at: new Date(),
+                updated_by: userId,
+                updated_at: new Date()
+              } as Partial<AuthRequest>;
+              //console.log(request);
+              const docRef = await addDoc(AuthRequestDoc, request);
+              await updateDoc(docRef, { id: docRef.id });
+              setMessage("Réglément enregistré avec success");
+              setAlert("success")
+              setTimeout(() => setSubmitting(false), 1000);
+            } catch (error) {
+              console.error("Error adding document: ", error);
+              setMessage("Erreur lors de l'enregistrement de la requete");
+              setAlert("danger")
+            }
     }
 
     return (<>
@@ -34,20 +65,13 @@ export const AddAuthRequest = () => {
             onClose={onDialogClose}
             onRequestClose={onDialogClose}
         >
+            {message && (
+                <Alert showIcon className="mb-4" type={alert}>
+                <span className="break-all">{message}</span>
+                </Alert>
+            )}
             <h5 className="mb-4">Nouvelle Réglément</h5>
             <AuthRequestForm onSubmitForm={onSubmitForm}></AuthRequestForm>
-            {/* <div className="text-right mt-6">
-                <Button
-                    className="ltr:mr-2 rtl:ml-2"
-                    variant="plain"
-                    onClick={onDialogClose}
-                >
-                    Cancel
-                </Button>
-                <Button variant="solid" onClick={onDialogOk}>
-                    Okay
-                </Button>
-            </div> */ }
         </Dialog>
     </>)
 }

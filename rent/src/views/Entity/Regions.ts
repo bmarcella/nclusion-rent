@@ -2,7 +2,6 @@ import { Bank } from '@/views/Entity';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BankDoc } from "@/services/Landlord";
 import { DocumentData, getDocs, orderBy, Query, query, where } from "firebase/firestore";
-import { getQueryFiltersDate } from '@/services/Report';
 
 
 export type RegionType = {
@@ -420,7 +419,7 @@ interface ReportItem {
 
 export const fetchReportPerReport = async (ReportSteps: [], hq: Query<DocumentData>) => {
 
-  const report: ReportItem[] = (
+  const report: ReportItem [] = (
     await Promise.all(
       Regions.map(async (region) => {
         const steps: string[] = [];

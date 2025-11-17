@@ -1,13 +1,12 @@
-/* eslint-disable import/no-duplicates */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
-import { Alert } from '@/components/ui';
+import { Form, FormItem, Input, Select, Button, Alert } from '@/components/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/utils/hooks/useTranslation';
-import { modePayments, exp_categories, ReqSteps } from '@/views/Entity/Request';
+import { modePayments, exp_categories, RequestType, ReqSteps } from '@/views/Entity/Request';
 import { useSessionUser } from '@/store/authStore';
 import { manageAuth } from '@/constants/roles.constant';
 import { BankDoc, ExpenseRequestDoc, getLandlordDoc, Landlord } from '@/services/Landlord';
@@ -19,10 +18,6 @@ import { getBankImages } from '@/services/firebase/BankService';
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage';
 import ImageReq from '../ImageReq';
 import EndBank from '@/views/bank/add/components/EndBank';
-import { RequestType, RequestTypeEnum } from '../../entities/AuthRequest';
-import { MoneyRequest, MoneyRequestSchema } from '../../entities/SchemaRequest';
-import { ViewReqForm } from './ViewReqForm';
-import React from 'react';
 
 const schema = z.object({
   modePayment: z.enum(modePayments),
@@ -41,15 +36,15 @@ const schema = z.object({
 type RequestFormValues = z.infer<typeof schema>;
 
 interface Props {
-  typeRequest : RequestType 
+  typeRequest : any 
 }
 
 const CreateRequestForm = ( { typeRequest } : Props) => {
   const { t } = useTranslation();
+
   const [regions, setRegions] = useState([]) as any;
-  const [roles, setRoles] = useState([]) as any;
-  const { userId, authority, proprio } = useSessionUser((state) => state.user);
   const [hideReg, setHideReg] = useState(false);
+  const { userId, authority, proprio } = useSessionUser((state) => state.user);
   const [accounts, setAccounts] = useState([]) as any;
   const [agents, setAgents] = useState<OptionType[] | any>([]);
   const [sregion, setsRegion] = useState() as any;
@@ -60,45 +55,42 @@ const CreateRequestForm = ( { typeRequest } : Props) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [message, setMessage] = useTimeOutMessage()
   const [alert, setAlert] = useState("success") as any;
-const methods = useForm<MoneyRequest>({
-resolver: zodResolver(MoneyRequestSchema),
-defaultValues: {
-  general : {
-    type_request: typeRequest.key as any,
-    id_region_user: 0,
-    on_behalf_user_id: "",
-    on_behalf_approve: "pending",
-    paymentMethod: "cash",
-    currency: "USD",
-    typePayment: "full",
-    documents: [],
-  }
-},
-mode: "onChange",
-});
- const {
+
+  const {
+    control,
+    handleSubmit,
     setValue,
     watch,
     reset,
-    formState: { errors, isValid},
-  } = methods;
+    formState: { errors },
+  } = useForm<RequestFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      modePayment: modePayments[0],
+      currency: 'HTG',
+      id_region: 0,
+      exp_category: exp_categories[0],
+      description: '',
+      amount: 0,
+    },
+  });
 
   useEffect(() => {
     if (!authority || authority.length === 0) return;
     const auth = authority[0];
     const manage = async () => {
-      const { regions, roles } = await manageAuth(auth, proprio, t);
-      setRegions(regions);  
-      setRoles(roles);
+      const { regions } = await manageAuth(auth, proprio, t);
+      setRegions(regions); // setRegions first
+
       if (regions.length === 1) {
-        setValue("general.id_region_user", regions[0].value); // safe to call here
+        setValue("id_region", regions[0].value); // safe to call here
         setsRegion(regions[0].value);
         setHideReg(true);
         setAccounts([regions[0].accounts]);
       }
     };
     manage();
-   if(typeRequest.key) fetchProprio();
+    fetchProprio();
   }, [authority]);
 
   useEffect(() => {
@@ -175,7 +167,6 @@ mode: "onChange",
 
   };
 
-
   const fetchProprio = async () => {
     if (!sregion) return;
     try {
@@ -195,6 +186,7 @@ mode: "onChange",
     }
 
   };
+
 
   const submit = async (data: RequestFormValues) => {
     setSubmitting(true);
@@ -224,32 +216,11 @@ mode: "onChange",
   };
 
 
+  const cat = watch('exp_category');
+  const modePayment = watch('modePayment');
   const nextStep = (step: number, data?: any) => {
     setStep(step);
   }
-
-  
-const type = watch("general.type_request");
-
-// Keep the payload clean: when type changes, clear other sections
-React.useEffect(() => {
-const clearIfNot = (key: keyof MoneyRequest, keep: boolean) => {
-  if (!keep) methods.setValue(key as any, undefined, { shouldValidate: true, shouldDirty: true });
-};
-const typeReq = Object.values(RequestTypeEnum) as readonly string[];
-typeReq.forEach((key: any)=>{
-   clearIfNot(key, type == key ); 
-});
-}, [type]);
-
-
-const onSubmit: SubmitHandler<MoneyRequest> = (data) => {
-// Here you would POST `data` to your backend.
-// For demo, we print it nicely.
-alert("Valid! Check console for payload.");
-// eslint-disable-next-line no-console
-console.log("Money request payload", data);
-};
 
   return (
     <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
@@ -258,9 +229,126 @@ console.log("Money request payload", data);
           <span className="break-all">{message}</span>
         </Alert>
       )}
-      {step == 0 && (<ViewReqForm 
-      onSubmit={onSubmit} 
-      methods={methods}  type={type} ></ViewReqForm>)}
+      {step == 0 && (<Form onSubmit={handleSubmit(submit)}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormItem label={t('request.exp_category')} invalid={!!errors.exp_category} errorMessage={errors.exp_category?.message}>
+            <Controller
+              name="exp_category"
+              control={control}
+              render={({ field }) => (
+                <Select options={exp_categories.map(e => ({ value: e, label: t(e) }))} value={{ value: field.value, label: t(field.value) }} onChange={val => field.onChange(val?.value)} />
+              )}
+            />
+          </FormItem>
+          {!hideReg && <FormItem label="Région" invalid={!!errors.id_region} errorMessage={errors.id_region?.message}>
+            <Controller name="id_region" control={control} render={({ field }) =>
+              <Select placeholder="Please Select"
+                options={regions.map((region: any) => ({ value: region.value, label: region.label, accounts: region.accounts }))}
+                onChange={(option: any) => {
+                  setAccounts(option?.accounts);
+                  setsRegion(option.value);
+                  field.onChange(option.value);
+                }} />
+            } />
+          </FormItem>}
+          {(agents.length > 0) && (
+            <FormItem label="Responsable" invalid={!!errors.confirmationFrom} errorMessage={errors.confirmationFrom?.message}>
+              <Controller name="confirmationFrom" control={control} render={({ field }) =>
+                <Select
+                  placeholder="choissir un responsable"
+                  options={agents}
+                  onChange={(option: any) => {
+                    field.onChange(option.value);
+                  }}
+                />
+              } />
+            </FormItem>
+          )}
+
+          {(banks.length > 0 && cat == 'request.expense.lease') && (
+            <>
+              <FormItem label="Bank" invalid={!!errors.objectId} errorMessage={errors.objectId?.message}>
+                <Controller name="objectId" control={control} render={({ field }) =>
+                  <Select
+                    placeholder="choissir une bank"
+                    options={banks.map((bank: any) => ({ value: bank.id, label: bank.bankName }))}
+                    onChange={(option: any) => {
+                      setCBank(banks.find((b: any) => b.id === option.value));
+
+                      field.onChange(option.value);
+                    }}
+                  />
+                } />
+              </FormItem>
+            </>
+          )}
+
+          <FormItem label={t('request.modePayment')} invalid={!!errors.modePayment} errorMessage={errors.modePayment?.message}>
+            <Controller
+              name="modePayment"
+              control={control}
+              render={({ field }) => (
+                <Select options={modePayments.map(p => ({ value: p, label: t(p) }))} value={{ value: field.value, label: t(field.value) }} onChange={val => field.onChange(val?.value)} />
+              )}
+            />
+          </FormItem>
+
+          <FormItem label={t('request.beneficiary_name')} invalid={!!errors.beneficiary_name} errorMessage={errors.beneficiary_name?.message}>
+            <Controller
+              name="beneficiary_name"
+              control={control}
+              render={({ field }) => <Input type="text" {...field} onChange={e => field.onChange(e.target.value)} />} />
+          </FormItem>
+
+
+          {modePayment == "request.check" && <FormItem label={t('request.beneficiary_name_check')} invalid={!!errors.beneficiary_name_check} errorMessage={errors.beneficiary_name_check?.message}>
+            <Controller
+              name="beneficiary_name_check"
+              control={control}
+              render={({ field }) => <Input type="text" {...field} onChange={e => field.onChange(e.target.value)} />} />
+          </FormItem>}
+
+          {modePayment == "request.wire_transfer" && <FormItem label={t('request.beneficiary_name_wire')} invalid={!!errors.beneficiary_name_wire} errorMessage={errors.beneficiary_name_wire?.message}>
+            <Controller
+              name="beneficiary_name_wire"
+              control={control}
+              render={({ field }) => <Input type="text" {...field} onChange={e => field.onChange(e.target.value)} />} />
+          </FormItem>}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormItem label={t('request.amount')} invalid={!!errors.amount} errorMessage={errors.amount?.message}>
+              <Controller
+                name="amount"
+                control={control}
+                render={({ field }) => <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />} />
+            </FormItem>
+            <FormItem label={t('request.currency')} invalid={!!errors.currency} errorMessage={errors.currency?.message}>
+              <Controller
+                name="currency"
+                control={control}
+                render={({ field }) => (
+                  <Select options={[{ value: 'HTG', label: 'HTG' }, { value: 'USD', label: 'USD' }]}
+                    value={{ value: field.value, label: field.value }}
+                    onChange={val => field.onChange(val?.value)} />
+                )}
+              />
+            </FormItem>
+          </div>
+
+          <FormItem label={t('request.description')} invalid={!!errors.description} errorMessage={errors.description?.message}>
+            <Controller name="description" control={control} render={({ field }) => <textarea className='w-full h-50 bg-gray-100'  {...field} />} />
+          </FormItem>
+
+      
+        </div>
+
+
+        <div className="mt-6">
+          <Button type="submit" variant="solid" loading={isSubmitting}>
+            {t('common.submit')}
+          </Button>
+        </div>
+      </Form>)}
       {step == 1 && (
         <ImageReq nextStep={nextStep} reqId={request} userId={userId || ''} ></ImageReq>
       )}

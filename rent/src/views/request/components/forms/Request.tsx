@@ -4,9 +4,13 @@ import TabList from "@/components/ui/Tabs/TabList"
 import TabNav from "@/components/ui/Tabs/TabNav"
 import SelectTypeRequest from "./SelectTypeRequest"
 import { AuthRequest } from "../../AuthRequest/AuthRequest"
+import { useState } from "react"
+import RequestForm from "./RequestForm"
 
 
 export const Request = () => {
+    const [ selectedType , SetSelectedType ]  = useState();
+
     return (<>
         <Tabs defaultValue="tab1" >
             <TabList>
@@ -15,7 +19,8 @@ export const Request = () => {
             </TabList>
             <div className="p-4">
                 <TabContent value="tab1">
-                    <SelectTypeRequest />
+                   { !selectedType && <SelectTypeRequest GetSelected={SetSelectedType} /> }
+                   { selectedType && <RequestForm typeRequest={selectedType} /> }
                 </TabContent>
                 <TabContent value="tab2">
                     <AuthRequest></AuthRequest>

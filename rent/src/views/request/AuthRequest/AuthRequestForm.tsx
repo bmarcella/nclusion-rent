@@ -72,7 +72,7 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
             max_amount: defaultValues?.max_amount as any ?? 0,
             canApprove: defaultValues?.canApprove ?? false,
             reqType: defaultValues?.reqType ?? [],
-            create_at: defaultValues?.create_at ?? new Date(),
+            created_at: defaultValues?.created_at ?? new Date(),
         },
     });
 
@@ -127,7 +127,7 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                                     isMulti
                                     placeholder={t('common.select')}
                                     options={reqOptions}
-                                    value={ reqOptions.filter(opt => field.value.includes(Number(opt.value)))}
+                                    value={ reqOptions.filter(opt => field.value?.includes(Number(opt.value)))}
                                     onChange={(opts: any[]) => field.onChange(opts.map(o => o.value))}
                                 />
                             )}

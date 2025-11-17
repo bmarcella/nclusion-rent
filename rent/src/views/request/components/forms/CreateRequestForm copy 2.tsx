@@ -66,6 +66,7 @@ defaultValues: {
   general : {
     type_request: typeRequest.key as any,
     id_region_user: 0,
+    on_behave_id_region: 0,
     on_behalf_user_id: "",
     on_behalf_approve: "pending",
     paymentMethod: "cash",
@@ -240,6 +241,15 @@ const typeReq = Object.values(RequestTypeEnum) as readonly string[];
 typeReq.forEach((key: any)=>{
    clearIfNot(key, type == key ); 
 });
+// clearIfNot("legal", type === "legal");
+// clearIfNot("bill", type === "bill");
+// clearIfNot("capex", type === "capex");
+// clearIfNot("locomotif", type === "locomotif");
+// clearIfNot("telecom", type === "telecom");
+// clearIfNot("opex", type === "opex");
+// clearIfNot("transport_logistique", type === "transport_logistique");
+// clearIfNot("bank_renovation", type === "bank_renovation");
+// clearIfNot("lease_payment", type === "lease_payment");
 }, [type]);
 
 

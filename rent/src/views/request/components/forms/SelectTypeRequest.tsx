@@ -1,18 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react'
 import { requestType } from '../../entities/AuthRequest';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Steps from '@/components/ui/Steps';
 import useTranslation from '@/utils/hooks/useTranslation';
+interface Props {
+  GetSelected : (tq: any) => void 
+}
 
-
-function SelectTypeRequest() {
+function SelectTypeRequest( { GetSelected } : Props) {
   const { t } = useTranslation();
-  const [typeReq, setTypeReq] = useState(requestType(t));
-  const [step, setStep] = useState(0);
-  const cardFooter = (
+  const [typeReq] = useState(requestType(t));
+  const [step] = useState(0);
+  const cardFooter = (tq: any) => (
     <div className="flex">
-      <Button size="sm" className="ltr:mr-2 rtl:ml-2">
+      <Button size="sm" className="ltr:mr-2 rtl:ml-2" onClick={()=>{ GetSelected(tq)}}>
         Démarrer
       </Button>
     </div>
@@ -21,6 +24,7 @@ function SelectTypeRequest() {
     <>
       <Steps current={step}>
         <Steps.Item title={"Selectionner le type de requête"} />
+        <Steps.Item title={"Ajouter requête"} />
       </Steps>
       <div className="grid grid-cols-4 gap-4 mt-4">
         {typeReq.map((tq) => <Card className='mt-1' key={tq.value}
@@ -29,7 +33,7 @@ function SelectTypeRequest() {
             bordered: false,
           }}
           footer={{
-            content: cardFooter,
+            content: cardFooter(tq),
             bordered: false,
           }}
         >
@@ -38,9 +42,6 @@ function SelectTypeRequest() {
           </p>
         </Card>)}
       </div>
-
-
-
     </>
 
   )

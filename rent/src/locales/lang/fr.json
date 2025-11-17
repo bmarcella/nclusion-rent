@@ -55,6 +55,14 @@
       "7": {
         "label": "Legal",
         "description": "Pour les factures qui sont attribuées aux opérations quotidiennes"
+      },
+      "8": {
+        "label": "Loyer",
+        "description": "Paiment bail"
+      },
+      "9": {
+        "label": "Renovation bank",
+        "description": "Reparation bank"
       }
     },
     "cash": "Espèces",
@@ -407,6 +415,7 @@
     "manager": "Manager",
     "assist_manager": "Assistant manager",
     "operation": "Opérations",
+    "super_operation": "Super Opérations",
     "admin": "Administrateur",
     "fields_ops": "Opérations terrain",
     "vendor_management": "Géstion des vendeurs",

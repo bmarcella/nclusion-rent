@@ -468,7 +468,7 @@ const pageSizeOption = [
            } , []);
     return (
       <div>
-         <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
+          <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
             <div className={classNames( 'rounded-2xl p-4 flex flex-col justify-center','bg-green-100' )} >
                 <div className="flex justify-between items-center relative">
                     <div>

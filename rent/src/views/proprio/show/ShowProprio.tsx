@@ -52,12 +52,13 @@ interface Props {
 
   
   function ShowProprio( { name = "Entités", isUser = undefined}: Props) {
+    const [hasNext, setHasNext] = useState(true);
     const [data, setData] = useState<Proprio [] >([]);
     const [totalData, setTotalData] = useState(1);
     const [page, setPage] = useState(1);
     const [pageCursors, setPageCursors] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
     const [loading, setLoading] = useState(false);
-    const [hasNext, setHasNext] = useState(true);
+
     const fetchedRef = useRef(false);
     const [cEnt, setEnt] = useState<Proprio>();
     const [dialogIsOpen, setIsOpen] = useState(false);
@@ -67,7 +68,7 @@ interface Props {
     const [ regions, setRegions] = useState<number []>([]);
     const [roles, setRoles] = useState<string>();
 
-     const openDialog = (e: string) => {
+     const openDialog = (e: any) => {
             setEnt(e);
             setIsOpen(true)
         }
@@ -84,7 +85,7 @@ interface Props {
    
 
         const columns = useMemo<ColumnDef<Proprio>[]>(() => {
-          const baseColumns: ColumnDef<Proprio>[] = [
+        const baseColumns: ColumnDef<Proprio>[] = [
               {
                   header: 'FullName',
                   accessorKey: 'fullName',
