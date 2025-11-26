@@ -178,10 +178,10 @@ export const ShowBankDetailsBase= () => {
    const tasks: BankTask [] = [];
    renovSteps.forEach(async (step, index) => {
       const task: BankTask  = {
-        createdBy: userId,
+        createdBy: userId!,
         createdAt: new Date(),
         taskName: step,
-        bankId: bankId,
+        bankId: bankId!,
         id_region: bank?.id_region,
         done: false,
         index: index,
