@@ -76,8 +76,7 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
     });
 
     const onSubmit = (data: AuthRequest) =>  onSubmitForm(data);
-     
-
+    
     // Disable submit if options are still loading or region not chosen
     const submitDisabled = useMemo(
         () => loading || optLoading,

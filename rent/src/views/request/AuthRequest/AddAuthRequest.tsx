@@ -29,7 +29,6 @@ export const AddAuthRequest = ( { newRuleAdd } : any ) => {
 
     const onSubmitForm = async  (data: any) => {
          console.log(data);
-      
          setSubmitting(true);
             try {
               const request = {
@@ -39,7 +38,7 @@ export const AddAuthRequest = ( { newRuleAdd } : any ) => {
                 updated_by: userId,
                 updated_at: new Date()
               } as Partial<AuthRequest>;
-              //console.log(request);
+              console.log(request);
               const docRef = await addDoc(AuthRequestDoc, request);
               await updateDoc(docRef, { id: docRef.id });
               newRuleAdd();
