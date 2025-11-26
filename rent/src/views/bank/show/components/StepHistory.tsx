@@ -31,7 +31,7 @@ function StepHistory( { bankId } : any) {
         }
         fetchSteps()
     });
-    const getColor = (step: string )=>{
+    const getColor = (step: string )=> {
         const key = step.replace("bankSteps.", "");
           const color = stepColorClassMap[key] || {
             bg: "bg-gray-50",

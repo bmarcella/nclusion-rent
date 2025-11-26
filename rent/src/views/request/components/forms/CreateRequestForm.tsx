@@ -4,7 +4,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
-import { Alert } from '@/components/ui';
+import { Alert, Steps } from '@/components/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/utils/hooks/useTranslation';
 import { modePayments, exp_categories, ReqSteps } from '@/views/Entity/Request';
@@ -19,33 +19,19 @@ import { getBankImages } from '@/services/firebase/BankService';
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage';
 import ImageReq from '../ImageReq';
 import EndBank from '@/views/bank/add/components/EndBank';
-import { RequestType, RequestTypeEnum } from '../../entities/AuthRequest';
+import { requestStatusAll, RequestType, RequestTypeEnum } from '../../entities/AuthRequest';
 import { MoneyRequest, MoneyRequestSchema } from '../../entities/SchemaRequest';
 import { ViewReqForm } from './ViewReqForm';
-import React from 'react';
-
-const schema = z.object({
-  modePayment: z.enum(modePayments),
-  amount: z.number().min(1),
-  id_region: z.number().optional(),
-  objectId: z.string().optional(),
-  beneficiary_name_check: z.string().optional(),
-  beneficiary_name_wire: z.string().optional(),
-  beneficiary_name: z.string().min(3),
-  currency: z.string().min(1),
-  confirmationFrom: z.string().min(1),
-  description: z.string().optional(),
-  exp_category: z.enum(exp_categories),
-});
-
-type RequestFormValues = z.infer<typeof schema>;
+import { IRequest } from '../../entities/IRequest';
 
 interface Props {
   typeRequest : RequestType 
+  goBack: ()=> void
 }
 
-const CreateRequestForm = ( { typeRequest } : Props) => {
+const CreateRequestForm = ( { typeRequest, goBack } : Props) => {
   const { t } = useTranslation();
+  const statuses = requestStatusAll(t);
   const [regions, setRegions] = useState([]) as any;
   const [roles, setRoles] = useState([]) as any;
   const { userId, authority, proprio } = useSessionUser((state) => state.user);
@@ -60,7 +46,7 @@ const CreateRequestForm = ( { typeRequest } : Props) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [message, setMessage] = useTimeOutMessage()
   const [alert, setAlert] = useState("success") as any;
-const methods = useForm<MoneyRequest>({
+  const methods = useForm<MoneyRequest>({
 resolver: zodResolver(MoneyRequestSchema),
 defaultValues: {
   general : {
@@ -71,7 +57,7 @@ defaultValues: {
     paymentMethod: "cash",
     currency: "USD",
     typePayment: "full",
-    documents: [],
+    is_for_other: false
   }
 },
 mode: "onChange",
@@ -80,6 +66,8 @@ mode: "onChange",
     setValue,
     watch,
     reset,
+    trigger,
+    clearErrors,
     formState: { errors, isValid},
   } = methods;
 
@@ -193,36 +181,7 @@ mode: "onChange",
     } catch (error) {
       console.error('Error fetching page:', error);
     }
-
   };
-
-  const submit = async (data: RequestFormValues) => {
-    setSubmitting(true);
-    try {
-      const request = {
-        ...data,
-        step: "reqSteps.needConfirmation" as ReqSteps,
-        createdBy: userId,
-        createdAt: new Date(),
-        updatedBy: userId,
-        updatedAt: new Date()
-      } as Partial<RequestType>;
-      const docRef = await addDoc(ExpenseRequestDoc, data);
-      console.log('Request Details:', request);
-      reset();
-      setStep(1);
-      await updateDoc(docRef, { id: docRef.id });
-      setRequest(docRef.id);
-      setMessage("Requête enregistrée avec success");
-      setAlert("success")
-      setTimeout(() => setSubmitting(false), 1000);
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      setMessage("Erreur lors de l'enregistrement de la requete");
-      setAlert("danger")
-    }
-  };
-
 
   const nextStep = (step: number, data?: any) => {
     setStep(step);
@@ -231,39 +190,126 @@ mode: "onChange",
   
 const type = watch("general.type_request");
 
+const paymentMethod = watch("general.paymentMethod");
+
+const addNull = (value: any)=> {
+  const clearIfNot = (key: keyof MoneyRequest, keep: boolean) => {
+    if (!keep) methods.setValue(key as any, value , { shouldValidate: true, shouldDirty: true });
+  };
+  const typeReq = Object.values(RequestTypeEnum) as readonly string[];
+  typeReq.forEach((key: any)=>{
+    clearIfNot(key, type == key ); 
+  });
+
+}
+
 // Keep the payload clean: when type changes, clear other sections
-React.useEffect(() => {
-const clearIfNot = (key: keyof MoneyRequest, keep: boolean) => {
-  if (!keep) methods.setValue(key as any, undefined, { shouldValidate: true, shouldDirty: true });
-};
-const typeReq = Object.values(RequestTypeEnum) as readonly string[];
-typeReq.forEach((key: any)=>{
-   clearIfNot(key, type == key ); 
-});
+useEffect(() => {
+    addNull(null);
 }, [type]);
 
+  useEffect(() => {
+  if (paymentMethod === "bank_transfer") {
+    // ensure BankInfo is validated when bank transfer is selected
+    trigger("BankInfo");
+  } else {
+    methods.setValue("BankInfo", null, {
+      shouldValidate: false,
+      shouldDirty: true,
+    });
+    // remove BankInfo errors when not bank transfer
+    clearErrors([
+    "BankInfo",
+    "BankInfo.AccountName",
+    "BankInfo.AccountNumber",
+    "BankInfo.BankName",
+    "BankInfo.SWIFT",
+  ]);
+  }
+}, [paymentMethod]);
 
-const onSubmit: SubmitHandler<MoneyRequest> = (data) => {
-// Here you would POST `data` to your backend.
-// For demo, we print it nicely.
-alert("Valid! Check console for payload.");
-// eslint-disable-next-line no-console
-console.log("Money request payload", data);
+const getAmount = (data: MoneyRequest, type: string ) : number | undefined=> {
+
+   switch (type) {
+        case "legal":
+          return data.legal!.price!;
+      case "bill":
+          return data.bill!.price!;
+      case "capex":
+          return data.capex!.price!;
+      case "locomotif":
+          return data.locomotif!.price!;
+      case "telecom":
+           return data.telecom!.total_price!;
+      case "opex":
+          return data.opex!.amount!;
+      case "transport_logistique":
+        return data.transport_logistique!.amount!;
+      case "bank_renovation":
+        return data.bank_renovation!.total_amount!;
+      case "lease_payment":
+        return data.lease_payment!.rentCost!;
+  }
+}
+
+const onSubmit: SubmitHandler<MoneyRequest> = async (data) => {
+       try {
+        setSubmitting(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        const request = {
+          ...data,
+          regionalApproved_by: null,
+          preApproval_by: null,
+          accountantApproval: null,
+          managerGlobalApproval: null,
+          historicApproval: [{
+            status_to: (!data.general?.is_for_other) ? statuses[1].value : statuses[0].value,
+            status_from: null,
+            by_who: userId,
+            createdAt: new Date(),
+          }],
+          createdBy: userId,
+          createdAt: new Date(),
+          updatedBy: userId,
+          updatedAt: new Date(),
+          status: (!data.general?.is_for_other) ? statuses[1].value : statuses[0].value,
+          requestType: typeRequest.key,
+          amount : getAmount(data, typeRequest.key)
+        } as unknown as Partial<IRequest>;
+         console.log(request);
+         const docRef = await addDoc(ExpenseRequestDoc, request);
+         reset();
+         setStep(1);
+         await updateDoc(docRef, { id: docRef.id });
+         setRequest(docRef.id);
+         setMessage("Requête enregistrée avec succes");
+         setAlert("success")
+         setTimeout(() => setSubmitting(false), 1000);
+       } catch (error) {
+         console.error("Error adding document: ", error);
+         setSubmitting(false);
+         setMessage("Erreur lors de l'enregistrement de la requete");
+         setAlert("danger")
+       }
 };
-
   return (
     <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
+      <Steps current={step}>
+        <Steps.Item title={"Ajouter requête  " + typeRequest.label} />
+        <Steps.Item title={"Document  " + typeRequest.label} />
+         <Steps.Item title={"Terminé"} />
+      </Steps>
       {message && (
-        <Alert showIcon className="mb-4" type={alert}>
+        <Alert showIcon className="mb-4 mt-4" type={alert}>
           <span className="break-all">{message}</span>
         </Alert>
       )}
-      {step == 0 && (<ViewReqForm 
-      onSubmit={onSubmit} 
-      methods={methods}  type={type} ></ViewReqForm>)}
+      {step == 0 && ( <ViewReqForm 
+        onSubmit={onSubmit}
+        methods={methods} stype={typeRequest} goBack={goBack} ></ViewReqForm>)}
       {step == 1 && (
-        <ImageReq nextStep={nextStep} reqId={request} userId={userId || ''} ></ImageReq>
-      )}
+        <ImageReq  nextStep={nextStep} reqId={request} userId={userId || ''} ></ImageReq>
+      ) }
       {step === 2 && (
         <div className="text-gray-700 dark:text-white">
           <EndBank message={t("entity.submitSuccess")} btnText="Nouvelle requête" onRestart={(): void => {

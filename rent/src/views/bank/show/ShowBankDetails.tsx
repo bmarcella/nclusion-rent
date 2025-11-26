@@ -178,14 +178,16 @@ export const ShowBankDetailsBase= () => {
    const tasks: BankTask [] = [];
    renovSteps.forEach(async (step, index) => {
       const task: BankTask  = {
-        createdBy: userId,
+        createdBy: userId as any,
         createdAt: new Date(),
         taskName: step,
-        bankId: bankId,
-        id_region: bank?.id_region,
+        bankId: bankId as any,
+        id_region: bank?.id_region as any,
         done: false,
-        index: index,
-        state: "pending"
+        index,
+        state: "pending",
+        id: "",
+        description: ""
       };
      tasks.push(task);
     });

@@ -34,6 +34,9 @@ export const taskCollection = collection(db, task);
 export const ExpenseRequestDoc = collection(db, Expenserequest)
 export const ReqPicturesDoc = collection(db, reqPictures);
 export const AuthRequestDoc = collection(db, authRequest);
+
+
+
 export const getAuthRequestRef = (id: string) => {
      return doc(db, otherBankPictures, id);
 }

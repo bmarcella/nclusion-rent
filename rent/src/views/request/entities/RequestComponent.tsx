@@ -7,12 +7,13 @@ import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { CapexTypeEnum, CurrencyEnum, DocumentTypeEnum, LocomotifSpentEnum, LocomotifTypeEnum, MoneyRequest, ProviderTelecomEnum, RenovationTypeEnum, TypePaymentEnum } from './SchemaRequest';
 import { useSessionUser } from '@/store/authStore';
 import { manageAuth } from '@/constants/roles.constant';
-import { Landlord } from '@/services/Landlord';
+import { BankDoc, getLandlordDoc, Landlord } from '@/services/Landlord';
 import { Proprio } from '@/views/Entity';
 import { convertToSelectOptionsProprio } from '@/views/report/components/ReportTypeFilter';
-import { Query, DocumentData, CollectionReference, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { Query, DocumentData, CollectionReference, query, where, getDocs, orderBy, getDoc } from 'firebase/firestore';
 import { Regions } from '@/views/Entity/Regions';
 import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBank';
+import { getBankImages } from '@/services/firebase/BankService';
 // ----------------------
 // UI helpers
 // ----------------------
@@ -112,7 +113,6 @@ const paymentMethod = watch("general.paymentMethod");
 const sregion = watch("general.id_region_user");
 const other = watch("general.is_for_other");
 
-
  const fetchManager = async () => {
       if (!sregion) return;
       setLoading(true);
@@ -143,15 +143,7 @@ const other = watch("general.is_for_other");
     manage();
   }, [sregion, other]);
 
-  useEffect(() => {
-  if (paymentMethod === "bank_transfer") {
-    // ensure BankInfo is validated when bank transfer is selected
-    trigger("BankInfo");
-  } else {
-    // remove BankInfo errors when not bank transfer
-    clearErrors("BankInfo");
-  }
-}, [paymentMethod, clearErrors, trigger]);
+
 
 
 
@@ -187,7 +179,13 @@ const other = watch("general.is_for_other");
               <Select
                 defaultValue={field.value}
                 options={paymentMethodOpts}
-                onChange={(option) => field.onChange(option?.value)}
+                onChange={(option) => { 
+                    if(option?.value !="bank_transfer") {
+                       clearErrors("BankInfo");
+                    }
+                   field.onChange(option?.value)
+                 } 
+                }
               />
             )}
           />
@@ -290,6 +288,11 @@ const other = watch("general.is_for_other");
   
                                                 
     </Section>
+      {errors.BankInfo?.BankName && (
+        <p className="text-red-500 text-xs mt-4 mb-4">
+          {errors.BankInfo.BankName.message}
+        </p>
+       )}
       {paymentMethod == "bank_transfer" && <BankInfoFields />}
     </>
    
@@ -300,9 +303,8 @@ export function BillFields( {  t } : any) {
   const { register } = useFormContextTyped();
   return (
     <Section title="Bill">
-      <Field label="Beneficiary"><Input {...register("bill.beneficiary")} /></Field>
-      <Field label="Price"><Input type="number" step="0.01" {...register("bill.price", { valueAsNumber: true })} /></Field>
-      <Field label="Description"><textarea {...register("bill.description")} /></Field>
+      <Field label="Amount"><Input type="number" step="0.01" {...register("bill.price", { valueAsNumber: true })} /></Field>
+      <Field label="Description"><Input textArea {...register("bill.description")} /></Field>
       <Field label="Target date"><Input type="date" {...register("bill.target_date", { valueAsDate: true })} /></Field>
     </Section>
   );
@@ -474,7 +476,7 @@ export function TelecomFields({  t } : any) {
   );
 }
 
-export function OpexFields({  t } : any) {
+export function OpexFields({  t, categories } : any) {
   const { control, register, watch } = useFormContextTyped();
   const { fields, append, remove } = useFieldArray({ name: "opex.items", control });
   const cat = watch("opex.categorie");
@@ -485,14 +487,7 @@ export function OpexFields({  t } : any) {
           control={control}
           name="opex.categorie"
           render={({ field }) => (
-            <Select onChange={field.onChange} defaultValue={field.value}>
-              <SelectTrigger><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-              <SelectContent>
-                {["Matériaux de construction","Énergie (kits solaires, batteries, câbles, etc.)","Fournitures de bureau","autre"].map((o) => (
-                  <SelectItem key={o} value={o}>{o}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Select onChange={field.onChange} value={field.value} options={categories}/>
           )}
         />
       </Field>
@@ -825,30 +820,149 @@ export function BankRenovationFields({  t } : any) {
 }
 
 export function LeasePaymentFields({  t } : any) {
-  const { register } = useFormContextTyped();
+  const { register, watch, control, setValue, formState: { errors }  } = useFormContextTyped();
+  const [cbank, setCBank] = useState() as any;
+  const [banks, setBanks] = useState([]) as any;
+  const sregion = watch('general.id_region_user');
+  const fetchBanks = async () => {
+      if (!sregion) return;
+      const q: Query<DocumentData> = query(BankDoc, orderBy("createdAt", "desc"),
+        where("id_region", "==", sregion),
+        where("approve", "==", true),
+        where("step", "in", ["bankSteps.needContract", "bankSteps.needContract"]),
+      );
+      const snapshot = await getDocs(q);
+      const newBanks = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+          const data = docSnap.data();
+          const landlordId = data.landlord;
+          let landlord = null;
+          if (landlordId) {
+            const landlordSnap = await getDoc(getLandlordDoc(landlordId));
+            landlord = landlordSnap.exists() ? landlordSnap.data() : null;
+          }
+          const images = await getBankImages(docSnap.id);
+          return { id: docSnap.id, ...data, landlord, images };
+        })
+      );
+      // Instead of replacing, accumulate
+      setBanks(newBanks);
+    };
+
+  const FrenchDate = (dateString: any, y = 0, format?: boolean) => {
+    const date = new Date(dateString);
+
+    // Add y years if y > 0
+    if (y > 0) {
+      date.setFullYear(date.getFullYear() + y);
+    }
+    if (format) {
+        const formatted = new Intl.DateTimeFormat('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        }).format(date);
+        return formatted;
+     }
+     return date;
+  };
+
+  const formatForInput = (date: Date | string | null) => {
+  if (!date) return "";
+  const d = new Date(date);
+  return d.toISOString().split("T")[0];
+  };
+
+  const addYears = (date: Date, years: number) => {
+  const result = new Date(date);
+  result.setFullYear(result.getFullYear() + years);
+  return result;
+  };
+
+  useEffect(() => {
+    if (!sregion) return;
+    fetchBanks();
+  }, [sregion]);
+
+    useEffect(() => {
+      if(!cbank) return;
+    setValue("lease_payment.id_landlord", cbank.landlord.id);
+    setValue("lease_payment.landlordName", cbank?.landlord?.fullName);
+    setValue("lease_payment.bankName", cbank?.bankName);
+    setValue("lease_payment.create_by", cbank.createdBy);
+    const formatted = formatForInput(cbank.date);
+    const end = formatForInput(addYears(cbank.date, cbank.yearCount)); 
+    setValue("lease_payment.start_date", formatted as any);
+    setValue("lease_payment.end_date", end as any);
+    setValue("lease_payment.rentCost", cbank.final_rentCost ?? cbank.rentCost );
+    setValue("lease_payment.yearNumber", cbank.yearCount as any);
+    setValue("lease_payment.whoApproveTheBank", cbank.finalDecision.createdBy);
+     setValue('lease_payment.description', ` Location pour une nouvelle bank : ${cbank.bankName} 
+        \n Nom du proprietaire :  ${cbank?.landlord?.fullName || ""} 
+        \n Adresse : ${cbank.city || ''} ${cbank.address || ''}
+        \n Montant:  HTG ${cbank.final_rentCost || 0}
+        \n Durée : ${cbank.yearCount}
+        \n Date de debut: ${FrenchDate(cbank.date)}
+        \n Date de fin: ${FrenchDate(cbank.date, cbank.yearCount)}
+        \n Description : ${cbank.description || 'Pas de description'} 
+        `);
+    console.log(cbank);
+  }, [cbank]);
+  console.log(errors);
   return (
     <Section title="Lease Payment">
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Bank ID"><Input {...register("lease_payment.id_bank")} /></Field>
-        <Field label="Bank name"><Input {...register("lease_payment.bankName")} /></Field>
-        <Field label="Landlord ID"><Input {...register("lease_payment.id_landlord")} /></Field>
-        <Field label="Landlord name"><Input {...register("lease_payment.landlordName")} /></Field>
-        <Field label="Start date"><Input type="date" {...register("lease_payment.start_date", { valueAsDate: true })} /></Field>
-        <Field label="End date"><Input type="date" {...register("lease_payment.end_date", { valueAsDate: true })} /></Field>
-        <Field label="Years"><Input type="number" {...register("lease_payment.yearNumber", { valueAsNumber: true })} /></Field>
-        <Field label="Rent cost"><Input type="number" step="0.01" {...register("lease_payment.rentCost", { valueAsNumber: true })} /></Field>
-        <Field label="Who approves the bank"><Input {...register("lease_payment.whoApproveTheBank")} /></Field>
-        <Field label="Created by"><Input {...register("lease_payment.create_by")} /></Field>
+        <Field label="Bank" errors={ 
+          { key: "id_bank",
+            data: errors.lease_payment }
+        }>
+          {/* <Input {...register("lease_payment.id_bank")} /> */}
+
+           <Controller name="lease_payment.id_bank" control={control} render={({ field }) =>
+                  <Select
+                    placeholder="choissir une bank"
+                    options={banks.map((bank: any) => ({ value: bank.id, label: bank.bankName }))}
+                    onChange={(option: any) => {
+                      setCBank(banks.find((b: any) => b.id === option.value));
+                      field.onChange(option.value);
+                    }}
+                  />
+                } />
+          </Field>
+        <Field label="Nom du proprietaire"><Input  disabled={true} {...register("lease_payment.landlordName")} /></Field>
+
+        <Field label="Start date"
+        errors={ 
+          { key: "start_date",
+            data: errors.lease_payment }
+        }
+        ><Input  type="date" {...register("lease_payment.start_date")} /></Field>
+        <Field label="End date"
+        errors={ 
+          { key: "end_date",
+            data: errors.lease_payment }
+        }
+        ><Input  type="date" {...register("lease_payment.end_date")} /></Field>
+
+        <Field label="Years" 
+         errors={ 
+          { key: "yearNumber",
+            data: errors.lease_payment }
+        }
+        ><Input type="number" {...register("lease_payment.yearNumber", { valueAsNumber: true })} /></Field>
+        <Field label="Rent cost"><Input disabled={true} type="number" step="1000" {...register("lease_payment.rentCost", { valueAsNumber: true })} /></Field>
+        {/* <Field label="Who approves the bank"><Input disabled={true} {...register("lease_payment.whoApproveTheBank")} /></Field>
+        <Field label="Created by"><Input disabled={true} {...register("lease_payment.create_by")} /></Field> */}
       </div>
       <Field label="Renovation by the landlord">
         <Controller
-          name="Lease_payment.renovationByTheLandlord"
+          name="lease_payment.renovationByTheLandlord"
           render={({ field }) => (
             <div className="flex items-center gap-2"><Checkbox checked={!!field.value} onChange={field.onChange} /> <span className="text-sm text-muted-foreground">Yes</span></div>
           )}
         />
       </Field>
-      <Field label="Description"><textarea {...register("lease_payment.description")} /></Field>
+      <Field label="Description"><Input textArea {...register("lease_payment.description")} /></Field>
     </Section>
   );
 }

@@ -14,7 +14,7 @@ export const CurrencyEnum = z.enum(["HTG", "USD", "PESOS"]);
 export const TypePaymentEnum = z.enum(["partial", "full"]);
 export const DocumentTypeEnum = z.enum(["proformat", "invoice", "id_card", "contract"]);
 export const typeReq = Object.values(RequestTypeEnum) as readonly string[];
-export const RequestTypeEnum_2 = z.enum(typeReq as any).optional();
+export const RequestTypeEnum_2 = z.enum(typeReq as any);
 export const CapexTypeEnum = z.enum(["Moto", "Generatrice", "Ordinateur", "autre"]);
 export const LocomotifSpentEnum = z.enum(["Carburant", "Maintenance"]);
 export const LocomotifTypeEnum = z.enum(["Vehicule", "Moto"]);
@@ -31,14 +31,13 @@ export const DocumentSchema = z.object({
 export const GeneralSchema = z.object({
     type_request: RequestTypeEnum_2,
     id_region_user: z.number(),
-    is_for_other: z.boolean().optional(),
+    is_for_other: z.boolean().default(false).optional(),
     on_behalf_user_id: z.string().optional(),
     on_behalf_approve: OnBehalfApproveEnum.optional(),
     paymentMethod: PaymentMethodEnum,
     currency: CurrencyEnum,
     beneficiaryName: z.string().optional(),
-    typePayment: TypePaymentEnum,
-    documents: z.array(DocumentSchema).optional().default([]),
+    typePayment: TypePaymentEnum
 });
 
 export const BankInfoSchema = z.object({
@@ -57,7 +56,6 @@ export const LegalSchema = z.object({
 });
 
 export const BillSchema = z.object({
-  beneficiary: z.string().min(1),
   price: z.coerce.number().nonnegative(),
   description: z.string().min(1),
   target_date: z.coerce.date(),
@@ -93,7 +91,15 @@ export const TelecomPlanSchema = z.object({
   end_date: z.coerce.date(),
   price: z.coerce.number().nonnegative(),
   id_card: z.string().min(1),
-});
+}).superRefine((val, ctx) => {
+    if (val.end_date < val.start_date) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["end_date"],
+        message: "End date cannot be before start date",
+      });
+    }
+  });
 
 export const TelecomSchema = z.object({
   plans: z.array(TelecomPlanSchema).min(1),
@@ -143,7 +149,15 @@ export const TransportSchema = z.object({
   donebyAnEmployee: z.coerce.boolean().default(false),
   amount: z.coerce.number().nonnegative(),
   items: z.array(TransportItemSchema).min(1, "Vous devez ajouter au moins un materiel"),
-});
+}).superRefine((val, ctx) => {
+    if (val.transport_date < new Date()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["transport_date"],
+        message: "Transport date cannot be before start date",
+      });
+    }
+  });
 
 export const BankRenovationSchema = z.object({
   Bank: z.array(
@@ -175,23 +189,31 @@ export const LeasePaymentSchema = z.object({
   renovationByTheLandlord: z.coerce.boolean(),
   whoApproveTheBank: z.string().min(1),
   create_by: z.string().min(1),
-});
+}).superRefine((val, ctx) => {
+    if (val.end_date < val.start_date) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["transport_date"],
+        message: "End date cannot be before start date",
+      });
+    }
+  });;
 
 
 
 export const MoneyRequestSchema = z
   .object({
     general: GeneralSchema.optional(),
-    BankInfo: BankInfoSchema.optional(),
-    bill: BillSchema.optional(),
-    capex: CapexSchema.optional(),
-    locomotif: LocomotifSchema.optional(),
-    telecom: TelecomSchema.optional(),
-    opex: OpexSchema.optional(),
-    transport_logistique: TransportSchema.optional(),
-    bank_renovation: BankRenovationSchema.optional(),
-    lease_payment: LeasePaymentSchema.optional(),
-    legal: LegalSchema.optional(),
+    BankInfo: BankInfoSchema.nullable().optional(),
+    bill: BillSchema.nullable().optional(),
+    capex: CapexSchema.nullable().optional(),
+    locomotif: LocomotifSchema.nullable().optional(),
+    telecom: TelecomSchema.nullable().optional(),
+    opex: OpexSchema.nullable().optional(),
+    transport_logistique: TransportSchema.nullable().optional(),
+    bank_renovation: BankRenovationSchema.nullable().optional(),
+    lease_payment: LeasePaymentSchema.nullable().optional(),
+    legal: LegalSchema.nullable().optional(),
   })
   .superRefine((val, ctx) => {
     // Conditional requirements by type_request
@@ -221,12 +243,12 @@ export const MoneyRequestSchema = z
         if (!val.bank_renovation) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["bank_renovation"], message: "Bank renovation section is required" });
         break;
       case "lease_payment":
-        if (!val.lease_payment) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["Lease_payment"], message: "Lease payment section is required" });
+        if (!val.lease_payment) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["lease_payment"], message: "Lease payment section is required" });
         break;
     }
 
      // BankInfo required if payment method is bank transfer
-    const isBankTransfer = val.general?.paymentMethod === "bank_transfer";
+    const isBankTransfer = val.general?.paymentMethod == "bank_transfer";
 
     // BankInfo required if payment method is bank transfer
    if (isBankTransfer && !val.BankInfo) {

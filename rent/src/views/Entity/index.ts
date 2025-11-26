@@ -721,6 +721,7 @@ export interface BankTask {
   state: string;
   id_region: number | string ;
   description: string;
+  index?: any,
   done :  boolean;
   createdBy: string;
   createdAt: Date;

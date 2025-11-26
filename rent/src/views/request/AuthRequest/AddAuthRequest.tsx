@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/Button"
 import Dialog from '@/components/ui/Dialog'
@@ -11,7 +12,7 @@ import { AuthRequestDoc } from "@/services/Landlord"
 import { addDoc, updateDoc } from "@firebase/firestore"
 import { Alert } from "@/components/ui/Alert"
 
-export const AddAuthRequest = () => {
+export const AddAuthRequest = ( { newRuleAdd } : any ) => {
 
     const [dialogIsOpen, setIsOpen] = useState(false);
     const [isSubmitting, setSubmitting] = useState(false);
@@ -21,18 +22,14 @@ export const AddAuthRequest = () => {
     const openDialog = () => {
         setIsOpen(true)
     }
-
     const onDialogClose = (e: MouseEvent) => {
-        console.log('onDialogClose', e)
         setIsOpen(false)
     }
 
-    const onDialogOk = (e?: MouseEvent) => {
-        setIsOpen(false)
-    }
 
     const onSubmitForm = async  (data: any) => {
-         setIsOpen(false);
+         console.log(data);
+      
          setSubmitting(true);
             try {
               const request = {
@@ -45,6 +42,7 @@ export const AddAuthRequest = () => {
               //console.log(request);
               const docRef = await addDoc(AuthRequestDoc, request);
               await updateDoc(docRef, { id: docRef.id });
+              newRuleAdd();
               setMessage("Réglément enregistré avec success");
               setAlert("success")
               setTimeout(() => setSubmitting(false), 1000);
@@ -71,7 +69,9 @@ export const AddAuthRequest = () => {
                 </Alert>
             )}
             <h5 className="mb-4">Nouvelle Réglément</h5>
+                
             <AuthRequestForm onSubmitForm={onSubmitForm}></AuthRequestForm>
+                 
         </Dialog>
     </>)
 }

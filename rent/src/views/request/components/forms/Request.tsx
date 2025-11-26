@@ -1,35 +1,56 @@
-import { Tabs } from "@/components/ui/Tabs"
-import TabContent from "@/components/ui/Tabs/TabContent"
-import TabList from "@/components/ui/Tabs/TabList"
-import TabNav from "@/components/ui/Tabs/TabNav"
-import SelectTypeRequest from "./SelectTypeRequest"
-import { AuthRequest } from "../../AuthRequest/AuthRequest"
-import { useState } from "react"
-import RequestForm from "./RequestForm"
-
+import { Tabs } from "@/components/ui/Tabs";
+import TabContent from "@/components/ui/Tabs/TabContent";
+import TabList from "@/components/ui/Tabs/TabList";
+import TabNav from "@/components/ui/Tabs/TabNav";
+import SelectTypeRequest from "./SelectTypeRequest";
+import { AuthRequest } from "../../AuthRequest/AuthRequest";
+import { useEffect, useState } from "react";
+import CreateRequestForm from "./CreateRequestForm";
 
 export const Request = () => {
-    const [ selectedType , SetSelectedType ]  = useState();
+  // Persisted tab
+  const [tab, setTab] = useState<"tab1" | "tab2">("tab1");
+  const [selectedType, setSelectedType] = useState<any>();
 
-    return (<>
-        <Tabs defaultValue="tab1" >
-            <TabList>
-                <TabNav value="tab1">Requête</TabNav>
-                <TabNav value="tab2">Configuration</TabNav>
-            </TabList>
-            <div className="p-4">
-                <TabContent value="tab1">
-                   { !selectedType && <SelectTypeRequest GetSelected={SetSelectedType} /> }
-                   { selectedType && <RequestForm typeRequest={selectedType} /> }
-                </TabContent>
-                <TabContent value="tab2">
-                    <AuthRequest></AuthRequest>
-                </TabContent>
+  // Load initial tab from localStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem("request_tab");
+    if (saved === "tab1" || saved === "tab2") {
+      setTab(saved);
+    }
+  }, []);
 
-            </div>
-        </Tabs>
+  // Save tab when it changes
+  const handleTabChange = (value: string) => {
+    setTab(value as "tab1" | "tab2");
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("request_tab", value);
+    }
+  };
 
-
-
-    </>)
-}
+  return (
+    <Tabs value={tab} onChange={handleTabChange}>
+      <TabList>
+        <TabNav value="tab1">Requête</TabNav>
+        <TabNav value="tab2">Configuration</TabNav>
+      </TabList>
+      <div className="p-4">
+        <TabContent value="tab1">
+          {!selectedType && <SelectTypeRequest GetSelected={setSelectedType} />}
+          {selectedType && (
+            <CreateRequestForm
+              typeRequest={selectedType}
+              goBack={() => {
+                setSelectedType(undefined);
+              }}
+            />
+          )}
+        </TabContent>
+        <TabContent value="tab2">
+          <AuthRequest />
+        </TabContent>
+      </div>
+    </Tabs>
+  );
+};

@@ -14,7 +14,6 @@ import {
   FaExclamationCircle,
   FaInfoCircle,
 } from "react-icons/fa";
-import Badge from "@/components/ui/Badge";
 import StepHistory from "./StepHistory";
 
 interface BankInfoProps {

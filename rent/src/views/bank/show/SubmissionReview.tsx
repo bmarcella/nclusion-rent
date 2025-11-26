@@ -71,6 +71,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
       useEffect(() => {
          
      }, [bankId]);
+     
      const pdfExport = async () => {
        setPdf(true);
        setTimeout(async () => {

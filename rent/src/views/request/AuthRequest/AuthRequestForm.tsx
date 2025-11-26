@@ -13,13 +13,12 @@ const schema = z.object({
     region_id: z.coerce.number().min(1, 'Required'),
     roles: z.array(z.string()).nonempty('Required'),
     status: z.string(),
-    reqType: z.array(z.number()),
+    reqType: z.array(z.string()),
     max_amount: z.preprocess(
         (v) => (v === '' || v === null ? undefined : Number(v)),
         z.number({ required_error: 'Required' }).min(1, 'Must be greater than 0')
     ),
     canApprove: z.boolean(),
-    create_at: z.date(),
 });
 
 interface AuthFormProps {
@@ -76,7 +75,8 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
         },
     });
 
-    const onSubmit = (data: AuthRequest) => onSubmitForm(data);
+    const onSubmit = (data: AuthRequest) =>  onSubmitForm(data);
+     
 
     // Disable submit if options are still loading or region not chosen
     const submitDisabled = useMemo(
@@ -85,9 +85,30 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
     );
 
     return (
-        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded shadow w-full">
+        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded shadow w-full max-h-150 overflow-y-auto">
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    {/* Region */}
+                    <FormItem
+                        label={t('authReq.region')}
+                        invalid={!!errors.region_id}
+                        errorMessage={errors.region_id?.message}
+                    >
+                        <Controller
+                            name="region_id"
+                            control={control}
+                            render={({ field }) => (
+                                <Select
+                                    isLoading={optLoading}
+                                    placeholder={t('common.select')}
+                                    options={regionOptions}
+                                    value={regionOptions.find(opt => Number(opt.value) === Number(field.value)) || null}
+                                    onChange={(opt) => field.onChange(Number(opt?.value))}
+                                />
+                            )}
+                        />
+                    </FormItem>
 
                     {/* Status */}
                     <FormItem
@@ -111,6 +132,7 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                         />
                     </FormItem>
 
+
                      {/* RequestType */}
                     <FormItem
                         label={t('authReq.reqType')}
@@ -127,34 +149,15 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                                     isMulti
                                     placeholder={t('common.select')}
                                     options={reqOptions}
-                                    value={ reqOptions.filter(opt => field.value?.includes(Number(opt.value)))}
-                                    onChange={(opts: any[]) => field.onChange(opts.map(o => o.value))}
+                                    value={ reqOptions.filter(opt => field.value?.includes(String(opt.value)))}
+                                    onChange={(opts: any[]) => field.onChange(opts.map(o => String(o.value)))}
                                 />
                             )}
 
                         />
                     </FormItem>
 
-                    {/* Region */}
-                    <FormItem
-                        label={t('authReq.region')}
-                        invalid={!!errors.region_id}
-                        errorMessage={errors.region_id?.message}
-                    >
-                        <Controller
-                            name="region_id"
-                            control={control}
-                            render={({ field }) => (
-                                <Select
-                                    isLoading={optLoading}
-                                    placeholder={t('common.select')}
-                                    options={regionOptions}
-                                    value={regionOptions.find(opt => Number(opt.value) === Number(field.value)) || null}
-                                    onChange={(opt) => field.onChange(Number(opt?.value))}
-                                />
-                            )}
-                        />
-                    </FormItem>
+                  
 
                     {/* Roles */}
                     <FormItem

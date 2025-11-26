@@ -172,8 +172,6 @@ mode: "onChange",
     );
     // Instead of replacing, accumulate
     setBanks(newBanks);
-
-
   };
 
 

@@ -163,8 +163,6 @@ const CreateRequestForm = ( { typeRequest } : Props) => {
     );
     // Instead of replacing, accumulate
     setBanks(newBanks);
-
-
   };
 
   const fetchProprio = async () => {

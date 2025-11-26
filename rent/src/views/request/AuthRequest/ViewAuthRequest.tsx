@@ -57,6 +57,7 @@ export const ViewAuthRequest: React.FC = () => {
     reqType: [],
     region: undefined,
   });
+  
   type SortKey = "created-desc" | "created-asc" | "status-asc";
   const [sortKey, setSortKey] = useState<SortKey>("created-desc");
 
