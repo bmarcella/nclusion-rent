@@ -31,7 +31,7 @@ const LeaseContractForm = ( { bank }: Props) => {
     <>
     {/* max-w-4xl */}
     { landlord && (<div className="mx-auto p-6 bg-white rounded-lg text-gray-800 leading-relaxed">
-      <h1 className="text-2xl font-bold text-center mb-6">CONTRAT DE BAIL</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">CONTRAT DE BAIL</h1>
 
       <p className="mb-4 font-semibold">ENTRE :  </p>
       <div className="mb-6">
@@ -98,7 +98,7 @@ const LeaseContractForm = ( { bank }: Props) => {
         </p>
       </div>
 
-      <div className="mt-8 flex justify-between">
+      <div className="mt-15 flex justify-between">
         <div>
           <p className="mb-1">____________________________</p>
           <p className="text-sm">Pour le Bailleur</p>
