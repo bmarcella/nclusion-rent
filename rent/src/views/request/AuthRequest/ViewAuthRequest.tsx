@@ -18,18 +18,19 @@ import {
 import { AuthRequestDoc } from "@/services/Landlord";
 import type { AuthRequest } from "../entities/AuthRequest";
 import { Button, Pagination, Select, Tag } from "@/components/ui";
+import UserName from "@/views/bank/show/components/UserName";
+import { getRegionsById } from "@/views/Entity/Regions";
 
 const { Tr, Th, Td, THead, TBody } = Table;
 
 type Filter = {
-  isUser?: string | undefined; // creator user id/email
-  roles: string[];             // array of roles to overlap
-  reqType: number[];           // array of req types to overlap
-  region?: number | undefined; // region_id
+  isUser?: string;      // creator user id/email
+  roles: string[];      // array of roles to overlap
+  reqType: number[];    // array of req types to overlap
+  region?: number;      // region_id
 };
 
 const PAGE_SIZE_OPTIONS = [
-  { value: 50, label: "50 / page" },
   { value: 100, label: "100 / page" },
   { value: 200, label: "200 / page" },
   { value: 500, label: "500 / page" },
@@ -57,33 +58,31 @@ export const ViewAuthRequest: React.FC = () => {
     reqType: [],
     region: undefined,
   });
-  
+
   type SortKey = "created-desc" | "created-asc" | "status-asc";
   const [sortKey, setSortKey] = useState<SortKey>("created-desc");
 
   // ---------- Columns ----------
-  // keep the layout simple; customize as needed
   const columns = [
-    { key: "id", label: "ID" },
-    { key: "status", label: "Status" },
-    { key: "max_amount", label: "Max Amount" },
-    { key: "roles", label: "Roles" },
-    { key: "reqType", label: "Req Types" },
-    { key: "region_id", label: "Region" },
-    { key: "create_by", label: "Created By" },
-    { key: "create_at", label: "Created At" },
-    { key: "update_at", label: "Updated At" },
-    { key: "canApprove", label: "Can Approve" },
+    { key: "status",      label: "Status" },
+    { key: "max_amount",  label: "Max Amount" },
+    { key: "roles",       label: "Roles" },
+    { key: "reqType",     label: "Req Types" },
+    { key: "region_id",   label: "Region" },
+    { key: "created_by",  label: "Created By" },
+    { key: "created_at",  label: "Created At" },
+    { key: "canApprove",  label: "Can Approve" },
   ] as const;
 
-  // ---------- Constraints (same pattern as ShowProprio) ----------
+  // ---------- Constraints ----------
   const constraints = useMemo<QueryConstraint[]>(() => {
     const cs: QueryConstraint[] = [];
 
-    // NOTE: Using `create_by` to match your AuthRequest interface.
-    // If your collection actually uses 'createBy', switch here.
+    // Un-comment these when you're ready to use them (note: Firestore
+    // only allows ONE array-contains-any / in / not-in field per query).
+
     if (filter.isUser && filter.isUser.trim() !== "") {
-      cs.push(where("create_by", "==", filter.isUser.trim()));
+      cs.push(where("created_by", "==", filter.isUser.trim()));
     }
 
     if (filter.roles?.length) {
@@ -94,13 +93,15 @@ export const ViewAuthRequest: React.FC = () => {
       cs.push(where("region_id", "==", filter.region));
     }
 
+    // ⚠ If you also need reqType, you CANNOT keep array-contains-any
+    // on both roles and reqType at the same time.
     if (filter.reqType?.length) {
-      cs.push(where("reqType", "array-contains-any", filter.reqType.slice(0, 10)));
+      // cs.push(where("reqType", "array-contains-any", filter.reqType.slice(0, 10)));
     }
-    
-    // Sorting (ensure indexes exist for combos)
-    if (sortKey === "created-desc") cs.push(orderBy("create_at", "desc"));
-    if (sortKey === "created-asc") cs.push(orderBy("create_at", "asc"));
+
+    // Sorting (make sure you have composite indexes for combinations)
+    if (sortKey === "created-desc") cs.push(orderBy("created_at", "desc"));
+    if (sortKey === "created-asc") cs.push(orderBy("created_at", "asc"));
     if (sortKey === "status-asc") cs.push(orderBy("status", "asc"));
 
     return cs;
@@ -119,8 +120,10 @@ export const ViewAuthRequest: React.FC = () => {
     (async () => {
       try {
         const base = AuthRequestDoc as CollectionReference<DocumentData>;
-        const cnt = await getCountFromServer(query(base, ...constraints));
-        if (!cancelled) setTotalCount(Number(cnt.data().count || 0));
+        const cntSnap = await getCountFromServer(query(base, ...constraints));
+        if (!cancelled) {
+          setTotalCount(Number(cntSnap.data().count || 0));
+        }
       } catch {
         // optional: swallow count errors
       }
@@ -142,6 +145,7 @@ export const ViewAuthRequest: React.FC = () => {
       } else {
         const prevCursor = pageCursors[pageNumber - 2];
         if (!prevCursor) {
+          // no cursor stored for this page yet
           setLoading(false);
           return;
         }
@@ -149,7 +153,10 @@ export const ViewAuthRequest: React.FC = () => {
       }
 
       const snap = await getDocs(q);
-      const items: AuthRequest[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+      const items: AuthRequest[] = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as any),
+      }));
 
       if (snap.docs.length > 0) {
         setPageCursors((prev) => {
@@ -179,9 +186,15 @@ export const ViewAuthRequest: React.FC = () => {
   const goPrev = () => page > 1 && !loading && fetchPage(page - 1);
   const goNext = () => hasNext && !loading && fetchPage(page + 1);
 
-  // ---------- Simple controls (swap for your own UI) ----------
+  // ---------- Simple controls ----------
   const setRolesCsv = (csv: string) =>
-    setFilter((f) => ({ ...f, roles: csv.split(",").map((s) => s.trim()).filter(Boolean) }));
+    setFilter((f) => ({
+      ...f,
+      roles: csv
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    }));
 
   const setReqTypesCsv = (csv: string) =>
     setFilter((f) => ({
@@ -196,7 +209,6 @@ export const ViewAuthRequest: React.FC = () => {
 
   const fmt = (v: any) => {
     if (!v) return "-";
-    // Firestore Timestamp?
     if (typeof v?.toDate === "function") return v.toDate().toLocaleString();
     if (v instanceof Date) return v.toLocaleString();
     return String(v);
@@ -212,7 +224,12 @@ export const ViewAuthRequest: React.FC = () => {
             className="border px-2 py-1 rounded w-64"
             placeholder="user id or email"
             value={filter.isUser ?? ""}
-            onChange={(e) => setFilter((f) => ({ ...f, isUser: e.target.value || undefined }))}
+            onChange={(e) =>
+              setFilter((f) => ({
+                ...f,
+                isUser: e.target.value || undefined,
+              }))
+            }
           />
         </div>
 
@@ -224,7 +241,9 @@ export const ViewAuthRequest: React.FC = () => {
             value={filter.roles.join(",")}
             onChange={(e) => setRolesCsv(e.target.value)}
           />
-          <div className="text-xs text-gray-500 mt-1">Max 10 values (Firestore limit).</div>
+          <div className="text-xs text-gray-500 mt-1">
+            Max 10 values (Firestore limit).
+          </div>
         </div>
 
         <div>
@@ -245,7 +264,11 @@ export const ViewAuthRequest: React.FC = () => {
             placeholder="e.g. 5"
             value={filter.region ?? ""}
             onChange={(e) =>
-              setFilter((f) => ({ ...f, region: e.target.value === "" ? undefined : Number(e.target.value) }))
+              setFilter((f) => ({
+                ...f,
+                region:
+                  e.target.value === "" ? undefined : Number(e.target.value),
+              }))
             }
           />
         </div>
@@ -255,7 +278,7 @@ export const ViewAuthRequest: React.FC = () => {
           <select
             className="border px-2 py-1 rounded"
             value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as any)}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
           >
             <option value="created-desc">Created (newest)</option>
             <option value="created-asc">Created (oldest)</option>
@@ -270,85 +293,103 @@ export const ViewAuthRequest: React.FC = () => {
             isSearchable={false}
             value={PAGE_SIZE_OPTIONS.find((o) => o.value === pageSize) as any}
             options={PAGE_SIZE_OPTIONS as any}
-            onChange={(opt) => setPageSizeIdx(Math.max(0, PAGE_SIZE_OPTIONS.findIndex((o) => o.value === opt?.value)))}
+            onChange={(opt) =>
+              setPageSizeIdx(
+                Math.max(
+                  0,
+                  PAGE_SIZE_OPTIONS.findIndex(
+                    (o) => o.value === (opt?.value ?? PAGE_SIZE_OPTIONS[0].value),
+                  ),
+                )
+              )
+            }
           />
         </div>
       </div>
- <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
-  {/* Table */}
-      <Table>
-        <THead>
-          <Tr>
-            {columns.map((c) => (
-              <Th key={c.key as string}>{c.label}</Th>
-            ))}
-          </Tr>
-        </THead>
-        <TBody>
-          {loading && (
-            <Tr>
-              <Td colSpan={columns.length}>Loading…</Td>
-            </Tr>
-          )}
-          {!loading &&
-            rows.map((r) => (
-              <Tr key={r.id}>
-                <Td>
-                  <span className="inline-flex items-center gap-2">
-                    {r.status}
-                    {r.canApprove ? (
-                      <Tag className="bg-emerald-100 text-emerald-700 border-0">approvable</Tag>
-                    ) : null}
-                  </span>
-                </Td>
-                <Td>{r.max_amount}</Td>
-                <Td>{Array.isArray(r.roles) ? r.roles.join(", ") : "-"}</Td>
-                <Td>{Array.isArray(r.reqType) ? r.reqType.join(", ") : "-"}</Td>
-                <Td>{r.region_id ?? "-"}</Td>
-                <Td>{r.created_by ?? "-"}</Td>
-                <Td>{fmt(r.created_at)}</Td>
-                <Td>{fmt(r.updated_at)}</Td>
-                <Td>{String(r.canApprove)}</Td>
-              </Tr>
-            ))}
-          {!loading && rows.length === 0 && (
-            <Tr>
-              <Td colSpan={columns.length}>No results</Td>
-            </Tr>
-          )}
-        </TBody>
-      </Table>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between mt-4">
-        <Pagination
-          pageSize={pageSize}
-          currentPage={page}
-          total={totalCount}
-          onChange={(next) => {
-            if (next === page + 1) return hasNext && fetchPage(next);
-            if (next === page - 1) return page > 1 && fetchPage(next);
-            // random page jump: try to fetch directly (works if we’ve stored that cursor; otherwise resets from 1)
-            fetchPage(next);
-          }}
-        />
-        <div className="flex items-center gap-2">
-          <Button
-                      className="border px-3 py-1 rounded disabled:opacity-50"
-                      disabled={page === 1 || loading}
-                      onClick={() => page > 1 && fetchPage(page - 1)}          >
-            Prev
-          </Button>
-          <Button
-                      className="border px-3 py-1 rounded disabled:opacity-50"
-                      disabled={!hasNext || loading}
-                      onClick={() => hasNext && fetchPage(page + 1)}           >
-            Next
-          </Button>
+      <div className="w-full mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
+        {/* Table */}
+        <Table>
+          <THead>
+            <Tr>
+              {columns.map((c) => (
+                <Th key={c.key as string}>{c.label}</Th>
+              ))}
+            </Tr>
+          </THead>
+          <TBody>
+            {loading && (
+              <Tr>
+                <Td colSpan={columns.length}>Loading…</Td>
+              </Tr>
+            )}
+            {!loading &&
+              rows.map((r) => (
+                <Tr key={r.id}>
+                  <Td>
+                    <span className="inline-flex items-center gap-2">
+                       <Tag className="bg-emerald-100 text-emerald-700 border-0">
+                           {r.status}
+                        </Tag>
+                    </span>
+                  </Td>
+                  <Td>{r.max_amount}</Td>
+                  <Td>{Array.isArray(r.roles) ? r.roles.join(", ") : "-"}</Td>
+                  <Td>{Array.isArray(r.reqType) ? r.reqType.join(", ") : "-"}</Td>
+                  <Td>{ r.region_id ? getRegionsById(r.region_id).capital : "-"}</Td>
+                  <Td><UserName userId={r.created_by ?? "-"}></UserName></Td>
+                  <Td>{fmt(r.created_at)}</Td>
+                  <Td>{String()}
+                    {  (r.canApprove) &&
+                      <Tag className="bg-emerald-100 text-emerald-700 border-0">
+                          Oui
+                        </Tag>
+                    }
+                     {  (!r.canApprove) &&
+                      <Tag className="bg-red-100 text-red-700 border-0">
+                           Non
+                      </Tag> }
+                  </Td>
+                </Tr>
+              ))}
+            {!loading && rows.length === 0 && (
+              <Tr>
+                <Td colSpan={columns.length}>No results</Td>
+              </Tr>
+            )}
+          </TBody>
+        </Table>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-4">
+          <Pagination
+            pageSize={pageSize}
+            currentPage={page}
+            total={totalCount}
+            onChange={(next) => {
+              if (next === page + 1) return hasNext && fetchPage(next);
+              if (next === page - 1) return page > 1 && fetchPage(next);
+              fetchPage(next);
+            }}
+          />
+          <div className="flex items-center gap-2">
+            <Button
+              className="border px-3 py-1 rounded disabled:opacity-50"
+              disabled={page === 1 || loading}
+              onClick={goPrev}
+            >
+              Prev
+            </Button>
+            <Button
+              className="border px-3 py-1 rounded disabled:opacity-50"
+              disabled={!hasNext || loading}
+              onClick={goNext}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
- </div>
-    
     </div>
   );
 };

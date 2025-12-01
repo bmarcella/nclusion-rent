@@ -113,7 +113,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.reqMenu.add',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['assist_accoutant', 'accoutant', 'admin',"assist_manager", "assist_coordonator", "coordonator", "manager", "super_manager"],
                 subMenu: [],
             },
             {
@@ -143,7 +143,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.reqMenu.action',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['assist_accoutant', 'accoutant', 'admin'],
                 subMenu: [],
             },
            

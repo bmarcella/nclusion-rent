@@ -1,8 +1,9 @@
 import React from 'react'
+import ShowReq from './ShowReq'
 
 function SentReq() {
   return (
-    <div>SentReq</div>
+   <ShowReq  sentByMe={true} ></ShowReq> 
   )
 }
 

@@ -15,12 +15,15 @@ import { AuthRequestDoc } from '@/services/Landlord'
 import { AuthRequest, RequestTypeEnum } from '../entities/AuthRequest'
 import { manageAuth } from '@/constants/roles.constant'
 import { useTranslation } from 'react-i18next'
+import { Spinner } from '@/components/ui';
+
 interface Props {
     data : IRequest
-    onDialogClose: (close: boolean, data: IRequest)=> void 
+    onDialogClose: (close: boolean, data: IRequest)=> void ,
+    action: boolean
 } 
 
-function TabView({ data, onDialogClose } : Props) {
+function TabView({ data, onDialogClose, action} : Props) {
  const { userId, proprio, authority } = useSessionUser((state) => state.user);
  const [request , setRequest]=  useState<IRequest>(data);
  const [rules , setRules]=  useState<AuthRequest [] | undefined>([]) as any;
@@ -74,32 +77,39 @@ useEffect(() => {
         ? rule.reqType.includes(request.requestType as RequestTypeEnum)
         : false
     );
-  console.log(objs)
+
   setRules(objs);
 };
+ const see = (rules.length > 0 || ( request.status !='regionalApproval' &&  request.status !='accountantRegionalApproval'  &&  request.status !='accountantRegionalApproval' )) 
+ const end = request.status =='completed' || request.status =='rejected' || request.status =='cancelled' 
   // cd ui
   return (
     <>
-       { rules.length > 0 && <Tabs defaultValue="tab1" className="w-full">
+       { see &&  <Tabs defaultValue="tab1" className="w-full">
         <TabList>
           <TabNav value="tab1"> {request.requestType.toUpperCase() }</TabNav>
-          <TabNav value="tab2"> Documents</TabNav>
-          <TabNav value="tab3"> Historique</TabNav>
+         { <><TabNav value="tab2"> Documents</TabNav>
+          <TabNav value="tab3"> Historique</TabNav> </> }
         </TabList>
          <div className="p-4">
             <TabContent value="tab1">
-              <DetailsRequest data={request} getNewreq={save} rules={rules} /> 
+              <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} /> 
             </TabContent>
+            <>
             <TabContent value="tab3">
                  <HistoticView data={request}></HistoticView>
             </TabContent>
               <TabContent value="tab2">
-                  <ImageReq   reqId={request.id} userId={userId || ''} isEdit={true} owner={data.createdBy==userId} ></ImageReq>
+                  <ImageReq   reqId={request.id} userId={userId || ''} isEdit={true} owner={data.createdBy==userId}  end={end} ></ImageReq>
             </TabContent>
+            </>
         </div> 
     </Tabs> }
-    { rules.length == 0  && <>
+    { !see && <>
          {loadingRules && <>
+           <div className="flex items-center mt-12">
+            <Spinner className="mr-4 text-green-500" size="40px" />
+        </div>
          </>}
 
           {!loadingRules && <>

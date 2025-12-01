@@ -258,10 +258,14 @@ const onSubmit: SubmitHandler<MoneyRequest> = async (data) => {
         window.scrollTo({ top: 0, behavior: "smooth" });
         const request = {
           ...data,
-          regionalApproved_by: null,
           preApproval_by: null,
+          regionalApproved_by: null,
           accountantApproval: null,
           managerGlobalApproval: null,
+          rejectedBy: null,
+          cancelledBy: null,
+          approvedBy: null,
+          completedBy: null,
           historicApproval: [{
             status_to: (!data.general?.is_for_other) ? statuses[1].value : statuses[0].value,
             status_from: null,
@@ -308,7 +312,7 @@ const onSubmit: SubmitHandler<MoneyRequest> = async (data) => {
         onSubmit={onSubmit}
         methods={methods} stype={typeRequest} goBack={goBack} ></ViewReqForm>)}
       {step == 1 && (
-        <ImageReq  nextStep={nextStep} reqId={request} userId={userId || ''} ></ImageReq>
+        <ImageReq  nextStep={nextStep} reqId={request} userId={userId || ''} end={false}  isEdit={false} ></ImageReq>
       ) }
       {step === 2 && (
         <div className="text-gray-700 dark:text-white">

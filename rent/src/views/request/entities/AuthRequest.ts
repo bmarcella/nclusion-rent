@@ -13,6 +13,11 @@ export interface RequestApprovalStatus {
 // Types
 type TFunction = (key: string) => string;
 
+export const REQUEST_STATUS_VALUES_ACTION = [
+  'approved',
+  'completed',
+] as const;
+
 export const REQUEST_STATUS_VALUES = [
   'preApproval',
   'regionalApproval',
@@ -45,6 +50,9 @@ export const requestStatus = (t: TFunction): StatusOption[] =>
     'accountantRegionalApproval',
     'managerGlobalApproval',
   ]);
+
+export const requestStatusAction = (t: TFunction): StatusOption[] =>
+  makeStatusOptions(t, [...REQUEST_STATUS_VALUES_ACTION]);
 
 export const requestStatusAll = (t: TFunction): StatusOption[] =>
   makeStatusOptions(t, [...REQUEST_STATUS_VALUES]);

@@ -179,7 +179,6 @@ const pageSizeOption = [
             {
                 header: 'Action',
                 cell: ({ row }) => {
-
                  if (!step && !all) return (
                         <div>
                         <Button variant="solid"  shape="circle" size="xs" onClick={() => openDialog(row.original)}>

@@ -108,6 +108,12 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/request/MyRequest')),
         authority: ['admin', 'coordonator', 'assist_coordonator', 'manager', 'assist_manager', 'super_manager', 'operation'],
     },
+     {
+        key: 'reqMenu.action',
+        path: '/request/action',
+        component: lazy(() => import('@/views/request/AccountantAction')),
+        authority: ['assist_accoutant', 'accoutant', 'admin'],
+    },
 
     ...othersRoute,
 ]

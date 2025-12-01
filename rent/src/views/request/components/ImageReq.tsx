@@ -19,10 +19,11 @@ interface Props {
   isEdit?: boolean,
   reqId: string,
   userId? : string
-  owner? : boolean
+  owner? : boolean,
+  end?: boolean
 }
 
-const ImageReq = ( { reqId, isEdit = false, nextStep, userId, owner = false } : Props) => {
+const ImageReq = ( { reqId, isEdit = false, nextStep, userId, owner = false, end = false } : Props) => {
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
     const [docFiles, setDocFiles] = useState<any[]>([])
     const [loading, setLoading] = useState(false);
@@ -114,7 +115,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId, owner = false } : 
 
     return (
         <div>
-           { (!isEdit || owner)  && (<div  className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow mb-4 mt-4" >
+           { (!isEdit || owner)  && !end && (<div  className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow mb-4 mt-4" >
                 <FormItem label="Type document" invalid={!!error.is} errorMessage={error.message}>
                     <Select placeholder="Please Select" options={ support_docs.map((doc) => ({ label: t(doc), value: doc }))} 
                         onChange={(option) => { 
@@ -154,7 +155,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId, owner = false } : 
                 </Button>`
             </div>) }
             </div>) }
-           { !isEdit  && nextStep &&  (
+           { !isEdit  && nextStep && !end &&  (
             <div className="mt-6 right">
                 `<Button  variant="solid" onClick={()=>{
                     nextStep(2, undefined);
@@ -162,7 +163,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId, owner = false } : 
                         { isEdit? "Ajouter" : 'Suivant' }
                 </Button>`
             </div>) }
-            { isEdit || images.length> 0 &&  ( <ImageReqComp images={images} userId={userId || ''} onDelete={OnDeleteImg} />  ) }
+            { isEdit || images.length> 0 &&  ( <ImageReqComp images={images} userId={userId || ''} onDelete={OnDeleteImg} end={end} />  ) }
         </div>
     )
 }

@@ -15,10 +15,11 @@ import { AuthRequest } from '../entities/AuthRequest';
 interface Props {
   data: IRequest;
   rules : AuthRequest []
-  getNewreq :(data: IRequest)=>void 
+  getNewreq :(data: IRequest)=>void ,
+  action: boolean
 }
 
-function DetailsRequest({ data , rules, getNewreq}: Props) {
+function DetailsRequest({ data , rules, getNewreq, action}: Props) {
   // In many backends, the "business payload" is nested (e.g. data.request).
   // If not, we fall back to using `data` directly.
   const [request , setRequest]=  useState<IRequest>(data) as any;
@@ -41,12 +42,37 @@ function DetailsRequest({ data , rules, getNewreq}: Props) {
     return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
   
-  const onNextStatus = (data: string, validated)=>{
-      updateMoneyRequestStatus(data);
+  const onNextStatus = (data: string, validated: boolean, prevStatus: string) => {
+      updateMoneyRequestStatus(data,validated, prevStatus);
+  }
+
+  const getPrev = (prevStatus: string )=>{
+      switch (prevStatus) {
+        case 'preApproval':
+            return "preApproval_by"
+        case 'regionalApproval':
+            return "regionalApproved_by"
+        case 'accountantRegionalApproval':
+              return "accountantApproval"
+        case 'managerGlobalApproval':
+              return 'managerGlobalApproval'
+        case 'approved':
+            return "approvedBy"
+        case 'completed':
+            return  "completedBy"
+        case 'rejected':
+            return "rejectedBy"
+        case 'cancelled':
+          return "cancelledBy"
+        default:
+          return "changeBy";
+      }
   }
 
  const  updateMoneyRequestStatus = async (
   nextStatus: string,
+  validated: boolean,
+  prevStatus: string
 ) => {
   if (!data.id) {
     throw new Error("updateMoneyRequestStatus: requestId is required");
@@ -63,9 +89,12 @@ function DetailsRequest({ data , rules, getNewreq}: Props) {
             createdAt: new Date(),
    });
 
+   const prev = getPrev(prevStatus);
+
   const payload: Record<string, any> = {
     status: nextStatus,
-    historicApproval : hist
+    historicApproval : hist,
+    [prev] : userId
   };
   await updateDoc(ref, payload);
   // 👉 Fetch the updated document
@@ -76,9 +105,6 @@ function DetailsRequest({ data , rules, getNewreq}: Props) {
 
 }
 
-const getValidateState = ()=> {
-
-}
 
   // ---- Section renderers ----------------------------------------------------
 
@@ -673,7 +699,7 @@ const getValidateState = ()=> {
       {renderMainSection()}
 
       {renderDocuments() }
-      <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus}></MoneyRequestNextStatusButton>
+      <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus} rules={rules} action={action} />
     </div>
   );
 }

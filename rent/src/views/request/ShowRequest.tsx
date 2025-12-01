@@ -5,7 +5,6 @@ import TabNav from '@/components/ui/Tabs/TabNav';
 import { useTranslation } from 'react-i18next';
 import { requestStatusAll } from './entities/AuthRequest';
 import ShowReq from './components/ShowReq';
-
 export function ShowRequestBase() {
   const { t } = useTranslation();
   const statuses = requestStatusAll(t)

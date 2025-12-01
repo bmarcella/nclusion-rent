@@ -31,13 +31,14 @@ interface ImageGalleryProps {
   onDelete?: (image: ReqImage) => void;
   canDelete?: boolean;
   showPic?: boolean;
+  end?: boolean
 }
 
 const openPDF = (url: string ) => {
   window.open(url, '_blank');
 };
 
-const ImageReqComp : React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=>{} , userId, canDelete = true, showPic=false}) => {
+const ImageReqComp : React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=>{} , userId, canDelete = true, showPic=false , end = false}) => {
   const [ image, setCImg] = useState() as any;
   const [dialogIsOpen, setIsOpen] = useState(false)
   const { width, height } = useWindowSize();
@@ -88,7 +89,7 @@ const ImageReqComp : React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)=
     </div>
 
     <div className="justify-end items-start gap-2 p-2">
-      {canDelete && (
+      {canDelete && !end && (
         <Button
           icon={<MdOutlineDeleteOutline />}
           className="text-sm text-red-600 hover:underline mr-4"

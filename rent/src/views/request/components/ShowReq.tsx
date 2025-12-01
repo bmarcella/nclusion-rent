@@ -3,7 +3,7 @@
 import { ColumnDef } from "@/components/shared/DataTable";
 import { ExpenseRequestDoc } from "@/services/Landlord";
 import classNames from "classnames";
-import { QueryDocumentSnapshot, DocumentData, QueryConstraint, orderBy, where, CollectionReference, getCountFromServer, query, Query, limit, startAfter, getDocs } from "firebase/firestore";
+import { QueryDocumentSnapshot, DocumentData, QueryConstraint, orderBy, where, CollectionReference, getCountFromServer, query, Query, limit, startAfter, getDocs, or, QueryCompositeFilterConstraint, and } from "firebase/firestore";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HiHome } from "react-icons/hi";
 import { IRequest } from "../entities/IRequest";
@@ -12,7 +12,7 @@ import Currency from "@/views/shared/Currency";
 import { formatRelative } from "date-fns/formatRelative";
 import { fr } from "date-fns/locale/fr";
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, flexRender } from "@tanstack/react-table";
-import { Table, Pagination, Select, Button, Dialog ,  } from "@/components/ui";
+import { Table, Pagination, Select, Button, Dialog, Badge ,  } from "@/components/ui";
 import TBody from "@/components/ui/Table/TBody";
 import Td from "@/components/ui/Table/Td";
 import Th from "@/components/ui/Table/Th";
@@ -25,6 +25,7 @@ import { PiEyeLight } from "react-icons/pi";
 import { useWindowSize } from "@/utils/hooks/useWindowSize";
 import TabView from "../View/TabView";
 import { getRegionsById } from "@/views/Entity/Regions";
+import { manageAuth } from "@/constants/roles.constant";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const PAGE_SIZE_OPTIONS = [
@@ -34,7 +35,9 @@ const PAGE_SIZE_OPTIONS = [
   { value: 500, label: "500 / page" },
 ];
 
-function ShowReq({ status, step = false }: any) {
+type AnyConstraint = QueryConstraint | QueryCompositeFilterConstraint;
+
+ function ShowReq({ status, step = false, action = false, forMe= false , sentByMe = false, recieve = undefined, transition = undefined, rejected = false }: any) {
   // server-side paging state
     const [currentPage, setPage] = useState(1);
     const [pageCursors, setPageCursors] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
@@ -52,6 +55,8 @@ function ShowReq({ status, step = false }: any) {
     const [cObj, setCObj] = useState<IRequest>();
     const [dialogIsOpen, setIsOpen] = useState(false);
     const { width, height } = useWindowSize();
+    const [regions, setRegions] = useState([]) as any;
+
     const openDialog = (obj: IRequest) => {
         setCObj(obj as any);
         setIsOpen(true)
@@ -73,20 +78,72 @@ function ShowReq({ status, step = false }: any) {
       );
     };
 
-    // ---------- Constraints (same pattern as ShowProprio) ----------
-    const constraints = useMemo<QueryConstraint[]>(() => {
-        const cs: QueryConstraint[] = [];
+    const constraints = useMemo<any[]>( () => {
+ 
+    const role = authority![0];
+    const reg = regions.map((r:any)=>r.id);
 
-        if (status) {
-          console.log("STATUSADD");
-            cs.push(where("status", "==", status));
-        }
-        // Sorting (ensure indexes exist for combos)
-        if (sortKey === "created-desc") cs.push(orderBy("createdAt", "desc"));
-        if (sortKey === "created-asc") cs.push(orderBy("createdAt", "asc"));
-        if (sortKey === "status-asc") cs.push(orderBy("status", "asc"));
-        return cs;
-      }, [status, sortKey]);
+    const cs: any[] = [];
+    if(role != "admin") {
+        cs.push(where("general.id_region_user", "in", reg));
+    }
+
+    if (status) {
+        cs.push(where("status", "==", status));
+    }
+  
+    if (forMe) {
+        cs.push(
+            or(
+                where("preApproval_by", "==", userId!),
+                where("regionalApproved_by", "==", userId),
+                where("accountantApproval", "==", userId),
+                where("managerGlobalApproval", "==", userId),
+                where("approvedBy", "==", userId),
+                where("completedBy", "==", userId)
+            )
+        );
+    }
+
+    if (rejected) {
+        cs.push(
+            or(
+                where("rejectedBy", "==", userId),
+                where("cancelledBy", "==", userId),
+            )
+        );
+    }
+
+     if (sentByMe) {
+        cs.push(
+                where("createdBy", "==", userId),
+        );
+     }
+
+      if (recieve) {
+        cs.push( and (
+                 where("status", "in", recieve.status),
+                 where("requestType", "in", recieve.reqType),
+               )
+        );
+     }
+
+
+    // Sorting (ensure Firestore indexes exist)
+    switch (sortKey) {
+        case "created-desc":
+            cs.push(orderBy("createdAt", "desc"));
+            break;
+        case "created-asc":
+            cs.push(orderBy("createdAt", "asc"));
+            break;
+        case "status-asc":
+            cs.push(orderBy("status", "asc"), orderBy("createdAt", "desc")); // optional second order
+            break;
+    }
+
+    return cs;
+}, [status, forMe, sentByMe, recieve, sortKey, userId, regions, authority]);
 
          // total count for pagination UI
         useEffect(() => {
@@ -126,7 +183,6 @@ function ShowReq({ status, step = false }: any) {
       
             const snap = await getDocs(q);
             const items: IRequest[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
-            console.log(items);
             if (snap.docs.length > 0) {
               setPageCursors((prev) => {
                 const next = [...prev];
@@ -134,7 +190,7 @@ function ShowReq({ status, step = false }: any) {
                 return next;
               });
             }
-    
+           // console.log(items);
             setRows(items);
             setPage(pageNumber);
             setHasNext(snap.docs.length == pageSize);
@@ -158,7 +214,9 @@ function ShowReq({ status, step = false }: any) {
                 header: 'Crée par',
                 cell: ({ row }) => (
                  <div className="min-w-[160px]">
-                    <div className="font-medium">  { ( row.original?.createdBy) ? <UserName userId={row.original.createdBy} /> : "" } </div>
+                    <div className="font-medium">  { row.original?.createdBy != userId ?
+                    ( row.original?.createdBy) ? <UserName userId={row.original.createdBy} /> : "" : "Moi" }
+                     </div>
                   </div>
                  ),
             },
@@ -192,6 +250,22 @@ function ShowReq({ status, step = false }: any) {
                 cell: ({ row }) => (
                     <div className="min-w-auto">
                           { t('request.status.'+row.original.status)  }
+                          <br/>
+                          {transition && (
+                                  <>
+                                    {row.original.historicApproval
+                                      ?.filter(a => a.by_who === userId)
+                                      .map(a => (
+                                       <> { a?.status_from && <> <Badge content={ a?.status_from +"<=>"+a.status_to} key={`${a.by_who}-${a.status_from}-${a.status_to}`}>
+                                         
+                                          </Badge>
+                                        <p className="mt-1" ></p>
+                                        </> }
+          
+                                       </>
+                                      ))}
+                                  </>
+                          )}
                      </div>
                     ),
             },
@@ -244,7 +318,12 @@ function ShowReq({ status, step = false }: any) {
 
   useEffect(() => {
         if (fetchedRef.current) return;
-        fetchPage(1); // load first page
+           const run = async () => {
+             const { regions } = await manageAuth(authority![0], proprio, t);
+             setRegions(regions);
+             fetchPage(1); // load first page
+           }
+         run();
       }, []);      
   
   return (
@@ -345,8 +424,7 @@ function ShowReq({ status, step = false }: any) {
                         </h5>
                     </div>
                       <div className="flex-1 overflow-y-auto">
-                  
-                       <TabView data={cObj!} onDialogClose={onDialogClose} />
+                       <TabView data={cObj!} onDialogClose={onDialogClose} action={action} />
                       </div>
                     <div className="text-right mt-6">
                     <Button
