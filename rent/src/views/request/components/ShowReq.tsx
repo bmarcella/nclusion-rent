@@ -269,7 +269,7 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
       {
         header: 'Requête',
         cell: ({ row }) => (
-          <div className="max-w-[160px]">
+          <div className="max-w-[160px]" title={row.original.id}>
             <div className="font-medium">
               <Tag className={classNames(
                 getTypeRequestTagClasses(row.original.requestType), "mb-1 mr-1"
@@ -277,7 +277,8 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
 
             </div>
              <div className="font-medium">
-              <Tag className="mt-1">  {getCategorieName(t, row.original)} </Tag>
+              
+              <Tag className="mt-1" >  {getCategorieName(t, row.original)} </Tag>
             </div>
           </div>
         ),
