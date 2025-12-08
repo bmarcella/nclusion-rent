@@ -18,7 +18,7 @@ import { getBankImages } from '@/services/firebase/BankService';
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage';
 import ImageReq from '../ImageReq';
 import EndBank from '@/views/bank/add/components/EndBank';
-import { requestStatusAll, RequestType, RequestTypeEnum } from '../../entities/AuthRequest';
+import { getNextNodeV2, requestStatusAll, RequestType, RequestTypeEnum } from '../../entities/AuthRequest';
 import { MoneyRequest, MoneyRequestSchema } from '../../entities/SchemaRequest';
 import { ViewReqForm } from './ViewReqForm';
 import { IRequest } from '../../entities/IRequest';
@@ -253,6 +253,17 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
 
   const onSubmit: SubmitHandler<MoneyRequest> = async (data) => {
     try {
+      let new_status = undefined
+      if(data.general?.is_for_other) {
+         new_status = statuses[0].value;
+      } else {
+            const flow = data?.general?.approvalFlow;
+            if (flow == 1 || flow == 2) {
+                 new_status = statuses[1].value; 
+              } else  {
+               new_status = statuses[2].value; 
+           }
+      }
       setSubmitting(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
       const request = {
@@ -266,7 +277,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
         approvedBy: null,
         completedBy: null,
         historicApproval: [{
-          status_to: (!data.general?.is_for_other) ? statuses[1].value : statuses[0].value,
+          status_to: new_status,
           status_from: null,
           by_who: userId,
           createdAt: new Date(),
@@ -275,7 +286,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
         createdAt: new Date(),
         updatedBy: userId,
         updatedAt: new Date(),
-        status: (!data.general?.is_for_other) ? statuses[1].value : statuses[0].value,
+        status: new_status,
         requestType: typeRequest.key,
         amount: getAmount(data, typeRequest.key)
       } as unknown as Partial<IRequest>;
