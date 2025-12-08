@@ -172,17 +172,17 @@ export const ShowBankDetailsBase = () => {
   }
 
   const SaveBankTasks = async () => {
-    const hasRenov = ((bank?.renovationDetails?.neededSecurity?.length ?? 0) > 0 ||
-      (bank?.renovationDetails?.majorRenovation?.length ?? 0) > 0 ||
-      (bank?.renovationDetails?.minorRenovation?.length ?? 0) > 0)
-    const tasks: BankTask[] = [];
-    renovSteps.forEach(async (step, index) => {
-      const task: BankTask = {
-        createdBy: userId as any,
+  const hasRenov =  ((bank?.renovationDetails?.neededSecurity?.length ?? 0) > 0  || 
+                      (bank?.renovationDetails?.majorRenovation?.length ?? 0) > 0 || 
+                      (bank?.renovationDetails?.minorRenovation?.length ?? 0) > 0 )
+   const tasks: BankTask [] = [];
+   renovSteps.forEach(async (step, index) => {
+      const task: BankTask  = {
+        createdBy: userId!,
         createdAt: new Date(),
         taskName: step,
-        bankId: bankId as any,
-        id_region: bank?.id_region as any,
+        bankId: bankId!,
+        id_region: bank?.id_region,
         done: false,
         index,
         state: "pending",

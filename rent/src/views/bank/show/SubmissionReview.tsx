@@ -71,7 +71,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
       useEffect(() => {
          
      }, [bankId]);
-     
+
      const pdfExport = async () => {
        setPdf(true);
        setTimeout(async () => {
@@ -161,12 +161,16 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
 
       { bank && (contrat || bank.step=='bankSteps.needContract') && <LeaseContractForm bank={bank} ></LeaseContractForm> }
 
-      { bank && bank.id && (bank.step=='bankSteps.needRenovation') && <div>
+
+
+      { bank && bank.id && (bank.step=='bankSteps.needRenovation') &&  !pdf && <div>
         <h2 className="text-2xl font-bold mb-2 text-pink-600">Rénovation</h2>
         <AllTask bankId={bank.id} genTasks={genTasks}></AllTask>
-        </div> }
+        </div> 
+      }
 
       {  (pdf || pConfig) && <div className={ (pConfig && !pdf ) ? "w-full border" : "w-full" } style={{ height: h3+'px' }}></div> }
+
      <h2 className="text-2xl font-bold mb-2 text-pink-600">Bank Location</h2>
       {/* Map section */}
       <div className="w-full h-100 mb-6 rounded-lg shadow-lg overflow-hidden">
