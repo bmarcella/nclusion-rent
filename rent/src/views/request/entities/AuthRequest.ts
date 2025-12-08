@@ -165,7 +165,6 @@ export const StatusTrainV2 = (t: TFunction, flow?: number): StatusNode => {
   if (!head) {
     throw new Error("StatusTrain: train is empty");
   }
-
   return head;
 };
 

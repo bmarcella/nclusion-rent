@@ -43,6 +43,7 @@ export interface IGeneral {
   currency: Currency;
   beneficiaryName?: string;
   typePayment: TypePayment;
+  approvalFlow?: number,
 }
 
 export interface IDocument {
@@ -246,6 +247,5 @@ export interface IRequest {
   updatedAt: Date,
   status: string,
   requestType: string,
-  approvalFlow?: number,
   amount: number,
 }

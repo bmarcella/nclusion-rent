@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslation } from "react-i18next";
-import { AuthRequest, getNextNode } from "../entities/AuthRequest";
+import { AuthRequest, getNextNodeV2 } from "../entities/AuthRequest";
 import { IRequest } from "../entities/IRequest";
 import { Button, Card } from "@/components/ui";
 import StatusPopup from "./StatusPopup";
@@ -23,7 +23,7 @@ export default function MoneyRequestNextStatusButton({
 
   const { t } = useTranslation();
   // Compute next step (if any)
-  const nextStep = getNextNode(currentStatus, t)
+  const nextStep = getNextNodeV2(currentStatus, t, request?.general?.approvalFlow);
 
    const handleClick = async () => {
     if (!nextStep) return;
