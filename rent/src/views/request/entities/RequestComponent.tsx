@@ -203,15 +203,15 @@ export function GeneralFields({ t, newRegionSet }: any) {
     return [ 
       {
        value: 1,
-       label: 'complet'
+       label: 'Tout le monde'
      },
      {
        value: 2,
-       label: 'coordonateur'
+       label: 'Coordonateur'
      },
      {
        value: 3,
-       label: 'comptable'
+       label: 'Comptable'
      } 
   ]
   }, []);
@@ -398,7 +398,7 @@ export function GeneralFields({ t, newRegionSet }: any) {
           )}
 
           { flows && flows.length> 0 && <Field
-            label="Envoyer a"
+            label="Envoyer a/au"
             errors={{
               key: "approvalFlow",
               data: errors.general,
@@ -409,10 +409,10 @@ export function GeneralFields({ t, newRegionSet }: any) {
               name="general.approvalFlow"
               render={({ field }) => (
                 <Select
-                  defaultValue={field.value}
+                  value={flows.find((f)=>f.value == field.value)}
                   options={flows}
                   onChange={(option) => {
-                    field.onChange(Number(option?.value))
+                     field.onChange(Number(option?.value))
                   }
                   }
                 />

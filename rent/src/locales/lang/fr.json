@@ -22,6 +22,11 @@
     "bank_renovation": "Rénovation bank",
     "lease_payment": "Paiement de loyer",
     "legal": "Juridique",
+    "general":{
+      "bank_transfer":"Transfert bancaire",
+      "cash": "Agent Comptant",
+      "check":"Chèque"
+    },
     "status": {
       "completed": "Terminé",
       "cancelled": "Annulé",
