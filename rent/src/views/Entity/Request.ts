@@ -8,6 +8,7 @@ export const modePayments = [
   export const support_docs = [
     "request.proformat",
     "request.contrat",
+    "request.signed_contrat",
     "request.leaseContract",
     "request.employee",
     "request.receipt",
@@ -16,6 +17,7 @@ export const modePayments = [
     "request.id_card",
     "request.inventory",
     "request.report_checklist",
+    "request.copy_check",
     "request.other",
   ] as const;
   export type SupportDoc = typeof support_docs[number];

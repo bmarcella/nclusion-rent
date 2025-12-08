@@ -15,13 +15,15 @@ import { support_docs } from '@/views/Entity/Request'
 import { useTranslation } from 'react-i18next'
 
 interface Props {
-  nextStep: (step: number, data: any) => void;
+  nextStep?: (step: number, data: any) => void;
   isEdit?: boolean,
   reqId: string,
   userId? : string
+  owner? : boolean,
+  end?: boolean
 }
 
-const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
+const ImageReq = ( { reqId, isEdit = false, nextStep, userId, owner = false, end = false } : Props) => {
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
     const [docFiles, setDocFiles] = useState<any[]>([])
     const [loading, setLoading] = useState(false);
@@ -48,11 +50,14 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
       return true
     }
    
-
-    useEffect(() => {
-        getReqImages(reqId).then((images) => {
+    const getImages = ()=>{
+          getReqImages(reqId).then((images) => {
+            console.log(images);
             setImages(images);
         });
+    }
+    useEffect(() => {
+      getImages();
     }, [reqId]);
 
     const upload = async () => {
@@ -63,6 +68,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
             setError({ is: true, message: 'Please select a document type' });
             return
         }
+
         try {
         setLoading(true)    
         const pics  = await Promise.all(
@@ -87,14 +93,8 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
         );
         setLoading(false)
         setDocFiles(pics);
-        // was nextStep(6, pics);
-        nextStep(2, pics);
-        if (isEdit) {
-            setUploadedFiles([]);
-            getReqImages(reqId).then((images) => {
-                setImages(images);
-            }); 
-        }
+        setUploadedFiles([]);
+         getImages();
         } catch (error){
             setLoading(false)
         }
@@ -106,7 +106,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
             await deleteDoc(picturesRef);
             await deleteImageFromStorage(img.imageUrl);
             setImages(prev => prev.filter(image => img.id !== image.id));
-        } catch (error) {
+         } catch (error) {
             throw new Error('Error uploading image: ' + error);
         }  
     }
@@ -115,7 +115,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
 
     return (
         <div>
-            <div  className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow" >
+           { (!isEdit || owner)  && !end && (<div  className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow mb-4 mt-4" >
                 <FormItem label="Type document" invalid={!!error.is} errorMessage={error.message}>
                     <Select placeholder="Please Select" options={ support_docs.map((doc) => ({ label: t(doc), value: doc }))} 
                         onChange={(option) => { 
@@ -128,7 +128,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
                 fileList={uploadedFiles}
                 beforeUpload={validateBeforeUpload}
                 accept=".png,.jpg,.jpeg,.pdf"
-                multiple={false}
+                multiple={true}
                 tip={<p className="text-xs text-gray-500 mt-2">Max file size: 50MB</p>}
                 uploadLimit={1}
                 onChange={handleFileChange}
@@ -147,14 +147,23 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId } : Props) => {
                             Support: jpeg, png, gif, pdf
                         </p>
                     </div>
-                </Upload>
-            </div>
-           { uploadedFiles.length>0 &&  (<div className="mt-6">
+               </Upload>
+            { uploadedFiles.length>0 &&  (
+            <div className="mt-6">
                 `<Button  variant="solid" loading={loading} icon={<HiOutlineInboxIn />}  onClick={upload} >
+                        { isEdit? "Ajouter" : 'Ajouter' }
+                </Button>`
+            </div>) }
+            </div>) }
+           { !isEdit  && nextStep && !end &&  (
+            <div className="mt-6 right">
+                `<Button  variant="solid" onClick={()=>{
+                    nextStep(2, undefined);
+                }} >
                         { isEdit? "Ajouter" : 'Suivant' }
                 </Button>`
             </div>) }
-            { isEdit && images.length> 0 &&  ( <ImageReqComp images={images} userId={userId || ''} onDelete={OnDeleteImg} />  )}
+            { isEdit || images.length> 0 &&  ( <ImageReqComp images={images} userId={userId || ''} onDelete={OnDeleteImg} end={end} />  ) }
         </div>
     )
 }
