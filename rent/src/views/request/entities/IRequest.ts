@@ -64,25 +64,28 @@ export interface ILegal {
 }
 
 export interface IBill {
+  categorie: number;
+  type?: string;
   price: number;
   description: string;
   target_date: Date;
 }
 
 export interface ICapex {
-  type: CapexType;
+  categorie: number;
+  type?: string;
   quantity: number;
+  unit_price: number;
   price: number;
   provider: string;
-  beneficiary: string;
   target_date: Date;
   decripstion: string; // spelling kept from schema
 }
 
 export interface ILocomotif {
-  spent_type: LocomotifSpentType;
+  categorie: number;
   type_locomotif: LocomotifType;
-  plaquea?: string;
+  plaque?: string;
   provider: string;
   price: number;
   description: string;
@@ -91,16 +94,17 @@ export interface ILocomotif {
 export interface ITelecomPlan {
   beneficiary: string;
   provider: ProviderTelecom;
-  plan_type: string;
+  plan_type?: string;
   start_date: Date;
   end_date: Date;
-  price: number;
-  id_card: string;
+  price: number | null;
+  id_card?: string;
 }
 
 export interface ITelecom {
+  categorie: number;
   plans: ITelecomPlan[];
-  description: string;
+  description?: string;
   total_price: number;
 }
 
@@ -112,11 +116,11 @@ export interface IOpexItem {
 }
 
 export interface IOpex {
-  categorie: OpexCategorie;
+  categorie: number;
   other_categorie?: string;
   items: IOpexItem[];
   amount: number;
-  description: string;
+  description?: string;
   masterbankId?: string;
 }
 
@@ -131,7 +135,43 @@ export interface ITransportAddress {
   street?: string;
 }
 
+export const getTypeRequestTagClasses = (typeRequest?: string) => {
+  switch ((typeRequest ?? "").trim().toLowerCase()) {
+    case "bill":
+      return "bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-900/40 text-blue-900 dark:text-blue-50";
+
+    case "capex":
+      return "bg-purple-100 dark:bg-purple-900/30 border-purple-200 dark:border-purple-900/40 text-purple-900 dark:text-purple-50";
+
+    case "locomotif":
+      return "bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-900/40 text-amber-900 dark:text-amber-50";
+
+    case "telecom":
+      return "bg-cyan-100 dark:bg-cyan-900/30 border-cyan-200 dark:border-cyan-900/40 text-cyan-900 dark:text-cyan-50";
+
+    case "opex":
+      return "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-900/40 text-emerald-900 dark:text-emerald-50";
+
+    case "transport_logistique":
+      return "bg-orange-100 dark:bg-orange-900/30 border-orange-200 dark:border-orange-900/40 text-orange-900 dark:text-orange-50";
+
+    case "bank_renovation":
+      return "bg-pink-100 dark:bg-pink-900/30 border-pink-200 dark:border-pink-900/40 text-pink-900 dark:text-pink-50";
+
+    case "lease_payment":
+      return "bg-indigo-100 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-900/40 text-indigo-900 dark:text-indigo-50";
+
+    case "legal":
+      return "bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-900/40 text-red-900 dark:text-red-50";
+
+    default:
+      return "bg-gray-100 dark:bg-gray-700 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-gray-50";
+  }
+};
+
+
 export interface ITransport {
+  categorie: number;
   transport_date: Date;
   From: ITransportAddress;
   To: ITransportAddress;
@@ -147,19 +187,21 @@ export interface IBankRenovationBank {
 }
 
 export interface IBankRenovation {
-  Bank: IBankRenovationBank[];
-  type_renovation: RenovationType;
+  categorie: number;
+  type?: string;
   start_date: Date;
   end_date: Date;
   vendor_id: string;
   vendor_name: string;
   total_amount: number;
   contract_id: string;
-  description: string;
+  description?: string;
 }
 
 export interface ILeasePayment {
   id_bank: string;
+  categorie: number;
+  type?: string;
   bankName: string;
   id_landlord: string;
   landlordName: string;
@@ -176,9 +218,9 @@ export interface ILeasePayment {
 // ---- Main interface matching MoneyRequestSchema ----
 
 export interface IRequest {
-  id: string ,
+  id: string,
   general?: IGeneral;
-  BankInfo?: IBankInfo | null ;
+  BankInfo?: IBankInfo | null;
   bill?: IBill | null;
   capex?: ICapex | null;
   locomotif?: ILocomotif | null;
@@ -192,17 +234,18 @@ export interface IRequest {
   preApproval_by: string,
   accountantApproval: string,
   managerGlobalApproval: string,
-  historicApproval : {
-             status_to : string,
-             status_from: string,
-             by_who: string ,
-             createdAt: Date,
-   } [],
+  historicApproval: {
+    status_to: string,
+    status_from: string,
+    by_who: string,
+    createdAt: Date,
+  }[],
   createdBy: string,
-  createdAt: Date ,
+  createdAt: Date,
   updatedBy: string,
   updatedAt: Date,
-  status:  string,
+  status: string,
   requestType: string,
+  approvalFlow?: number,
   amount: number,
 }

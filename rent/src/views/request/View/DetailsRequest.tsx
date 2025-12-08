@@ -1,38 +1,43 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IRequest } from '../entities/IRequest';
-import { Card } from '@/components/ui';
+import { getTypeRequestTagClasses, IRequest } from '../entities/IRequest';
+import { Card, Tag } from '@/components/ui';
 import MoneyRequestNextStatusButton from './MoneyRequestNextStatusButton';
 import { getRegionsById } from '@/views/Entity/Regions';
 import { getExpenseRequestDoc } from '@/services/Landlord';
 import { getDoc, updateDoc } from 'firebase/firestore';
 import { useSessionUser } from '@/store/authStore';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { formatRelative } from 'date-fns/formatRelative';
 import { fr } from 'date-fns/locale';
-import { AuthRequest } from '../entities/AuthRequest';
+import { AuthRequest, getRequestCategorieById, getRequestType, requestType } from '../entities/AuthRequest';
+import { useTranslation } from 'react-i18next';
+import UserName from '@/views/bank/show/components/UserName';
+import classNames from 'classnames';
 
 interface Props {
   data: IRequest;
-  rules : AuthRequest []
-  getNewreq :(data: IRequest)=>void ,
-  action: boolean
+  rules: AuthRequest[]
+  getNewreq: (data: IRequest) => void,
+  action: boolean,
+  auth?: boolean
 }
 
-function DetailsRequest({ data , rules, getNewreq, action}: Props) {
+function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) {
   // In many backends, the "business payload" is nested (e.g. data.request).
   // If not, we fall back to using `data` directly.
-  const [request , setRequest]=  useState<IRequest>(data) as any;
-
+  const [request, setRequest] = useState<IRequest>(data) as any;
+  const type = useMemo(() => request?.requestType, [request?.requestType]);
+  const { t } = useTranslation();
   const general = request.general ?? {};
   const typeRequest = general.type_request as string | undefined;
-   const { userId, authority, proprio } = useSessionUser((state) => state.user);
+  const { userId, authority, proprio } = useSessionUser((state) => state.user);
   const metaId = (data as any).id ?? (data as any)._id ?? '';
   const metaStatus = (data as any).status ?? (data as any).state ?? '';
 
   const formatDate = (value: any) => {
     if (!value) return '-';
-       return  formatRelative(value.toDate?.() || value, new Date(), { locale: fr } )  
+    return formatRelative(value.toDate?.() || value, new Date(), { locale: fr })
   };
 
   const formatMoney = (value: any) => {
@@ -41,80 +46,77 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
     if (Number.isNaN(n)) return String(value);
     return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
-  
+
   const onNextStatus = (data: string, validated: boolean, prevStatus: string) => {
-      updateMoneyRequestStatus(data,validated, prevStatus);
+    updateMoneyRequestStatus(data, validated, prevStatus);
   }
 
-  const getPrev = (prevStatus: string )=>{
-      switch (prevStatus) {
-        case 'preApproval':
-            return "preApproval_by"
-        case 'regionalApproval':
-            return "regionalApproved_by"
-        case 'accountantRegionalApproval':
-              return "accountantApproval"
-        case 'managerGlobalApproval':
-              return 'managerGlobalApproval'
-        case 'approved':
-            return "approvedBy"
-        case 'completed':
-            return  "completedBy"
-        case 'rejected':
-            return "rejectedBy"
-        case 'cancelled':
-          return "cancelledBy"
-        default:
-          return "changeBy";
-      }
+  const getPrev = (prevStatus: string) => {
+    switch (prevStatus) {
+      case 'preApproval':
+        return "preApproval_by"
+      case 'regionalApproval':
+        return "regionalApproved_by"
+      case 'accountantRegionalApproval':
+        return "accountantApproval"
+      case 'managerGlobalApproval':
+        return 'managerGlobalApproval'
+      case 'approved':
+        return "approvedBy"
+      case 'completed':
+        return "completedBy"
+      case 'rejected':
+        return "rejectedBy"
+      case 'cancelled':
+        return "cancelledBy"
+      default:
+        return "changeBy";
+    }
   }
 
- const  updateMoneyRequestStatus = async (
-  nextStatus: string,
-  validated: boolean,
-  prevStatus: string
-) => {
-  if (!data.id) {
-    throw new Error("updateMoneyRequestStatus: requestId is required");
+  const updateMoneyRequestStatus = async (
+    nextStatus: string,
+    validated: boolean,
+    prevStatus: string
+  ) => {
+    if (!data.id) {
+      throw new Error("updateMoneyRequestStatus: requestId is required");
+    }
+    const ref = getExpenseRequestDoc(data.id)
+
+    // Clone the array to avoid mutating original state directly (React rule)
+    const hist = [...data.historicApproval];
+
+    hist.unshift({
+      status_to: nextStatus,
+      status_from: data.status,
+      by_who: userId!,
+      createdAt: new Date(),
+    });
+
+    const prev = getPrev(prevStatus);
+
+    const payload: Record<string, any> = {
+      status: nextStatus,
+      historicApproval: hist,
+      [prev]: userId
+    };
+    await updateDoc(ref, payload);
+    // 👉 Fetch the updated document
+    const snapshot = await getDoc(ref);
+    const new_req = { id: snapshot.id, ...snapshot.data() } as IRequest;
+    setRequest(new_req);
+    getNewreq(new_req);
+
   }
-  const ref = getExpenseRequestDoc(data.id) 
-
-  // Clone the array to avoid mutating original state directly (React rule)
-  const hist = [...data.historicApproval];
-
-  hist.unshift({
-            status_to: nextStatus,
-            status_from: data.status,
-            by_who: userId!,
-            createdAt: new Date(),
-   });
-
-   const prev = getPrev(prevStatus);
-
-  const payload: Record<string, any> = {
-    status: nextStatus,
-    historicApproval : hist,
-    [prev] : userId
-  };
-  await updateDoc(ref, payload);
-  // 👉 Fetch the updated document
-  const snapshot = await getDoc(ref);
-  const new_req = { id: snapshot.id, ...snapshot.data() } as IRequest;
-  setRequest(new_req);
-  getNewreq(new_req);
-
-}
-
-
   // ---- Section renderers ----------------------------------------------------
-
   const renderBill = () => {
     if (!request.bill) return null;
-    const { price, description, target_date } = request.bill;
+    const { price, description, target_date, categorie } = request.bill;
     return (
       <Card className="p-4 space-y-2">
         <h3 className="text-lg font-semibold">Bill</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-3 md:grid-cols-3 gap-3 text-sm mt-4">
           <div>
             <div className="font-bold">Amount</div>
             <div>{formatMoney(price)} {general.currency}</div>
@@ -123,8 +125,16 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
             <div className="font-bold">Target date</div>
             <div>{formatDate(target_date)}</div>
           </div>
+          <div>
+            <div className="font-bold">Categorie</div>
+            <div>{getRequestCategorieById(t, type, categorie)} </div>
+          </div>
+          <div>
+            <div className="font-bold">Type</div>
+            <div>{getRequestType(t, type, categorie, request.bill.type)} </div>
+          </div>
         </div>
-        <div className="mt-2">
+        <div className="mt-4">
           <div className="font-bold">Description</div>
           <p className="text-sm whitespace-pre-wrap">{description}</p>
         </div>
@@ -134,14 +144,18 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
 
   const renderCapex = () => {
     if (!request.capex) return null;
-    const { type, quantity, price, provider, beneficiary, target_date, decripstion } = request.capex;
+    const {  quantity, price, provider, target_date, decripstion, categorie } = request.capex;
     return (
       <Card className="p-4 space-y-2">
         <h3 className="text-lg font-semibold">Capex</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <div>
+            <div className="font-bold">Categorie</div>
+            <div>{getRequestCategorieById(t, type, categorie)} </div>
+          </div>
+          <div>
             <div className="font-bold">Type</div>
-            <div>{type}</div>
+            <div>{getRequestType(t, type, categorie, request.capex.type)} </div>
           </div>
           <div>
             <div className="font-bold">Quantity</div>
@@ -156,13 +170,12 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
             <div>{formatDate(target_date)}</div>
           </div>
           <div>
-            <div className="font-bold">Provider</div>
+            <div className="font-bold">Fournisseur</div>
             <div>{provider}</div>
           </div>
-          <div>
-            <div className="font-bold">Beneficiary</div>
-            <div>{beneficiary}</div>
-          </div>
+
+           
+        
         </div>
         <div className="mt-2">
           <div className="font-bold">Description</div>
@@ -174,17 +187,17 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
 
   const renderLocomotif = () => {
     if (!request.locomotif) return null;
-    const { spent_type, type_locomotif, plaque, provider, price, description } = request.locomotif;
+    const { categorie, type_locomotif, plaque, provider, price, description } = request.locomotif;
     return (
       <Card className="p-4 space-y-2">
         <h3 className="text-lg font-semibold">Locomotif</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <div>
-            <div className="font-bold">Spent type</div>
-            <div>{spent_type}</div>
+            <div className="font-bold">Categorie</div>
+            <div>{getRequestCategorieById(t, type, categorie)} </div>
           </div>
           <div>
-            <div className="font-bold">Type</div>
+            <div className="font-bold">Type Locomotif</div>
             <div>{type_locomotif}</div>
           </div>
           <div>
@@ -210,16 +223,27 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
 
   const renderTelecom = () => {
     if (!request.telecom) return null;
-    const { plans = [], description, total_price } = request.telecom;
+    const { plans = [], description, total_price, categorie } = request.telecom;
     return (
       <Card className="p-4 space-y-3">
         <h3 className="text-lg font-semibold">Telecom</h3>
-
-        <div className="text-sm">
-          <div className="font-bold">Total price</div>
-          <div>{formatMoney(total_price)} {general.currency}</div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mt-4 mb-4">
+              <div className="text-sm">
+                  <div className="font-bold">Total price</div>
+                  <div>{formatMoney(total_price)} {general.currency}</div>
+                </div>
+                 <div>
+            <div className="font-bold">Categorie</div>
+            <div>{getRequestCategorieById(t, type, categorie)} </div>
+          </div>
+         { <div>
+            <div className="font-bold">Type</div>
+            <div>{getRequestType(t, type, categorie, request.telecom.type)} </div>
+          </div> }
         </div>
 
+        
+       
         <div>
           <div className="font-bold mb-1">Description</div>
           <p className="text-sm whitespace-pre-wrap">{description}</p>
@@ -258,8 +282,8 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
                   <div>{formatMoney(p.price)} {general.currency}</div>
                 </div>
                 <div>
-                  <div className="font-bold">ID card</div>
-                  <div>{p.id_card}</div>
+                  <div className="font-bold">Nif / NIN</div>
+                  <div>{p.id_card || '-'}</div>
                 </div>
               </div>
             ))}
@@ -276,27 +300,32 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
       <Card className="p-4 space-y-3">
         <h3 className="text-lg font-semibold">Opex</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-          <div>
-            <div className="font-bold">Category</div>
-            <div>{categorie}</div>
+         <div>
+            <div className="font-bold">Categorie</div>
+            <div>{getRequestCategorieById(t, type, categorie)} </div>
           </div>
-          {categorie === 'autre' && (
+          {categorie == 0 && (
             <div>
               <div className="font-bold">Other category</div>
               <div>{other_categorie || '-'}</div>
             </div>
-          )}
+          ) }
+           <div>
+            <div className="font-bold">Type</div>
+            <div>{getRequestType(t, type, categorie, request.opex.type)} </div>
+          </div>
           <div>
             <div className="font-bold">Amount</div>
             <div>{formatMoney(amount)} {general.currency}</div>
           </div>
+
           <div>
-            <div className="font-bold">Master bank ID</div>
+            <div className="font-bold"> ID Bank</div>
             <div>{masterbankId || '-'}</div>
           </div>
         </div>
 
-        <div>
+        <div className='mt-4 mb-4'>
           <div className="font-bold mb-1">Description</div>
           <p className="text-sm whitespace-pre-wrap">{description}</p>
         </div>
@@ -329,14 +358,16 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
     );
   };
 
-  const renderTransport = () => {
+  const renderTransport = (tt: any) => {
+
     if (!request.transport_logistique) return null;
     const t = request.transport_logistique;
+
     return (
       <Card className="p-4 space-y-3">
         <h3 className="text-lg font-semibold">Transport &amp; Logistique</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm mt-4">
           <div>
             <div className="font-bold">Transport date</div>
             <div>{formatDate(t.transport_date)}</div>
@@ -349,18 +380,22 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
             <div className="font-bold">Amount</div>
             <div>{formatMoney(t.amount)} {general.currency}</div>
           </div>
+          <div>
+            <div className="font-bold">Categorie</div>
+            <div>{getRequestCategorieById(tt, type, t.categorie)} </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mt-4">
           <div>
             <div className="font-bold mb-1">From</div>
-            <div>Region: {t.From?.region}</div>
+            <div>Region: {getRegionsById(t.From?.region).label}</div>
             <div>City: {t.From?.city}</div>
             <div>Street: {t.From?.street || '-'}</div>
           </div>
           <div>
             <div className="font-bold mb-1">To</div>
-            <div>Region: {t.To?.region}</div>
+            <div>Region: {getRegionsById(t.To?.region).label}</div>
             <div>City: {t.To?.city}</div>
             <div>Street: {t.To?.street || '-'}</div>
           </div>
@@ -374,7 +409,7 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
         )}
 
         {Array.isArray(t.items) && t.items.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-2 mt-4">
             <div className="font-bold">Items</div>
             {t.items.map((it: any, idx: number) => (
               <div
@@ -402,33 +437,11 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
     const b = request.bank_renovation;
     return (
       <Card className="p-4 space-y-3">
-        <h3 className="text-lg font-semibold">Bank Renovation</h3>
-
-        {Array.isArray(b.Bank) && b.Bank.length > 0 && (
-          <div className="space-y-2">
-            <div className="font-bold">Banks</div>
-            {b.Bank.map((bk: any, idx: number) => (
-              <div
-                key={idx}
-                className="border rounded-lg p-2 text-sm grid grid-cols-2 gap-2"
-              >
-                <div>
-                  <div className="font-bold">Bank name</div>
-                  <div>{bk.bankName}</div>
-                </div>
-                <div>
-                  <div className="font-bold">Amount</div>
-                  <div>{formatMoney(bk.amount)} {general.currency}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md-grid-cols-2 gap-3 text-sm">
+        <h3 className="text-lg font-semibold">Rénovation Bank </h3>
+        <div className="grid grid-cols-3 md-grid-cols-2 gap-3 text-sm mt-4">
           <div>
-            <div className="font-bold">Type of renovation</div>
-            <div>{b.type_renovation}</div>
+            <div className="font-bold">Categorie</div>
+            <div>{getRequestCategorieById(t, type, b.categorie)} </div>
           </div>
           <div>
             <div className="font-bold">Total amount</div>
@@ -443,23 +456,19 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
             <div>{formatDate(b.end_date)}</div>
           </div>
           <div>
-            <div className="font-bold">Vendor ID</div>
-            <div>{b.vendor_id}</div>
-          </div>
-          <div>
-            <div className="font-bold">Vendor name</div>
+            <div className="font-bold">Fournisseur de service</div>
             <div>{b.vendor_name}</div>
           </div>
           <div>
-            <div className="font-bold">Contract ID</div>
+            <div className="font-bold">Id du Contrat </div>
             <div>{b.contract_id}</div>
           </div>
         </div>
 
-        <div>
+        {b.description && <div className='mt-4'>
           <div className="font-bold mb-1">Description</div>
           <p className="text-sm whitespace-pre-wrap">{b.description}</p>
-        </div>
+        </div>}
       </Card>
     );
   };
@@ -467,23 +476,21 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
   const renderLeasePayment = () => {
     if (!request.lease_payment) return null;
     const l = request.lease_payment;
+    console.log(l);
     return (
       <Card className="p-4 space-y-3">
-        <h3 className="text-lg font-semibold">Lease Payment</h3>
+        <h3 className="text-lg font-semibold mb-4">Lease Payment</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-          <div>
+          {/* <div>
             <div className="font-bold">Bank ID</div>
             <div>{l.id_bank}</div>
-          </div>
+          </div> */}
           <div>
             <div className="font-bold">Bank name</div>
             <div>{l.bankName}</div>
           </div>
-          <div>
-            <div className="font-bold">Landlord ID</div>
-            <div>{l.id_landlord}</div>
-          </div>
+
           <div>
             <div className="font-bold">Landlord name</div>
             <div>{l.landlordName}</div>
@@ -491,12 +498,12 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
           <div>
             <div className="font-bold">Start date</div>
             <div>{
-               formatDate(l.start_date)}
+              formatDate(l.start_date)}
             </div>
           </div>
           <div>
             <div className="font-bold">End date</div>
-            <div>{ formatDate(l.end_date)}</div>
+            <div>{formatDate(l.end_date)}</div>
           </div>
           <div>
             <div className="font-bold">Years</div>
@@ -508,11 +515,13 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
           </div>
           <div>
             <div className="font-bold">Who approves the bank</div>
-            <div>{l.whoApproveTheBank}</div>
+            <div> <UserName userId={l.whoApproveTheBank} /></div>
           </div>
           <div>
             <div className="font-bold">Created by</div>
-            <div>{l.create_by}</div>
+            <div>
+              <UserName userId={l.create_by} />
+            </div>
           </div>
           <div>
             <div className="font-bold">Renovation by the landlord</div>
@@ -521,8 +530,8 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
         </div>
 
         {l.description && (
-          <div>
-            <div className="font-bold mb-1">Description</div>
+          <div className='mb-4'>
+            <div className="font-bold mb-1 mt-4">Description</div>
             <p className="text-sm whitespace-pre-wrap">{l.description}</p>
           </div>
         )}
@@ -606,7 +615,7 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
 
   // ---- Choose which main section to show -----------------------------------
 
-  const renderMainSection = () => {
+  const renderMainSection = (t: any) => {
     switch (typeRequest) {
       case 'bill':
         return renderBill();
@@ -619,7 +628,7 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
       case 'opex':
         return renderOpex();
       case 'transport_logistique':
-        return renderTransport();
+        return renderTransport(t);
       case 'bank_renovation':
         return renderBankRenovation();
       case 'lease_payment':
@@ -661,8 +670,10 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mt-3">
           <div>
-            <div className="font-bold">Type of request</div>
-            <div>{typeRequest || '-'}</div>
+            <div className="font-bold">Type de requête</div>
+            <Tag className={classNames(
+              getTypeRequestTagClasses(typeRequest), "mb-1 mr-1"
+            )}>{t("request." + typeRequest)}</Tag>
           </div>
           <div>
             <div className="font-bold">Payment method</div>
@@ -678,11 +689,11 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
           </div>
           <div>
             <div className="font-bold">Region</div>
-            <div>{ getRegionsById(general.id_region_user).label }</div>
+            <div>{getRegionsById(general.id_region_user).label}</div>
           </div>
           <div>
             <b className="font-bold ">Created at</b>
-            <div>{    formatRelative(data.createdAt.toDate?.() || data.createdAt, new Date(), { locale: fr } )  }</div>
+            <div>{formatRelative(data.createdAt.toDate?.() || data.createdAt, new Date(), { locale: fr })}</div>
           </div>
         </div>
 
@@ -696,10 +707,11 @@ function DetailsRequest({ data , rules, getNewreq, action}: Props) {
 
       {renderBankInfo()}
 
-      {renderMainSection()}
+      {renderMainSection(t)}
 
-      {renderDocuments() }
-      <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus} rules={rules} action={action} />
+      {renderDocuments()}
+
+      {auth && <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus} rules={rules} action={action} />}
     </div>
   );
 }

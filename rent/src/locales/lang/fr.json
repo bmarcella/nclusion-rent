@@ -13,6 +13,15 @@
     }
   },
   "request": {
+    "bill": "Facture",
+    "capex": "CAPEX",
+    "locomotif": "Locomotive",
+    "telecom": "Télécom",
+    "opex": "OPEX",
+    "transport_logistique": "Transport & Logistique",
+    "bank_renovation": "Rénovation bank",
+    "lease_payment": "Paiement de loyer",
+    "legal": "Juridique",
     "status": {
       "completed": "Terminé",
       "cancelled": "Annulé",
@@ -21,37 +30,65 @@
       "accountantRegionalApproval": "Approbation comptable (régionale)",
       "managerGlobalApproval": "Approbation manager (globale)",
       "rejected": "Rejeté",
-      "approved" : "Approuvé"
+      "approved": "Approuvé"
     },
     "type": {
       "1": {
         "label": "Transport & Logistique",
-        "description": "Pour déplacer du matériel, des POS ou du personnel entre sites."
+        "description": "Pour déplacer du matériel, des POS ou du personnel entre sites.",
+        "categories": {
+          "1": "Matériaux de construction",
+          "2": "Énergie",
+          "3": "Fournitures de bureau",
+          "4": "Matériaux Electroniques"
+        }
       },
       "2": {
         "label": "Achat de Matériel / Fournitures (OPEX)",
         "description": "Pour les achats courants liés aux opérations, y compris l’énergie.",
         "categories": {
+          "0": "Autres",
           "1": "Matériaux de construction",
-          "2": "Énergie (kits solaires, batteries, câbles, etc.)",
+          "2": "Énergie ",
           "3": "Fournitures de bureau"
         }
       },
       "3": {
         "label": "Télécommunication (Plan Internet / Téléphone)",
-        "description": "Pour les abonnements ou recharges mensuelles"
+        "description": "Pour les abonnements ou recharges mensuelles",
+        "categories": {
+          "1": "Mobile ODT",
+          "2": "Bureau",
+          "3": "Mobile Employé",
+          "4": "Ouverture Bank",
+          "5": "Réouverture Bank"
+        }
       },
       "4": {
         "label": "Moto – Carburant & Maintenance",
-        "description": "Pour les abonnements ou recharges mensuelles"
+        "description": "Pour les abonnements ou recharges mensuelles",
+        "categories": {
+          "1": "Carburant",
+          "2": "Maintenance",
+          "3": "Achat Pieces",
+          "0": "Autres"
+        }
       },
       "5": {
         "label": "Achat / Investissement (CapEx)",
-        "description": "Pour les achats d’équipements ou investissements à long terme."
+        "description": "Pour les achats d’équipements ou investissements à long terme.",
+        "categories": {
+          "1": "Automobile",
+          "2": "Electronique"
+        }
       },
       "6": {
-        "label": "Bills",
-        "description": "Pour les factures qui sont attribuées aux opérations quotidiennes"
+        "label": "Bills & Autres",
+        "description": "Pour les factures qui sont attribuées aux opérations quotidiennes",
+        "categories": {
+          "1": "Legal",
+          "2": "Cash flow"
+        }
       },
       "7": {
         "label": "Legal",
@@ -59,11 +96,20 @@
       },
       "8": {
         "label": "Loyer",
-        "description": "Paiment bail"
+        "description": "Paiment bail",
+        "categories": {
+          "1": "Matériaux de construction",
+          "2": "Énergie (kits solaires, batteries, câbles, etc.)",
+          "3": "Fournitures de bureau"
+        }
       },
       "9": {
-        "label": "Renovation bank",
-        "description": "Reparation bank"
+        "label": "Rénovation",
+        "description": "Reparation bank",
+        "categories": {
+          "1": "Peinture",
+          "2": "Comptoire"
+        }
       }
     },
     "cash": "Espèces",

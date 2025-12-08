@@ -10,10 +10,11 @@ import { useEffect, useRef, useState } from 'react';
 import { AuthRequest } from '../entities/AuthRequest';
 import { Spinner } from '@/components/ui';
 export default function RecieveReq() {
- const {  proprio, authority } = useSessionUser((state) => state.user);
+ const { proprio, authority } = useSessionUser((state) => state.user);
+  const { t } = useTranslation();
  const [rules , setRules]=  useState<AuthRequest [] | undefined>([]) as any [];
  const [loadingRules , seLoadingRules]=  useState<boolean>(false);
- const { t } = useTranslation();
+
  const [nquery , setQuery]=  useState<{ status : [], reqType: [] }>() as any [];
  const didRun = useRef(false);
    const fetchRule = async () => {
