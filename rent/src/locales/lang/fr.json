@@ -98,9 +98,7 @@
         "label": "Loyer",
         "description": "Paiment bail",
         "categories": {
-          "1": "Matériaux de construction",
-          "2": "Énergie (kits solaires, batteries, câbles, etc.)",
-          "3": "Fournitures de bureau"
+          "1": "Nouveau Bank"
         }
       },
       "9": {
