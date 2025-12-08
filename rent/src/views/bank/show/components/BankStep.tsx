@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React from "react";
 import { useTranslation } from "@/utils/hooks/useTranslation";
 import Tooltip from "@/components/ui/Tooltip";

@@ -5,7 +5,7 @@ import Dialog from '@/components/ui/Dialog'
 import { useState } from 'react';
 import { CgClose } from 'react-icons/cg'
 
-function YesOrNoPopup( { id,  Ok , title= "Voulez-vous vraiment supprimer ceci ?", desc=""}: any) {
+function YesOrNoPopup( { id,  Ok , title= "Voulez-vous vraiment supprimer ceci ?", desc="" ,  btnText = undefined }: any) {
     const [ynOpen, setYnOpen] = useState(false); 
             const openDialogYON = () => { 
                 setYnOpen(true);
@@ -21,9 +21,9 @@ function YesOrNoPopup( { id,  Ok , title= "Voulez-vous vraiment supprimer ceci ?
   return (
     <div>
         
-             <Button shape="circle" size="xs" className="mt-2 hover:text-red-800 dark:hover:bg-red-600 border-0 hover:ring-0" onClick={() => openDialogYON()}>
-                              <CgClose />
-             </Button>         
+        <Button shape="circle" size="xs" className="mt-2 hover:text-red-800 dark:hover:bg-red-600 border-0 hover:ring-0" onClick={() => openDialogYON()}>
+                { btnText ? btnText : "" } <CgClose />
+        </Button>         
 
           <Dialog
                 isOpen={ynOpen}

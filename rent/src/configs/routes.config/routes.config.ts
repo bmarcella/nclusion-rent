@@ -30,7 +30,7 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/bank/show/NeedApproval')),
         authority: ["coordonator", "assist_coordonator", "admin", "manager", "assist_manager", 'super_manager'],
     },
-     {
+    {
         key: 'bankMenu.ops',
         path: '/bank/ops',
         component: lazy(() => import('@/views/bank/show/ops')),
@@ -108,6 +108,17 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/request/MyRequest')),
         authority: ['admin', 'coordonator', 'assist_coordonator', 'manager', 'assist_manager', 'super_manager', 'operation'],
     },
-
+    {
+        key: 'reqMenu.action',
+        path: '/request/action',
+        component: lazy(() => import('@/views/request/AccountantAction')),
+        authority: ['assist_accoutant', 'accoutant', 'admin'],
+    },
+    {
+        key: 'reqMenu.print',
+        path: '/request/:reqId',
+        component: lazy(() => import('@/views/request/ShowPrintRequest')),
+        authority: ['admin', 'coordonator', 'assist_coordonator', 'manager', 'assist_manager', 'super_manager', 'operation'],
+    },
     ...othersRoute,
 ]

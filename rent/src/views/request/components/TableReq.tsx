@@ -16,8 +16,8 @@ import {
     getCountFromServer,
   } from 'firebase/firestore';
 import  { useEffect, useMemo, useRef, useState } from 'react';
-import { Bank, BankStep } from '@/views/Entity';
-import { BankDoc, ExpenseRequestDoc, getLandlordDoc } from '@/services/Landlord';
+import {  BankStep } from '@/views/Entity';
+import {  ExpenseRequestDoc } from '@/services/Landlord';
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 import Table from '@/components/ui/Table';
 import { Alert, Button, Dialog, Pagination, Select, Tabs, Tooltip } from '@/components/ui';
@@ -37,12 +37,15 @@ import { getRegionIds } from '@/views/Entity/Regions';
 import classNames from 'classnames';
 import { HiHome } from 'react-icons/hi';
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
-import { deleteBank, deleteReqType, getBankImages } from '@/services/firebase/BankService';
+import { deleteReqType } from '@/services/firebase/BankService';
 import FilterBank from '@/views/bank/show/components/FilterBank';
 import { hasAuthority } from '@/utils/RoleChecker';
 import Currency from '@/views/shared/Currency';
 import { RequestType } from '@/views/Entity/Request';
 import FilterMyBank from '@/views/bank/show/components/FilterMyBank';
+import UserName from '@/views/bank/show/components/UserName';
+import MapPopup from '@/views/bank/show/MapPopup';
+import BankStepBadge from '@/views/bank/show/components/BankStep';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -68,7 +71,7 @@ const pageSizeOption = [
     const [pageDocs, setPageDocs] = useState<DocumentSnapshot[]>([]);
     const fetchedRef = useRef(false);
     const [totalData, setTotalData] = useState(1);
-    const [dialogIsOpen, setIsOpen] = useState(false)
+   
     const [cObj, setCObj] = useState<RequestType>();
     const { width, height } = useWindowSize();
     const [message, setMessage] = useTimeOutMessage();
@@ -83,6 +86,7 @@ const pageSizeOption = [
     const [steps, setSteps] = useState<string>();
 
     // 
+     const [dialogIsOpen, setIsOpen] = useState(false)
     const openDialog = (obj: RequestType) => {
         setCObj(obj);
         setIsOpen(true)
@@ -175,13 +179,12 @@ const pageSizeOption = [
             {
                 header: 'Action',
                 cell: ({ row }) => {
-
                  if (!step && !all) return (
                         <div>
                         <Button variant="solid"  shape="circle" size="xs" onClick={() => openDialog(row.original)}>
                             <PiEyeLight />
                          </Button>
-                         {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
+                         {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup> }
                     </div>);
                  else return (
                     <div className="min-w-[200px]">
@@ -334,6 +337,7 @@ const pageSizeOption = [
     const onSelectChange = (value = 0) => {
         table.setPageSize(Number(value))
     }
+
     const onChangeBank = (payload: any, step:number) => {
     if(step != 1) {
         setCObj((prev: any) => {
@@ -397,7 +401,7 @@ const pageSizeOption = [
           >
           </FilterBank> }
 
-              { step && <FilterMyBank  onChangeStep={onChangeStep}  t={t}  ></FilterMyBank> } 
+        { step && <FilterMyBank  onChangeStep={onChangeStep}  t={t}  ></FilterMyBank> } 
       
         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
           {   <>

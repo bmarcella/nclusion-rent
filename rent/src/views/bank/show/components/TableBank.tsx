@@ -14,8 +14,8 @@ import {
     QueryConstraint,
     Timestamp,
     getCountFromServer,
-  } from 'firebase/firestore';
-import  { useEffect, useMemo, useRef, useState } from 'react';
+} from 'firebase/firestore';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bank, BankStep } from '@/views/Entity';
 import { BankDoc, getLandlordDoc } from '@/services/Landlord';
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
@@ -56,23 +56,23 @@ import ImageSignedContract from '../../add/components/ImageSignedContract';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
-    { value: 10, label:  '10 / page' },
-    { value: 50, label:  '50 / page' },
+    { value: 10, label: '10 / page' },
+    { value: 50, label: '50 / page' },
     { value: 100, label: '100 / page' },
     { value: 200, label: '200 / page' },
 ]
 
-   type Option = {
-        value: number
-        label: string
-    }
+type Option = {
+    value: number
+    label: string
+}
 
-    interface Props {
-        step?: BankStep;
-        isAgent?:boolean;
-        all?: boolean;
-   }
-  export function TableBank ( { step , isAgent = false, all = false  }: Props) { 
+interface Props {
+    step?: BankStep;
+    isAgent?: boolean;
+    all?: boolean;
+}
+export function TableBank({ step, isAgent = false, all = false }: Props) {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(pageSizeOption[0].value);
     const [hasNext, setHasNext] = useState(true);
@@ -89,8 +89,8 @@ const pageSizeOption = [
     const { t } = useTranslation();
     const navigate = useNavigate()
     // 
-    const { userId, proprio , authority } = useSessionUser((state) => state.user);
-    const [ regions, setRegions] = useState<number>(0);
+    const { userId, proprio, authority } = useSessionUser((state) => state.user);
+    const [regions, setRegions] = useState<number>(0);
     const [agents, setAgents] = useState<string>();
     const [start, setStart] = useState<Date>();
     const [end, setEnd] = useState<Date>();
@@ -108,9 +108,9 @@ const pageSizeOption = [
     const onDialogClose = () => {
         setIsOpen(false)
     }
-    const yes  = async  (idToDel: string) => {
-                await deleteBank(idToDel || '');
-                setBanks(prev => prev.filter(item => item.id !== idToDel));
+    const yes = async (idToDel: string) => {
+        await deleteBank(idToDel || '');
+        setBanks(prev => prev.filter(item => item.id !== idToDel));
     }
 
     const columns = useMemo<ColumnDef<any>[]>(
@@ -120,135 +120,136 @@ const pageSizeOption = [
                 cell: ({ row }) => (
                     <div>
                         <Tooltip
-                            title= {
+                            title={
                                 <div>
                                     Urgent: {' '}
-                                    { row.original.urgency && <strong className="text-green-400"> Oui </strong> } <br />
-                                    { !row.original.urgency && <strong className="text-yellow-400"> Non </strong> }
+                                    {row.original.urgency && <strong className="text-green-400"> Oui </strong>} <br />
+                                    {!row.original.urgency && <strong className="text-yellow-400"> Non </strong>}
                                     Id: {' '}
-                                    { row.original.id && <strong className="text-green-400"> { row.original.id } </strong> }
+                                    {row.original.id && <strong className="text-green-400"> {row.original.id} </strong>}
                                 </div>
-                                
+
                             }
                         >
-                            <span className="cursor-pointer">{ row.original.bankName}</span>
+                            <span className="cursor-pointer">{row.original.bankName}</span>
                         </Tooltip>
                     </div>
-                    ),
-                
+                ),
+
             },
             {
                 header: 'Proprietaire',
                 cell: ({ row }) => (
-                 <div className="min-w-[160px]">
-                    <div className="font-medium">  { ( row.original?.landlord) ? row.original?.landlord?.fullName : "" } </div>
-                    <div className="text-sm text-gray-500">{ ( row.original?.landlord) ? row.original?.landlord?.phone : "" }</div>
-                  </div>
-                 ),
+                    <div className="min-w-[160px]">
+                        <div className="font-medium">  {(row.original?.landlord) ? row.original?.landlord?.fullName : ""} </div>
+                        <div className="text-sm text-gray-500">{(row.original?.landlord) ? row.original?.landlord?.phone : ""}</div>
+                    </div>
+                ),
             },
             {
                 header: 'Agent',
                 cell: ({ row }) => (
-                 <div className="min-w-[160px]">
-                    <div className="font-medium">  { ( row.original?.createdBy) ? <UserName userId={row.original.createdBy} /> : "" } </div>
-                  </div>
-                 ),
+                    <div className="min-w-[160px]">
+                        <div className="font-medium">  {(row.original?.createdBy) ? <UserName userId={row.original.createdBy} /> : ""} </div>
+                    </div>
+                ),
             },
             {
                 header: 'Prix',
                 cell: ({ row }) => (
                     <div className="min-w-[160px]">
-                       <div className="font-medium"> Initial : <Currency amount={row.original.rentCost}></Currency></div>
-                        { (row.original?.final_rentCost && row.original?.final_rentCost>0) && 
-                       <div className="font-medium"> Final : <Currency amount={row.original.final_rentCost}></Currency>
-                       </div> }
-                     </div>
-                    ),
+                        <div className="font-medium"> Initial : <Currency amount={row.original.rentCost}></Currency></div>
+                        {(row.original?.final_rentCost && row.original?.final_rentCost > 0) &&
+                            <div className="font-medium"> Final : <Currency amount={row.original.final_rentCost}></Currency>
+                            </div>}
+                    </div>
+                ),
             },
             {
-              header: 'Ville',
-              cell: ({ row }) => (
-                <div>
-                    <MapPopup bank={row.original}/>
-                </div>
+                header: 'Ville',
+                cell: ({ row }) => (
+                    <div>
+                        <MapPopup bank={row.original} />
+                    </div>
                 ),
             },
             {
                 header: 'Date de création',
                 cell: ({ row }) => (
                     <div className="min-w-[160px]">
-                       <div className="font-medium"> {    formatRelative(row.original.createdAt.toDate?.() || row.original.createdAt, new Date(), { locale: fr } )  }</div>
-                     </div>
-                    ),
+                        <div className="font-medium"> {formatRelative(row.original.createdAt.toDate?.() || row.original.createdAt, new Date(),
+                            { locale: fr })}</div>
+                    </div>
+                ),
             },
             {
                 header: 'Etape',
                 cell: ({ row }) => (
                     <div className="min-w-auto">
-                       <BankStepBadge renovStep={row.original?.renovStep} step={row.original.step} finaldec={row.original.finalDecision} isAgent={isAgent}/>
-                     </div>
-                    ),
+                        <BankStepBadge renovStep={row.original?.renovStep} step={row.original.step} finaldec={row.original.finalDecision} isAgent={isAgent} />
+                    </div>
+                ),
             },
             {
                 header: 'Action',
                 cell: ({ row }) => {
 
-                 if (!step && !all) return (
+                    if (!step && !all) return (
                         <div>
-                        <Button variant="solid"  shape="circle" size="xs" onClick={() => openDialog(row.original)}>
-                            <PiEyeLight />
-                         </Button>
-                         {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
-                    </div>);
-                 else return (
-                    <div className="min-w-[200px]">
-                        { (hasAuthority(authority, 'admin')  || hasAuthority(authority, 'super_manager'))&&
-                         <Button variant="solid"  shape="circle" size="xs" className='mr-1 '  onClick={() => openDialog(row.original)}>
-                            <PiEyeLight />
-                         </Button> }
-                         <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs"  onClick={() => navigate("/bank/"+row.original.id) }>
-                            <PiCheck />
-                         </Button>
-                         {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
-                    </div>);
-                } 
+                            <Button variant="solid" shape="circle" size="xs" onClick={() => openDialog(row.original)}>
+                                <PiEyeLight />
+                            </Button>
+                            {<YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
+                        </div>);
+                    else return (
+                        <div className="min-w-[200px]">
+                            {(hasAuthority(authority, 'admin') || hasAuthority(authority, 'super_manager')) &&
+                                <Button variant="solid" shape="circle" size="xs" className='mr-1 ' onClick={() => openDialog(row.original)}>
+                                    <PiEyeLight />
+                                </Button>}
+                            <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs" onClick={() => navigate("/bank/" + row.original.id)}>
+                                <PiCheck />
+                            </Button>
+                            {<YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
+                        </div>);
+                }
             },
         ],
         [],
     )
 
-    const getQueryDate = (q: Query<DocumentData, DocumentData>)  => {
-         
-            const filters: QueryConstraint[] = [];
+    const getQueryDate = (q: Query<DocumentData, DocumentData>) => {
 
-            if (regions && regions != 0) {
-                filters.push(where('id_region', '==', regions));
-            } else {
-                const ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
-                filters.push(where("id_region", "in", ids))
-            }
+        const filters: QueryConstraint[] = [];
 
-            if (agents) {
-                filters.push(where('createdBy', '==', agents));
-            }
+        if (regions && regions != 0) {
+            filters.push(where('id_region', '==', regions));
+        } else {
+            const ids = (proprio?.regions?.length == 0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
+            filters.push(where("id_region", "in", ids))
+        }
 
-            if (name) {
-                filters.push(where('bankName', '>=', name));
-                filters.push(where('bankName', '<=', name + '\uf8ff' ));
+        if (agents) {
+            filters.push(where('createdBy', '==', agents));
+        }
 
-                filters.push(where('bankName', '>=', cfl(name)));
-                filters.push(where('bankName', '<=', cfl(name) + '\uf8ff' ));
-            }
+        if (name) {
+            filters.push(where('bankName', '>=', name));
+            filters.push(where('bankName', '<=', name + '\uf8ff'));
 
-            if (steps) {
-                filters.push(where('step', '==', steps));
-            }
-           
-            if (start && end) {
-                const isSameDay =
+            filters.push(where('bankName', '>=', cfl(name)));
+            filters.push(where('bankName', '<=', cfl(name) + '\uf8ff'));
+        }
+
+        if (steps) {
+            filters.push(where('step', '==', steps));
+        }
+
+        if (start && end) {
+            const isSameDay =
                 start.toDateString() === end.toDateString();
 
-                if (isSameDay) {
+            if (isSameDay) {
                 const startOfDay = new Date(start);
                 startOfDay.setHours(0, 0, 0, 0);
 
@@ -257,23 +258,23 @@ const pageSizeOption = [
 
                 filters.push(where('createdAt', '>=', Timestamp.fromDate(startOfDay)));
                 filters.push(where('createdAt', '<=', Timestamp.fromDate(endOfDay)));
-                } else {
-                filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
-                filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
-                }
             } else {
-                if (start) {
                 filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
-                }
-                if (end) {
                 filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
-                }
             }
-            return filters.length > 0 ? query(q, ...filters) : q;
+        } else {
+            if (start) {
+                filters.push(where('createdAt', '>=', Timestamp.fromDate(start)));
+            }
+            if (end) {
+                filters.push(where('createdAt', '<=', Timestamp.fromDate(end)));
+            }
+        }
+        return filters.length > 0 ? query(q, ...filters) : q;
     }
 
-    const cfl = (val: string) =>{
-     return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+    const cfl = (val: string) => {
+        return String(val).charAt(0).toUpperCase() + String(val).slice(1);
     }
 
     const fetchTotalCount = async () => {
@@ -288,7 +289,7 @@ const pageSizeOption = [
             q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step));
         }
         q = getQueryDate(q);
-    
+
         const snapshot = await getCountFromServer(q);  // 🚀 NOT getDocs!
         setTotalData(snapshot.data().count);
     };
@@ -304,18 +305,18 @@ const pageSizeOption = [
         } else {
             q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step), limit(pageSize));
         }
-    
+
         q = getQueryDate(q);
-    
+
         // Only if not first page
         if (pageNum > 1 && pageDocs[pageNum - 2]) {
             q = query(q, startAfter(pageDocs[pageNum - 2]));
         }
 
         fetchTotalCount();
-    
+
         const snapshot = await getDocs(q);
-    
+
         const newBanks = await Promise.all(
             snapshot.docs.map(async (docSnap) => {
                 const data = docSnap.data();
@@ -333,7 +334,7 @@ const pageSizeOption = [
         // setBanks((prevBanks: any) => (pageNum === 1 ? newBanks : [...prevBanks, ...newBanks]));
         setBanks(newBanks);
         setCurrentPage(pageNum);
-    
+
         // Important: set the last doc for next page
         if (snapshot.docs.length > 0) {
             setPageDocs((prev) => {
@@ -342,16 +343,16 @@ const pageSizeOption = [
                 return updated;
             });
         }
-    
+
         // (optional) update totalData properly if you fetched total separately
     };
-    
+
     // useEffect(() => {
     //     if (fetchedRef.current) return;
     //      fetchBanks(currentPage); // load first page
     //   }, []);
 
-  
+
 
 
 
@@ -366,11 +367,11 @@ const pageSizeOption = [
     })
 
 
-      useEffect(() => {
+    useEffect(() => {
         //table.setPageSize(Number(pageSize))
         setCurrentPage(1); // reset first
-        fetchBanks(1); 
-     }, [start, end, regions, agents, steps, name]);
+        fetchBanks(1);
+    }, [start, end, regions, agents, steps, name]);
 
     // const onPaginationChange = (page: number) => {
     //         if (page !== currentPage) {
@@ -380,364 +381,361 @@ const pageSizeOption = [
     // }
 
     const onPaginationChange = async (page: number) => {
-        // if (page !== currentPage) {
-        //     await fetchBanks(page); // wait until data is fetched and state is correct
-        //     setCurrentPage(page);
-           
-        // }
+        if (page !== currentPage) {
+            await fetchBanks(page);
+        }
         //  table.setPageIndex(page - 1);
 
-          await fetchBanks(page);
-  };
+
+    };
 
     const onSelectChange = (value = 0) => {
-          table.setPageSize(Number(value))
-          setPageSize(Number(value));
+        table.setPageSize(Number(value))
+        setPageSize(Number(value));
     }
 
-    const onChangeBank = (payload: any, step:number) => {
-    if(step != 1) {
-        setCBank((prev: any) => {
-            const updatedData = { ...prev, ...payload };
-            setBanks((prev) => {
-                if (!cbank) return prev;
-                 const index = prev.findIndex((b) => b.id === updatedData.id);
-                 if (index !== -1) {
-                     const updatedBanks = [...prev];
-                     updatedBanks[index] = updatedData;
-                     return updatedBanks;
-                 }
-                 return prev;
-             });
-            return updatedData;
-        });
-    } else {
-        fetchBanks(currentPage);
-    }
+    const onChangeBank = (payload: any, step: number) => {
+        if (step != 1) {
+            setCBank((prev: any) => {
+                const updatedData = { ...prev, ...payload };
+                setBanks((prev) => {
+                    if (!cbank) return prev;
+                    const index = prev.findIndex((b) => b.id === updatedData.id);
+                    if (index !== -1) {
+                        const updatedBanks = [...prev];
+                        updatedBanks[index] = updatedData;
+                        return updatedBanks;
+                    }
+                    return prev;
+                });
+                return updatedData;
+            });
+        } else {
+            fetchBanks(currentPage);
+        }
 
     }
 
-    const nextStep = async (step: number, data: any ) => {
-     switch (step) {
-        case 6:
-            setMessage("Images saved successfully.");
-            setAlert("success");
-          break;
-        case 7:
-            setMessage("Comment saved successfully.");
-            setAlert("success");
-          break;
-        default:
-          console.warn(`Unhandled step: ${step}`);
-        return;
-      }
+    const nextStep = async (step: number, data: any) => {
+        switch (step) {
+            case 6:
+                setMessage("Images saved successfully.");
+                setAlert("success");
+                break;
+            case 7:
+                setMessage("Comment saved successfully.");
+                setAlert("success");
+                break;
+            default:
+                console.warn(`Unhandled step: ${step}`);
+                return;
+        }
     }
 
     const onChangeRegion = async (id: number) => {
         setRegions(id);
     }
 
-    const onChangeAgent = async (id: string) =>{
-       console.log("onChangeAgent: ", id);
-       setAgents(id);
-     }
+    const onChangeAgent = async (id: string) => {
+        console.log("onChangeAgent: ", id);
+        setAgents(id);
+    }
 
-    const onChangeName = async (name: string) =>{
-       setName(name);
-     }
+    const onChangeName = async (name: string) => {
+        setName(name);
+    }
 
-     const onChangeDate = async (start: Date, end: Date) => {
+    const onChangeDate = async (start: Date, end: Date) => {
         setStart(start);
         setEnd(end);
-     }
-     const onChangeStep = async (step: BankStep) => {
+    }
+    const onChangeStep = async (step: BankStep) => {
         console.log("onChangeStep: ", step);
         setSteps(step);
-     }
+    }
 
-       useEffect(() => {
-             navigator.geolocation.getCurrentPosition(
-               async (position) => {
-                 const { latitude, longitude } = position.coords;
-                 setLocation({ lat: latitude, lng: longitude });
-               },
-               (err) => {
-                 console.error(`Error: ${err.message}`);
-               }
-             );
-           } , []);
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                setLocation({ lat: latitude, lng: longitude });
+            },
+            (err) => {
+                console.error(`Error: ${err.message}`);
+            }
+        );
+    }, []);
     return (
-      <div>
-         <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
-            <div className={classNames( 'rounded-2xl p-4 flex flex-col justify-center','bg-green-100' )} >
-                <div className="flex justify-between items-center relative">
-                    <div>
-                        <div className="mb-4 text-gray-900 font-bold">{'Total banks'}</div>
-                        <h1 className="mb-1 text-gray-900">{totalData}</h1>
-                    </div>
-                    <div
-                        className={
-                            'flex items-center justify-center min-h-12 min-w-12 max-h-12 max-w-12 bg-gray-900 text-white rounded-full text-2xl md:hidden'
-                        }
-                    >
-                    <HiHome />
+        <div>
+            <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
+                <div className={classNames('rounded-2xl p-4 flex flex-col justify-center', 'bg-green-100')} >
+                    <div className="flex justify-between items-center relative">
+                        <div>
+                            <div className="mb-4 text-gray-900 font-bold">{'Total banks'}</div>
+                            <h1 className="mb-1 text-gray-900">{totalData}</h1>
+                        </div>
+                        <div
+                            className={
+                                'flex items-center justify-center min-h-12 min-w-12 max-h-12 max-w-12 bg-gray-900 text-white rounded-full text-2xl md:hidden'
+                            }
+                        >
+                            <HiHome />
+                        </div>
                     </div>
                 </div>
             </div>
-          </div>
-          { (step || all) && 
-          <FilterBank  authority={authority || []} proprio={proprio} t={t}
-           onChangeRegion={onChangeRegion} 
-           onChangeAgent={onChangeAgent} 
-           onChangeDate = {onChangeDate}
-           isMap = {true}
-           onChangeMap={(value) => { 
-            if (value) {
-                const data = banks.map((bank: any) => {
-                    if (bank.location?.lng && bank.location?.lat) {
-                    return {
-                        lng: bank.location?.lng,
-                        lat: bank.location?.lat,
-                        name: bank.bankName,
-                        price: bank.rentCost,
-                        state : bank.step,
-                        id: bank.id,
-                        imageUrls: bank.images,
-                    } as any;
-                 } else  return  null
-                }).filter((bank: any) => bank !== null);
-                console.log("mapData: ", data);
-                setMapData(data);
-            } else {
-                setMapData([]);
-            }
-            setMap(value);
+            {(step || all) &&
+                <FilterBank authority={authority || []} proprio={proprio} t={t}
+                    onChangeRegion={onChangeRegion}
+                    onChangeAgent={onChangeAgent}
+                    onChangeDate={onChangeDate}
+                    isMap={true}
+                    onChangeMap={(value) => {
+                        if (value) {
+                            const data = banks.map((bank: any) => {
+                                if (bank.location?.lng && bank.location?.lat) {
+                                    return {
+                                        lng: bank.location?.lng,
+                                        lat: bank.location?.lat,
+                                        name: bank.bankName,
+                                        price: bank.rentCost,
+                                        state: bank.step,
+                                        id: bank.id,
+                                        imageUrls: bank.images,
+                                    } as any;
+                                } else return null
+                            }).filter((bank: any) => bank !== null);
+                            console.log("mapData: ", data);
+                            setMapData(data);
+                        } else {
+                            setMapData([]);
+                        }
+                        setMap(value);
 
-           }}
-          >
+                    }}
+                >
 
-          </FilterBank> }
+                </FilterBank>}
 
-          { !step && <FilterMyBank onChangeDate={onChangeDate} onChangeStep={onChangeStep}  t={t} all={all} 
-          onChangeName={onChangeName}
-          ></FilterMyBank> } 
-      
-        <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
-          { !isMap &&  <>
-            <Table>
-                <THead>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <Tr key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
+            {!step && <FilterMyBank onChangeDate={onChangeDate} onChangeStep={onChangeStep} t={t} all={all}
+                onChangeName={onChangeName}
+            ></FilterMyBank>}
+
+            <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
+                {!isMap && <>
+                    <Table>
+                        <THead>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <Tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => {
+                                        return (
+                                            <Th
+                                                key={header.id}
+                                                colSpan={header.colSpan}
+                                            >
+                                                {flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext(),
+                                                )}
+                                            </Th>
+                                        )
+                                    })}
+                                </Tr>
+                            ))}
+                        </THead>
+                        <TBody>
+                            {table.getRowModel().rows.map((row) => {
                                 return (
-                                    <Th
-                                        key={header.id}
-                                        colSpan={header.colSpan}
-                                    >
-                                        {flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext(),
-                                        )}
-                                    </Th>
+                                    <Tr key={row.id}>
+                                        {row.getVisibleCells().map((cell) => {
+                                            return (
+                                                <Td key={cell.id}>
+                                                    {flexRender(
+                                                        cell.column.columnDef.cell,
+                                                        cell.getContext(),
+                                                    )}
+                                                </Td>
+                                            )
+                                        })}
+                                    </Tr>
                                 )
                             })}
-                        </Tr>
-                    ))}
-                </THead>
-                <TBody>
-                    {table.getRowModel().rows.map((row) => {
-                        return (
-                            <Tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => {
-                                    return (
-                                        <Td key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext(),
-                                            )}
-                                        </Td>
-                                    )
-                                })}
-                            </Tr>
-                        )
-                    })}
-                </TBody>
-            </Table>
-            </> }
-            {
-                  isMap && mapData && mapData.length > 0 && (
-                    <GoogleMapWithMarkers
-                    locations={mapData}
-                    // zoom={8} // optional
-                  />
-                  )
-             }
-            <div className="flex items-center justify-between mt-4">
-                <Pagination
-                    // pageSize={table.getState().pagination.pageSize}
-                    // currentPage={table.getState().pagination.pageIndex + 1}
-                    // currentPage={currentPage}
-                    pageSize={pageSize}
-                    currentPage={currentPage}
-                    total={totalData}
-                    // total={banks.length}
-                    onChange={onPaginationChange}
-                />
-                <div style={{ minWidth: 130 }}>
-                    <Select<Option>
-                        size="sm"
-                        isSearchable={false}
-                        value={pageSizeOption.filter(
-                            (option) =>
-                                option.value ===
-                                table.getState().pagination.pageSize,
-                        )}
-                        options={pageSizeOption}
-                        onChange={(option) => onSelectChange(option?.value)}
+                        </TBody>
+                    </Table>
+                </>}
+                {
+                    isMap && mapData && mapData.length > 0 && (
+                        <GoogleMapWithMarkers
+                            locations={mapData}
+                        // zoom={8} // optional
+                        />
+                    )
+                }
+                <div className="flex items-center justify-between mt-4">
+                    <Pagination
+                        // pageSize={table.getState().pagination.pageSize}
+                        // currentPage={table.getState().pagination.pageIndex + 1}
+                        // currentPage={currentPage}
+                        pageSize={pageSize}
+                        currentPage={currentPage}
+                        total={totalData}
+                        // total={banks.length}
+                        onChange={onPaginationChange}
                     />
+                    <div style={{ minWidth: 130 }}>
+                        <Select<Option>
+                            size="sm"
+                            isSearchable={false}
+                            value={pageSizeOption.filter(
+                                (option) =>
+                                    option.value ===
+                                    table.getState().pagination.pageSize,
+                            )}
+                            options={pageSizeOption}
+                            onChange={(option) => onSelectChange(option?.value)}
+                        />
+                    </div>
+
                 </div>
-
             </div>
-        </div>
 
-             <Dialog
+            <Dialog
                 isOpen={dialogIsOpen}
-                width={ width * 0.9 }
+                width={width * 0.9}
                 height={height * 0.9}
                 onClose={onDialogClose}
-                >
+            >
                 <div className="flex flex-col h-full px-4 py-6 bg-white dark:bg-gray-900 overflow-hidden">
-                   <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4">
                         <h5 className="text-lg font-semibold mb-4">
-                        {cbank?.bankName || ''}
+                            {cbank?.bankName || ''}
                         </h5>
                     </div>
 
-            <div className="flex-1 overflow-y-auto">
-            <Tabs defaultValue="tab1">
-                <TabList>
-                    <TabNav value="tab1" icon={<BiEdit />}>
-                        Informations générales
-                    </TabNav>
-                    <TabNav value="tab2" icon={<BiImage />}>
-                        Documents & Images
-                    </TabNav>
-                    <TabNav value="tab3" icon={<BiConversation />}>
-                        Commentaires
-                    </TabNav>
-                    <TabNav value="tab4" icon={<BiMap />}>
-                        Map
-                    </TabNav>
-                </TabList>
-                <div className="p-4">
-                    <TabContent value="tab1">
-                    {cbank?.id && (
-                        <EditBank
-                        docRef={cbank}
-                        id={cbank.id}
-                        userId={userId || ''}
-                        onChangeBank={onChangeBank}
-                        />
-                    )}
-                    </TabContent>
-                    <TabContent value="tab2">
-                        {message && (
-                        <Alert showIcon className="mt-6 mb-6" type={alert}>
-                            <span className="break-all ">{message}</span>
-                        </Alert>
-                        )}
-
-                            <Tabs defaultValue="2tab1">
-                                <TabList>
-                        
-                                    <TabNav value="2tab1" icon={<BiImage />}>
-                                        Banks
-                                    </TabNav>
-                                    <TabNav value="2tab2" icon={<BiImage />}>
-                                        Proprietaires
-                                    </TabNav>
-                                    <TabNav value="2tab3" icon={<BiImage />}>
-                                       Autres
-                                    </TabNav>
-                                </TabList>
-                                <div className="p-4">
-                                
-                                    <TabContent value="2tab1">
-                                        {message && (
+                    <div className="flex-1 overflow-y-auto">
+                        <Tabs defaultValue="tab1">
+                            <TabList>
+                                <TabNav value="tab1" icon={<BiEdit />}>
+                                    Informations générales
+                                </TabNav>
+                                <TabNav value="tab2" icon={<BiImage />}>
+                                    Documents & Images
+                                </TabNav>
+                                <TabNav value="tab3" icon={<BiConversation />}>
+                                    Commentaires
+                                </TabNav>
+                                <TabNav value="tab4" icon={<BiMap />}>
+                                    Map
+                                </TabNav>
+                            </TabList>
+                            <div className="p-4">
+                                <TabContent value="tab1">
+                                    {cbank?.id && (
+                                        <EditBank
+                                            docRef={cbank}
+                                            id={cbank.id}
+                                            userId={userId || ''}
+                                            onChangeBank={onChangeBank}
+                                        />
+                                    )}
+                                </TabContent>
+                                <TabContent value="tab2">
+                                    {message && (
                                         <Alert showIcon className="mt-6 mb-6" type={alert}>
                                             <span className="break-all ">{message}</span>
                                         </Alert>
-                                        )}
-                                        { cbank?.id && <ImageBank nextStep={nextStep} bankId={cbank.id}  userId={userId || ''} isEdit={true}></ImageBank> }
-                                    </TabContent>
+                                    )}
 
-                                    <TabContent value="2tab3">
-                                        {message && (
+                                    <Tabs defaultValue="2tab1">
+                                        <TabList>
+
+                                            <TabNav value="2tab1" icon={<BiImage />}>
+                                                Banks
+                                            </TabNav>
+                                            <TabNav value="2tab2" icon={<BiImage />}>
+                                                Proprietaires
+                                            </TabNav>
+                                            <TabNav value="2tab3" icon={<BiImage />}>
+                                                Autres
+                                            </TabNav>
+                                        </TabList>
+                                        <div className="p-4">
+
+                                            <TabContent value="2tab1">
+                                                {message && (
+                                                    <Alert showIcon className="mt-6 mb-6" type={alert}>
+                                                        <span className="break-all ">{message}</span>
+                                                    </Alert>
+                                                )}
+                                                {cbank?.id && <ImageBank nextStep={nextStep} bankId={cbank.id} userId={userId || ''} isEdit={true}></ImageBank>}
+                                            </TabContent>
+
+                                            <TabContent value="2tab3">
+                                                {message && (
+                                                    <Alert showIcon className="mt-6 mb-6" type={alert}>
+                                                        <span className="break-all ">{message}</span>
+                                                    </Alert>
+                                                )}
+                                                {cbank?.id &&
+                                                    <ImageSignedContract nextStep={nextStep}
+                                                        bankId={cbank.id}
+                                                        userId={userId || ''}
+                                                        isEdit={true}>
+                                                    </ImageSignedContract>}
+                                            </TabContent>
+
+                                            <TabContent value="2tab2">
+                                                {message && (
+                                                    <Alert showIcon className="mt-6 mb-6" type={alert}>
+                                                        <span className="break-all ">{message}</span>
+                                                    </Alert>
+                                                )}
+                                                {cbank?.id && cbank?.landlord?.id &&
+                                                    <ImageLandlord nextStep={nextStep}
+                                                        lordId={cbank.landlord.id}
+                                                        userId={userId || ''}
+                                                        isEdit={true}></ImageLandlord>}
+                                            </TabContent>
+                                        </div>
+                                    </Tabs>
+                                </TabContent>
+                                <TabContent value="tab3">
+                                    {message && (
                                         <Alert showIcon className="mt-6 mb-6" type={alert}>
                                             <span className="break-all ">{message}</span>
                                         </Alert>
-                                        )}
-                                        { cbank?.id && 
-                                        <ImageSignedContract nextStep={nextStep}
-                                          bankId={cbank.id} 
-                                          userId={userId || ''} 
-                                          isEdit={true}>
-                                          </ImageSignedContract> }
-                                    </TabContent>
+                                    )}
+                                    {cbank?.id && <CommentsBank nextStep={nextStep}
+                                        bankId={cbank.id}
+                                        userId={userId || ''}
+                                        isEdit={true} />}
+                                </TabContent>
 
-                                    <TabContent value="2tab2">
-                                        {message && (
-                                        <Alert showIcon className="mt-6 mb-6" type={alert}>
-                                            <span className="break-all ">{message}</span>
-                                        </Alert>
-                                        )}
-                                        { cbank?.id && cbank?.landlord?.id && 
-                                        <ImageLandlord nextStep={nextStep}
-                                          lordId={cbank.landlord.id} 
-                                          userId={userId || ''} 
-                                          isEdit={true}></ImageLandlord> }
-                                    </TabContent>
-                                </div>
-                            </Tabs>
-                    </TabContent>
-                    <TabContent value="tab3">
-                    {message && (
-                        <Alert showIcon className="mt-6 mb-6" type={alert}>
-                            <span className="break-all ">{message}</span>
-                        </Alert>
-                        )}
-                    { cbank?.id && <CommentsBank nextStep={nextStep}
-                      bankId={cbank.id} 
-                      userId={userId || ''} 
-                      isEdit={true}/> }
-                    </TabContent>
+                                <TabContent value="tab4">
+                                    {cbank?.id && location && <ChangeLocation location={location} bankId={cbank.id} ></ChangeLocation>}
+                                    {cbank?.location && <GoogleMapApp position={cbank.location} />}
+                                </TabContent>
+                            </div>
+                        </Tabs>
 
-                    <TabContent value="tab4">
-                         { cbank?.id && location && <ChangeLocation location={location} bankId={cbank.id} ></ChangeLocation>}
-                         { cbank?.location &&  <GoogleMapApp position={cbank.location}  /> }
-                    </TabContent>
-                </div>
-            </Tabs>
-          
                     </div>
 
                     <div className="text-right mt-6">
-                    <Button
-                        className="ltr:mr-2 rtl:ml-2"
-                        variant="plain"
-                        onClick={onDialogClose}
-                    >
-                        Fermer
-                    </Button>
+                        <Button
+                            className="ltr:mr-2 rtl:ml-2"
+                            variant="plain"
+                            onClick={onDialogClose}
+                        >
+                            Fermer
+                        </Button>
                     </div>
                 </div>
-             </Dialog>
-      </div>
+            </Dialog>
+        </div>
     );
-  }
-  
-
-  export default TableBank;
+}
 
 
-  
+export default TableBank;
+
+

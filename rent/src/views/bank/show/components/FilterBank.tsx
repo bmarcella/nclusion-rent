@@ -62,7 +62,6 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
       setRegions(regs);
       await fetchProprio();
     };
-
     fetchData();
   }, [authority, proprio, t]);
 
@@ -146,23 +145,7 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
         />
       )}
 
-      <DatePicker placeholder="Date debut"  onChange={(date) => {
-            setStart(undefined);
-            if (!date) {
-                 setStart(undefined);
-                return;
-              }
-             setStart(new Date(date));
-          }} />
-
-       <DatePicker placeholder="Date fin" onChange={(date) => {
-            setEnd(undefined);
-            if (!date) {
-                 setEnd(undefined);
-                return;
-              }
-             setEnd(new Date(date));
-          }}  />
+  
 
         
 
