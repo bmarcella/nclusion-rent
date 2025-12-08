@@ -372,7 +372,6 @@ export const requestType = (t: any, type: boolean = false) => [
     documentType: [],
     categories: [
       { value: 1, label: t("request.type.8.categories.1") },
-      { value: 2, label: t("request.type.8.categories.2") },
     ],
   },
 
