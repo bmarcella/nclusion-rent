@@ -42,10 +42,18 @@
         "label": "Transport & Logistique",
         "description": "Pour déplacer du matériel, des POS ou du personnel entre sites.",
         "categories": {
+          "0": "Autres",
           "1": "Matériaux de construction",
           "2": "Énergie",
           "3": "Fournitures de bureau",
-          "4": "Matériaux Electroniques"
+          "4": "Matériaux Electroniques",
+          "5": "Frais de transport des opérateurs de terrain",
+          "6": "Frais de transport des prospecteurs immobiliers",
+          "7": "Transport de baraques métalliques – Gerit",
+          "8": "Transport de marchandises générales",
+          "9": "Fret aérien : envoi de matériaux et d’équipements",
+          "10": "Logistique des opérations régionales",
+          "11": "Carburant pour générateurs"
         }
       },
       "2": {
@@ -55,7 +63,14 @@
           "0": "Autres",
           "1": "Matériaux de construction",
           "2": "Énergie ",
-          "3": "Fournitures de bureau"
+          "3": "Fournitures de bureau",
+          "4": "Matériaux achetés pour l’ouverture de nouvelles banques",
+          "5": "Achats divers : serpillières, balais, cartes SIM, chaises.",
+          "6": "Réparations.",
+          "7": "Onduleur : systèmes d’énergie.",
+          "8": "Ampoules",
+          "9": "Papier"
+
         }
       },
       "3": {
@@ -91,8 +106,10 @@
         "label": "Bills & Autres",
         "description": "Pour les factures qui sont attribuées aux opérations quotidiennes",
         "categories": {
-          "1": "Legal",
-          "2": "Cash flow"
+          "1": "Paie de l’entreprise, activités administratives et RH",
+          "2": "Contrôleurs de caisse (CC)",
+          "3": "Paiements juridiques",
+          "4": "Dépenses générales"
         }
       },
       "7": {
