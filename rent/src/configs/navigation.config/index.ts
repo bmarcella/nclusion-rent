@@ -32,7 +32,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.add',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["agent_immobilier", "admin",  'super_manager'],
+                authority: ["agent_immobilier", "admin",  'super_manager', 'coordonator'],
                 subMenu: [],
             },
             {
@@ -42,7 +42,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.show',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["agent_immobilier", "admin", 'super_manager'],
+                authority: ["agent_immobilier", "admin",'coordonator', 'super_manager'],
                 subMenu: [],
             },
              {
@@ -82,7 +82,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.vendor',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "vendor_management", 'super_manager'],
+                authority: ["admin", "vendor_management",'coordonator', 'super_manager'],
                 subMenu: [],
             },
             {

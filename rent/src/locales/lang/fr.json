@@ -47,13 +47,9 @@
           "2": "Énergie",
           "3": "Fournitures de bureau",
           "4": "Matériaux Electroniques",
-          "5": "Frais de transport des opérateurs de terrain",
-          "6": "Frais de transport des prospecteurs immobiliers",
-          "7": "Transport de baraques métalliques – Gerit",
           "8": "Transport de marchandises générales",
           "9": "Fret aérien : envoi de matériaux et d’équipements",
-          "10": "Logistique des opérations régionales",
-          "11": "Carburant pour générateurs"
+          "10": "Logistique des opérations régionales"
         }
       },
       "2": {
@@ -69,7 +65,8 @@
           "6": "Réparations.",
           "7": "Onduleur : systèmes d’énergie.",
           "8": "Ampoules",
-          "9": "Papier"
+          "9": "Papier",
+          "10": "Carburant pour générateurs"
 
         }
       },
@@ -109,7 +106,9 @@
           "1": "Paie de l’entreprise, activités administratives et RH",
           "2": "Contrôleurs de caisse (CC)",
           "3": "Paiements juridiques",
-          "4": "Dépenses générales"
+          "4": "Dépenses générales",
+          "5": "Baux / Constructions",
+          "6": "Frais de transport"
         }
       },
       "7": {
