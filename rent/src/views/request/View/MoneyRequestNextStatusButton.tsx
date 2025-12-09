@@ -24,8 +24,7 @@ export default function MoneyRequestNextStatusButton({
   const { t } = useTranslation();
   // Compute next step (if any)
   const nextStep = getNextNodeV2(currentStatus, t, request?.general?.approvalFlow);
-
-   const handleClick = async () => {
+  const handleClick = async () => {
     if (!nextStep) return;
     await onNextStatus(nextStep.value, true, currentStatus);
    };
