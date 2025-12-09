@@ -284,6 +284,13 @@ export const requestType = (t: any, type: boolean = false) => [
       { value: 2, label: t("request.type.1.categories.2") },
       { value: 3, label: t("request.type.1.categories.3") },
       { value: 4, label: t("request.type.1.categories.4") },
+      { value: 5, label: t("request.type.1.categories.5") },
+      { value: 6, label: t("request.type.1.categories.6") },
+      { value: 7, label: t("request.type.1.categories.7") },
+      { value: 8, label: t("request.type.1.categories.8") },
+      { value: 9, label: t("request.type.1.categories.9") },
+      { value: 10, label: t("request.type.1.categories.10") },
+      { value: 11, label: t("request.type.1.categories.11") },
     ],
   },
   {
@@ -296,7 +303,14 @@ export const requestType = (t: any, type: boolean = false) => [
       { value: 1, label: t("request.type.2.categories.1") },
       { value: 2, label: t("request.type.2.categories.2") },
       { value: 3, label: t("request.type.2.categories.3") },
+      { value: 4, label: t("request.type.2.categories.4") },
+      { value: 5, label: t("request.type.2.categories.5") },
+      { value: 6, label: t("request.type.2.categories.6") },
+      { value: 7, label: t("request.type.2.categories.7") },
+      { value: 8, label: t("request.type.2.categories.8") },
+      { value: 9, label: t("request.type.2.categories.9") },
       { value: 0, label: t("request.type.2.categories.0") },
+   
     ],
     documentType: [],
   },
@@ -403,6 +417,16 @@ export const requestType = (t: any, type: boolean = false) => [
         value: 2,
         label: t("request.type.6.categories.2"),
         type: billType[2]
+      },
+        {
+        value: 3,
+        label: t("request.type.6.categories.3"),
+        type: billType[3]
+      },
+      {
+        value: 4,
+        label: t("request.type.6.categories.4"),
+        type: billType[4]
       },
     ],
   },
