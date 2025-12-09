@@ -101,7 +101,6 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
      }
     }
 
- 
   return (
     <>
     <div className="flex gap-2 pt-6  space-y-6 rounded bg-white pl-1 mb-4 pr-1"  >
