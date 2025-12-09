@@ -91,7 +91,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     const  canApprove = () => {
       try {
         const role = authority?.[0] || null;
-        if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="admin" || role =="super_manager" || role =="manager" || role =="asssit_manager") ) {
+        if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="coordonator"  || role =="admin" || role =="super_manager" || role =="manager" || role =="asssit_manager") ) {
             return true;
         }
         return false;
@@ -218,6 +218,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
       {/* Action buttons */}
       { !pdf &&  
       <div className="flex justify-around items-center pt-6">
+
          { (bank &&  bank.step=='bankSteps.needRenovation')  && bank?.approve && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onRenovOk() }} />, "Approbation")}
         >
