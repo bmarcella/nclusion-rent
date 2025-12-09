@@ -37,7 +37,7 @@ interface Props {
   t: (key: string) => string;
   onChangeRegion: (id:  number) => void;
   onChangeAgent?: (d: string ) => void;
-  onChangeDate: (start:  Date, end? : Date) => void;
+  onChangeDate?: (start:  Date, end? : Date) => void;
   onChangeMap?: (value: boolean) => void;
   isMap?: boolean;
 }
@@ -53,6 +53,7 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
   //
   const [start, setStart] = useState<Date>();
   const [end, setEnd] = useState<Date>();
+
   useEffect(() => {
     if (!authority?.length) return;
       const fetchData = async () => {
@@ -74,7 +75,7 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
  }, [selectedRegions]);
 
  useEffect(() => {
-  onChangeDate(start, end);
+  onChangeDate?.(start!, end);
 }, [start, end]);
 
  useEffect(() => {
@@ -145,6 +146,24 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
         />
       )}
 
+     { onChangeDate &&  ( <>
+                    <DatePicker placeholder="Date debut"  onChange={(date) => {
+                          setStart(undefined);
+                          if (!date) {
+                              setStart(undefined);
+                              return;
+                            }
+                          setStart(new Date(date));
+                        }} />
+
+                    <DatePicker placeholder="Date fin" onChange={(date) => {
+                          setEnd(undefined);
+                          if (!date) {
+                              setEnd(undefined);
+                              return;
+                            }
+                          setEnd(new Date(date));
+                        }}  /></> ) }
   
 
         
