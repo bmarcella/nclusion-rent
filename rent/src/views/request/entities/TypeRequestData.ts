@@ -3,7 +3,7 @@
 
 export const capexType = {
     1: ["Moto", "Voiture"],
-    2: ["Ordinateur", "POS"]
+    2: ["Laptop", "POS"]
 } as const;
 
 export const billType = {
@@ -38,6 +38,21 @@ export const billType = {
     "Facture mensuelle — Téléphone du bureau",
     "Facture mensuelle — Forfaits data des opérateurs terrain",
   ],
+  5:[
+  "Banques : renouvellement des baux",
+  "Banques : construction — kiosques côté rue ",
+  "Banques : construction — baraques métalliques (Gerit) ",
+  "Terrain : nouveaux baux (pour installer des baraques)",
+  "Terrain : renouvellement des baux ",
+  "Bureaux : nouveaux baux",
+  "Bureaux : renouvellement des baux ",
+  "Bureaux : paiement mensuel",
+],
+6: [
+  "Frais de transport des opérateurs de terrain",
+  "Frais de transport des prospecteurs immobiliers",
+  "Transport de baraques métalliques – Gerit",
+]
 } as const;
 
 
