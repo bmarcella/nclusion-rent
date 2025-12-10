@@ -182,8 +182,6 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
     if (filter?.date?.end) {
       cs.push(where("createdAt", "<=", filter?.date?.end))
     }
-
-
     // Sorting (ensure Firestore indexes exist)
     switch (sortKey) {
       case "created-desc":

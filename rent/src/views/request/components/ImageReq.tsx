@@ -52,7 +52,6 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId, owner = false, end
    
     const getImages = ()=>{
           getReqImages(reqId).then((images) => {
-            console.log(images);
             setImages(images);
         });
     }
@@ -163,7 +162,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId, owner = false, end
                         { isEdit? "Ajouter" : 'Suivant' }
                 </Button>`
             </div>) }
-            { isEdit || images.length> 0 &&  ( <ImageReqComp images={images} userId={userId || ''} onDelete={OnDeleteImg} end={end} />  ) }
+            { images.length> 0 &&  ( <ImageReqComp images={images} userId={userId || ''} showPic={true} onDelete={OnDeleteImg} end={end} />  ) }
         </div>
     )
 }
