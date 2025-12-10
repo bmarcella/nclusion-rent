@@ -1,10 +1,10 @@
 
 import { z } from "zod";
-export const USER_ROLES = [ "super_manager","vendeur",
+export const USER_ROLES = ["super_manager","vendeur",
      "proprietaire", 'vendor_management', 
       "reference", "agent_immobilier", "coordonator", 
       "assist_coordonator", "manager", "assist_manager",
-       "operation", "super_operation", "admin", "fields_ops", 'accountant', 'assist_accountant'] as const;
+       "operation", "super_operation", "admin", "fields_ops", 'accountant', 'assist_accountant', 'super_accountant'] as const;
 export type  USER_ROLE = typeof USER_ROLES[number];
 export const ProprioSchema = z.object({
     id: z.string().optional(),

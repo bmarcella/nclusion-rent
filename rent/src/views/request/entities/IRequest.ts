@@ -235,6 +235,12 @@ export interface IRequest {
   preApproval_by: string,
   accountantApproval: string,
   managerGlobalApproval: string,
+ comments?: {
+    by_who: string,
+    status: string,
+    text : string , 
+    createdAt: Date,
+  } [];
   historicApproval: {
     status_to: string,
     status_from: string,
