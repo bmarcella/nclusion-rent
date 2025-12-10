@@ -165,10 +165,6 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
                           setEnd(new Date(date));
                         }}  /></> ) }
   
-
-        
-
-  
     </div>
   );
 }

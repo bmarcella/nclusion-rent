@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-sort-props */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getTypeRequestTagClasses, IRequest } from '../entities/IRequest';
@@ -14,6 +15,7 @@ import { AuthRequest, getRequestCategorieById, getRequestType, requestType } fro
 import { useTranslation } from 'react-i18next';
 import UserName from '@/views/bank/show/components/UserName';
 import classNames from 'classnames';
+import CommentReq from './CommentReq';
 
 interface Props {
   data: IRequest;
@@ -24,8 +26,7 @@ interface Props {
 }
 
 function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) {
-  // In many backends, the "business payload" is nested (e.g. data.request).
-  // If not, we fall back to using `data` directly.
+  
   const [request, setRequest] = useState<IRequest>(data) as any;
   const type = useMemo(() => request?.requestType, [request?.requestType]);
   const { t } = useTranslation();
@@ -47,8 +48,8 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
     return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const onNextStatus = (data: string, validated: boolean, prevStatus: string) => {
-    updateMoneyRequestStatus(data, validated, prevStatus);
+  const onNextStatus = (data: string, validated: boolean, prevStatus: string, comment?: string ) => {
+      updateMoneyRequestStatus(data, validated, prevStatus, comment);
   }
 
   const getPrev = (prevStatus: string) => {
@@ -77,37 +78,44 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
   const updateMoneyRequestStatus = async (
     nextStatus: string,
     validated: boolean,
-    prevStatus: string
+    prevStatus: string,
+    comment?: string
   ) => {
     if (!data.id) {
       throw new Error("updateMoneyRequestStatus: requestId is required");
     }
     const ref = getExpenseRequestDoc(data.id)
-
     // Clone the array to avoid mutating original state directly (React rule)
     const hist = [...data.historicApproval];
-
+    const coms = data?.comments || [];
+    const comments = (data?.comments) ?  [...coms] : [];
+    if(comment) {
+      comments.unshift({
+        by_who: userId!,
+        status: prevStatus,
+        text : comment , 
+        createdAt: new Date(),
+      });
+    }
     hist.unshift({
       status_to: nextStatus,
       status_from: data.status,
       by_who: userId!,
       createdAt: new Date(),
     });
-
     const prev = getPrev(prevStatus);
-
     const payload: Record<string, any> = {
       status: nextStatus,
       historicApproval: hist,
+      comments,
       [prev]: userId
     };
     await updateDoc(ref, payload);
-    // 👉 Fetch the updated document
+    //Fetch the updated document
     const snapshot = await getDoc(ref);
     const new_req = { id: snapshot.id, ...snapshot.data() } as IRequest;
     setRequest(new_req);
     getNewreq(new_req);
-
   }
   // ---- Section renderers ----------------------------------------------------
   const renderBill = () => {
@@ -699,19 +707,16 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
 
         {general.is_for_other && (
           <div className="text-sm mt-2">
-            <span className="font-bold">On behalf of:</span>{' '}
+            <span className="font-bold">On behalf of: </span>{' '}
             {general.on_behalf_user_id || '-'}
           </div>
         )}
       </Card>
-
-      {renderBankInfo()}
-
-      {renderMainSection(t)}
-
-      {renderDocuments()}
-
-      {auth && <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus} rules={rules} action={action} />}
+     {renderBankInfo()}
+     {renderMainSection(t)}
+     {renderDocuments()}
+     {data?.comments && data.comments.length && <CommentReq userId={''} comments={data.comments || []}></CommentReq> }
+     {auth && <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus} rules={rules} action={action} />}
     </div>
   );
 }
