@@ -38,7 +38,7 @@ export default function MoneyRequestNextStatusButton({
       {(rules.length > 0 && rules[0]?.max_amount >= request.amount || action ) && <Card className="grid grid-cols-1 gap-4"> 
          <div className="w-full">
           <div>
-             <Input textArea onChange={(e)=>{
+             <Input textArea placeholder="Entrer le commentaire ici" onChange={(e)=>{
                  const v = String(e.target.value);
                  setComment(v);
              }}></Input>
