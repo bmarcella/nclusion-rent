@@ -89,14 +89,16 @@ function TabView({ data, onDialogClose, action }: Props) {
         <TabList>
           <TabNav value="tab1"> {request.requestType.toUpperCase()}</TabNav>
           {<><TabNav value="tab2"> Documents</TabNav>
-            <TabNav value="tab3"> Historique</TabNav> </>}
+             <TabNav value="tab3"> Historique</TabNav> 
+            </>
+            }
         </TabList>
         <div className="p-4">
           <TabContent value="tab1">
             <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} />
           </TabContent>
-          <>
-            <TabContent value="tab3">
+           <>
+            <TabContent value="tab3"> 
               <HistoticView data={request}></HistoticView>
             </TabContent>
             <TabContent value="tab2">
