@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { formatRelative } from "date-fns";
 import { fr } from "date-fns/locale"; // Optional: For readable dates
