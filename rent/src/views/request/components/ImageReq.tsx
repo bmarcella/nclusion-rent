@@ -114,7 +114,7 @@ const ImageReq = ( { reqId, isEdit = false, nextStep, userId, owner = false, end
 
     return (
         <div>
-           { (!isEdit || owner)  && !end && (<div  className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow mb-4 mt-4" >
+           { !end && (<div  className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow mb-4 mt-4" >
                 <FormItem label="Type document" invalid={!!error.is} errorMessage={error.message}>
                     <Select placeholder="Please Select" options={ support_docs.map((doc) => ({ label: t(doc), value: doc }))} 
                         onChange={(option) => { 
