@@ -487,6 +487,7 @@
     "fields_ops": "Opérations terrain",
     "vendor_management": "Géstion des vendeurs",
     "assist_accountant": "Assistant comptable",
+    "super_accountant": "Super comptable",
     "accountant": "Comptable"
   },
   "steps": {
