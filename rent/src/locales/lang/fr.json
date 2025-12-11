@@ -22,6 +22,7 @@
     "bank_renovation": "Rénovation bank",
     "lease_payment": "Paiement de loyer",
     "legal": "Juridique",
+    "divers": "Divers",
     "general":{
       "bank_transfer":"Transfert bancaire",
       "cash": "Agent Comptant",
@@ -128,6 +129,18 @@
         "categories": {
           "1": "Peinture",
           "2": "Comptoire"
+        }
+      },
+      "10": {
+        "label": "Divers",
+        "description": "Dépenses diverses et autres pour les managers de NYLC.",
+        "categories": {
+          "1": "Paie de l’entreprise, activités administratives et RH",
+          "2": "Contrôleurs de caisse (CC)",
+          "3": "Paiements juridiques",
+          "4": "Dépenses générales",
+          "5": "Baux / Constructions",
+          "6": "Frais de transport"
         }
       }
     },

@@ -210,7 +210,7 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                             <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs" onClick={() => navigate("/bank/" + row.original.id)}>
                                 <PiCheck />
                             </Button>
-                        {<YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
+                          {<YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
                         </div>);
                 }
             },
@@ -375,7 +375,6 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
         table.setPageSize(Number(value))
         setPageSize(Number(value));
     }
-
     const onChangeBank = (payload: any, step: number) => {
         if (step != 1) {
             setCBank((prev: any) => {

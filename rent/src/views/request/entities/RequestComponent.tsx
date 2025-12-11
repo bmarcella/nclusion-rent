@@ -212,6 +212,10 @@ export function GeneralFields({ t, newRegionSet }: any) {
      {
        value: 3,
        label: 'Comptable'
+     },
+     {
+       value: 4,
+       label: 'Manager'
      } 
   ]
   }, []);
@@ -237,6 +241,7 @@ export function GeneralFields({ t, newRegionSet }: any) {
         id: doc.id,
         ...doc.data(),
       })) as Proprio[];
+      
       const a = convertToSelectOptionsProprio(landlords);
       setManagers(a);
       setLoading(false);
@@ -477,6 +482,50 @@ export function BillFields({ t, categories }: any) {
       <Field label="Amount"><Input type="number" step="0.01" {...register("bill.price", { valueAsNumber: true })} /></Field>
       <Field label="Description"><Input textArea {...register("bill.description")} /></Field>
       <Field label="Target date"><Input type="date" {...register("bill.target_date", { valueAsDate: true })} /></Field>
+    </Section>
+  );
+}
+
+
+export function DiversFields({ t, categories }: any) {
+  const { register, control } = useFormContextTyped();
+  const [type, setType] = useState([]);
+  return (
+    <Section title="Divers">
+      <Field label="Catégorie">
+        <Controller
+          control={control}
+          name="divers.categorie"
+          render={({ field }) => (
+            <Select
+              onChange={(option) => {
+                setType(option?.type)
+                field.onChange(Number(option?.value))
+              }
+              }
+              options={categories}
+            />
+          )}
+        />
+      </Field>
+      {type && type.length > 0 && < Field label="Type">
+        <Controller
+          control={control}
+          name="divers.type"
+          render={({ field }) => (
+            <Select
+              onChange={(option) => {
+                field.onChange(option?.value)
+              }
+              }
+              options={type.map((p) => ({ label: p, value: p }))}
+            />
+          )}
+        />
+      </Field>}
+      <Field label="Amount"><Input type="number" step="0.01" {...register("divers.price", { valueAsNumber: true })} /></Field>
+      <Field label="Description"><Input textArea {...register("divers.description")} /></Field>
+      <Field label="Target date"><Input type="date" {...register("divers.target_date", { valueAsDate: true })} /></Field>
     </Section>
   );
 }
@@ -1641,7 +1690,6 @@ export function BankRenovationFields({ t, categories }: any) {
 
   );
 }
-
 
 export function useFormContextTyped() {
   return useFormContext<MoneyRequest>();

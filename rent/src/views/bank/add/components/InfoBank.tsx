@@ -191,7 +191,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
       
       const onSubmitInfo = async (data: FormValuesInfo) => {
         setSubmitting(true);
-        
+
         setValue("bank", data);
           if (isEdit) {
              nextStep(1, data);
@@ -287,12 +287,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
       />
       </FormItem>
 
-           
- 
-
-     
-
-
+          
       <FormItem label={t('bank.reference')} invalid={!!errors.reference} errorMessage={errors.reference?.message}>
         <Controller name="reference" control={control} render={({ field }) =>
           <Input {...field} />

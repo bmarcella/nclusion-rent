@@ -15,7 +15,8 @@ export type RequestType =
   | "opex"
   | "transport_logistique"
   | "bank_renovation"
-  | "lease_payment";
+  | "lease_payment"
+  | "divers"
 
 export type CapexType = "Moto" | "Generatrice" | "Ordinateur" | "autre";
 export type LocomotifSpentType = "Carburant" | "Maintenance";
@@ -61,6 +62,7 @@ export interface ILegal {
   description: string;
   target_date: Date;
 }
+
 
 export interface IBill {
   categorie: number;
@@ -136,6 +138,10 @@ export interface ITransportAddress {
 
 export const getTypeRequestTagClasses = (typeRequest?: string) => {
   switch ((typeRequest ?? "").trim().toLowerCase()) {
+
+    case "divers":
+      return "bg-blue-200 dark:bg-blue-900/30 border-blue-300 dark:border-blue-900/40 text-blue-900 dark:text-blue-50";
+
     case "bill":
       return "bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-900/40 text-blue-900 dark:text-blue-50";
 
@@ -220,6 +226,7 @@ export interface IRequest {
   id: string,
   general?: IGeneral;
   BankInfo?: IBankInfo | null;
+  divers?: IBill | null;
   bill?: IBill | null;
   capex?: ICapex | null;
   locomotif?: ILocomotif | null;

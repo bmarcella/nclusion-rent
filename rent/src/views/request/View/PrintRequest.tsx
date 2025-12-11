@@ -48,6 +48,40 @@ const PrintRequest: React.FC<Props> = ({ request }) => {
         }, 2000);
     }
 
+      // ---- Section renderers ----------------------------------------------------
+  const renderDivers = () => {
+    if (!request.divers) return null;
+    const { price, description, target_date, categorie, } = request.divers;
+    const d = request.divers;
+    return (
+      <Card className="p-4 space-y-2">
+        <h3 className="text-lg font-semibold">Bill</h3>
+        <div className="grid grid-cols-3 md:grid-cols-3 gap-3 text-sm mt-4">
+          <div>
+            <div className="font-bold">Amount</div>
+            <div>{formatMoney(price)} {request?.general?.currency}</div>
+          </div>
+          <div>
+            <div className="font-bold">Target date</div>
+            <div>{formatDate(target_date)}</div>
+          </div>
+          <div>
+            <div className="font-bold">Categorie</div>
+            <div>{getRequestCategorieById(t, type, categorie)} </div>
+          </div>
+          <div>
+            <div className="font-bold">Type</div>
+            <div>{ (d?.type) ? getRequestType(t, type, categorie, d?.type) : '-'} </div>
+          </div>
+        </div>
+        <div className="mt-4">
+          <div className="font-bold">Description</div>
+          <p className="text-sm whitespace-pre-wrap">{description}</p>
+        </div>
+      </Card>
+    );
+  };
+
     // ---- Render sections ----
     const renderBill = () => {
         const b = request.bill;
@@ -64,7 +98,7 @@ const PrintRequest: React.FC<Props> = ({ request }) => {
                     </div>
                     <div>
                         <div className="font-bold">Type</div>
-                        <div>{getRequestType(t, type, b.categorie, b?.type)} </div>
+                        <div>{ (b?.type) ? getRequestType(t, type, b.categorie, b?.type) : '-' } </div>
                     </div>
                 </div>
                 <div className="mt-4">
@@ -119,7 +153,7 @@ const PrintRequest: React.FC<Props> = ({ request }) => {
         );
     };
 
-   const renderTelecom = () => {
+    const renderTelecom = () => {
     if (!request.telecom) return null;
     const { plans = [], description, total_price, categorie } = request.telecom;
     return (
@@ -186,9 +220,9 @@ const PrintRequest: React.FC<Props> = ({ request }) => {
         )}
       </Card>
     );
-  };
+    };
 
-const renderOpex = () => {
+    const renderOpex = () => {
     if (!request.opex) return null;
     const { categorie, other_categorie, items = [], amount, description, masterbankId } = request.opex;
     return (
@@ -251,7 +285,7 @@ const renderOpex = () => {
         )}
       </Card>
     );
-  };
+    };
 
     const renderSignatures = () => {
         const hhistory = request.historicApproval || [];
@@ -381,7 +415,7 @@ const renderOpex = () => {
         </div>
       </Card>
     );
-  };
+    };
 
     const renderBankInfo = () => {
         const b = request.BankInfo;
@@ -470,7 +504,7 @@ const renderOpex = () => {
             )}
           </Card>
         );
-      };
+    };
 
     const renderMainSection = () => {
         switch (request.general?.type_request) {
@@ -481,6 +515,7 @@ const renderOpex = () => {
             case "lease_payment": return renderLeasePayment();
             case "locomotif": return renderLocomotif();
             case "transport_logistique" : return renderTransport(t);
+            case "divers" : return renderDivers();
             default:
                 return <Card className="p-4"><p className="text-sm text-muted-foreground">No specific section.</p></Card>;
         }

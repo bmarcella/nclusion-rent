@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { FormProvider } from "react-hook-form";
-import { BankRenovationFields, BillFields, CapexFields, LeasePaymentFields, LocomotifFields, OpexFields, TelecomFields, TransportFields, GeneralFields, Section } from "../../entities/RequestComponent";
+import { BankRenovationFields, BillFields, CapexFields, LeasePaymentFields, LocomotifFields, OpexFields, TelecomFields, TransportFields, GeneralFields, Section, DiversFields } from "../../entities/RequestComponent";
 import { Button, Card } from '@/components/ui';
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
@@ -27,7 +27,6 @@ export const ViewReqForm = ({ onSubmit, methods, stype, goBack, }: Props) => {
     setRegion(id_region);
   }
 
-
   return (<>
     <div className=" mx-auto max-w-5xl space-y-6 p-4">
       <div className="flex items-end gap-1 mt-4 ml-4">
@@ -46,7 +45,6 @@ export const ViewReqForm = ({ onSubmit, methods, stype, goBack, }: Props) => {
       >
         {/* <h1 className="text-2xl font-bold">Money Request Form</h1> */}
         <GeneralFields t={t} newRegionSet={newRegionSet} />
-
         {type === "locomotif" && <LocomotifFields t={t} categories={stype.categories} />}
         {type === "telecom" && <TelecomFields t={t} categories={stype.categories} />}
         {type === "opex" && <OpexFields t={t} categories={stype.categories} />}
@@ -56,6 +54,7 @@ export const ViewReqForm = ({ onSubmit, methods, stype, goBack, }: Props) => {
 
         {type === "bank_renovation" && <BankRenovationFields t={t} categories={stype.categories} />}
         {type === "lease_payment" && <LeasePaymentFields t={t} categories={stype.categories} />}
+        {type === "divers" && <DiversFields t={t} categories={stype.categories} />}
 
         <Card className="p-4">
           <div className="text-sm text-red-600 space-y-1">
