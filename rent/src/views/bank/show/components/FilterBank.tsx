@@ -113,7 +113,7 @@ function FilterBank({ authority, proprio, t, onChangeRegion, onChangeAgent, onCh
              onChangeMap(options);
           }}>
       Show on Map 
-  </Checkbox> }
+    </Checkbox> }
     {regions.length > 1 && (
         <Select
           placeholder="Region"

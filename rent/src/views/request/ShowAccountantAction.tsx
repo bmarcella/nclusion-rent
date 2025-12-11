@@ -24,7 +24,6 @@ export function ShowAccountantActionBase() {
                 { <ShowReq status={st.value}  action={true} ></ShowReq> }
             </TabContent>)
           })} 
-    
         </div>
     </Tabs>
     </>
