@@ -38,7 +38,6 @@ const defaultFooterConfig: CardHeader = {
 
 const Card = (props: CardProps) => {
     const { ui } = useConfig()
-
     const {
         bodyClass,
         children,
