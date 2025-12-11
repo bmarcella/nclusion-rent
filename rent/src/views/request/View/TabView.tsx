@@ -88,7 +88,7 @@ function TabView({ data, onDialogClose, action }: Props) {
       {see && <Tabs defaultValue="tab1" className="w-full">
         <TabList>
           <TabNav value="tab1"> {request.requestType.toUpperCase()}</TabNav>
-          {<><TabNav value="tab2"> Documents</TabNav>
+          { <><TabNav value="tab2"> Documents</TabNav>
              <TabNav value="tab3"> Historique</TabNav> 
             </>
             }

@@ -64,6 +64,16 @@ export const BillSchema = z.object({
   support_docs: z.array(z.any()).default([]),
 });
 
+
+export const DiversSchema = z.object({
+  categorie: z.coerce.number().nonnegative(),
+  type: z.string().optional(),
+  price: z.coerce.number().nonnegative(),
+  description: z.string().min(1),
+  target_date: z.coerce.date(),
+  support_docs: z.array(z.any()).default([]),
+});
+
 export const CapexSchema = z.object({
   categorie: z.coerce.number().nonnegative(),
   type: z.string().optional(),
@@ -203,6 +213,7 @@ export const MoneyRequestSchema = z
     general: GeneralSchema.optional(),
     BankInfo: BankInfoSchema.nullable().optional(),
     bill: BillSchema.nullable().optional(),
+    divers: DiversSchema.nullable().optional(),
     capex: CapexSchema.nullable().optional(),
     locomotif: LocomotifSchema.nullable().optional(),
     telecom: TelecomSchema.nullable().optional(),
@@ -215,6 +226,9 @@ export const MoneyRequestSchema = z
   .superRefine((val, ctx) => {
     // Conditional requirements by type_request
     switch (val.general?.type_request) {
+       case "divers":
+        if (!val.divers) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["divers"], message: "Divers section is required" });
+        break;
       case "legal":
         if (!val.legal) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["legal"], message: "Legal section is required" });
         break;
