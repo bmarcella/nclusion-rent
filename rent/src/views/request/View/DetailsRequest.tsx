@@ -116,8 +116,8 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
     const new_req = { id: snapshot.id, ...snapshot.data() } as IRequest;
     setRequest(new_req);
     getNewreq(new_req);
-  }
-  // ---- Section renderers ----------------------------------------------------
+  };
+
   const renderBill = () => {
     if (!request.bill) return null;
     const { price, description, target_date, categorie } = request.bill;
@@ -140,6 +140,38 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
           <div>
             <div className="font-bold">Type</div>
             <div>{getRequestType(t, type, categorie, request.bill.type)} </div>
+          </div>
+        </div>
+        <div className="mt-4">
+          <div className="font-bold">Description</div>
+          <p className="text-sm whitespace-pre-wrap">{description}</p>
+        </div>
+      </Card>
+    );
+  };
+
+  const renderDivers = () => {
+    if (!request.divers) return null;
+    const { price, description, target_date, categorie } = request.divers;
+    return (
+      <Card className="p-4 space-y-2">
+        <h3 className="text-lg font-semibold">Divers</h3>
+        <div className="grid grid-cols-3 md:grid-cols-3 gap-3 text-sm mt-4">
+          <div>
+            <div className="font-bold">Amount</div>
+            <div>{formatMoney(price)} {general.currency}</div>
+          </div>
+          <div>
+            <div className="font-bold">Target date</div>
+            <div>{formatDate(target_date)}</div>
+          </div>
+          <div>
+            <div className="font-bold">Categorie</div>
+            <div>{getRequestCategorieById(t, type, categorie)} </div>
+          </div>
+          <div>
+            <div className="font-bold">Type</div>
+            <div>{getRequestType(t, type, categorie, request.divers.type)} </div>
           </div>
         </div>
         <div className="mt-4">
@@ -181,9 +213,6 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
             <div className="font-bold">Fournisseur</div>
             <div>{provider}</div>
           </div>
-
-           
-        
         </div>
         <div className="mt-2">
           <div className="font-bold">Description</div>
@@ -249,9 +278,6 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
             <div>{getRequestType(t, type, categorie, request.telecom.type)} </div>
           </div> }
         </div>
-
-        
-       
         <div>
           <div className="font-bold mb-1">Description</div>
           <p className="text-sm whitespace-pre-wrap">{description}</p>
@@ -576,7 +602,6 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
   };
 
   // ---- Bank info & documents -----------------------------------------------
-
   const renderBankInfo = () => {
     if (!request.BankInfo) return null;
     const { BankName, AccountName, AccountNumber, SWIFT } = request.BankInfo;
@@ -627,6 +652,8 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
     switch (typeRequest) {
       case 'bill':
         return renderBill();
+      case 'divers':
+        return renderDivers();  
       case 'capex':
         return renderCapex();
       case 'locomotif':
@@ -653,12 +680,8 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
         );
     }
   };
-
-  // ---- Render --------------------------------------------------------------
-
   return (
     <div className="space-y-4">
-      {/* Header / meta */}
       <Card className="p-4 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="mb-4">
@@ -675,7 +698,6 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
             </span>
           )}
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mt-3">
           <div>
             <div className="font-bold">Type de requête</div>
@@ -704,7 +726,6 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
             <div>{formatRelative(data.createdAt.toDate?.() || data.createdAt, new Date(), { locale: fr })}</div>
           </div>
         </div>
-
         {general.is_for_other && (
           <div className="text-sm mt-2">
             <span className="font-bold">On behalf of: </span>{' '}
@@ -714,9 +735,12 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
       </Card>
      {renderBankInfo()}
      {renderMainSection(t)}
-     {renderDocuments()}
-     {data?.comments && data.comments.length && <CommentReq userId={''} comments={data.comments || []}></CommentReq> }
-     {auth && <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus} rules={rules} action={action} />}
+     {data && data?.comments && data.comments.length>0 && 
+       <>
+        <CommentReq userId={userId || "" } comments={data.comments || []}></CommentReq> 
+       </> 
+     } 
+     {auth && <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus} rules={rules} action={action} />} 
     </div>
   );
 }

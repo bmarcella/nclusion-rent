@@ -228,8 +228,9 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
   }, [paymentMethod]);
 
   const getAmount = (data: MoneyRequest, type: string): number | undefined => {
-
     switch (type) {
+       case "divers":
+        return data.divers!.price!; 
       case "legal":
         return data.legal!.price!;
       case "bill":
@@ -258,11 +259,13 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
          new_status = statuses[0].value;
       } else {
             const flow = data?.general?.approvalFlow;
-            if (flow == 1 || flow == 2) {
+              if (flow == 1 || flow == 2) {
                  new_status = statuses[1].value; 
-              } else  {
-               new_status = statuses[2].value; 
-           }
+              }  else if (flow == 4 ) {
+                 new_status = statuses[3].value; 
+              }  else  {
+               new_status = statuses[2].value;
+              }
       }
       setSubmitting(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -290,7 +293,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
         requestType: typeRequest.key,
         amount: getAmount(data, typeRequest.key)
       } as unknown as Partial<IRequest>;
-      console.log(request);
+      // console.log(request);
       const docRef = await addDoc(ExpenseRequestDoc, request);
       reset();
       setStep(1);
@@ -300,7 +303,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
       setAlert("success")
       setTimeout(() => setSubmitting(false), 1000);
     } catch (error) {
-      console.error("Error adding document: ", error);
+      // console.error("Error adding document: ", error);
       setSubmitting(false);
       setMessage("Erreur lors de l'enregistrement de la requete");
       setAlert("danger")
@@ -324,6 +327,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
       {step == 1 && (
         <ImageReq nextStep={nextStep} reqId={request} userId={userId || ''} end={false} isEdit={false} ></ImageReq>
       )}
+
       {step === 2 && (
         <div className="text-gray-700 dark:text-white">
           <EndBank message={t("entity.submitSuccess")} btnText="Nouvelle requête" onRestart={(): void => {

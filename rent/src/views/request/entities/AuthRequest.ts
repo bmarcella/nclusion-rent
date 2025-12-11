@@ -89,7 +89,13 @@ const STATUS_TRAIN_ORDER_2: RequestStatusValue[] = [
 
 const STATUS_TRAIN_ORDER_3: RequestStatusValue[] = [
   'preApproval',
-  'accountantRegionalApproval',
+  'managerGlobalApproval',
+  'approved',
+  'completed',
+];
+
+const STATUS_TRAIN_ORDER_4: RequestStatusValue[] = [
+  'preApproval',
   'managerGlobalApproval',
   'approved',
   'completed',
@@ -147,6 +153,7 @@ export const StatusTrainV2 = (t: TFunction, flow?: number): StatusNode => {
     1: STATUS_TRAIN_ORDER,
     2: STATUS_TRAIN_ORDER_2,
     3: STATUS_TRAIN_ORDER_3,
+    4: STATUS_TRAIN_ORDER_4,
   } as const;
 
   const train = (flow && flow != null && allTrain[flow]) ? allTrain[flow] : STATUS_TRAIN_ORDER;
@@ -195,7 +202,8 @@ export enum RequestTypeEnum {
   opex = "opex",
   transport_logistique = "transport_logistique",
   bank_renovation = "bank_renovation",
-  lease_payment = "lease_payment"
+  lease_payment = "lease_payment",
+  divers = "divers"
 }
 
 export interface RequestType {
@@ -234,10 +242,12 @@ export const getRequestType = (t: any, tReq: string, catId: number, type: string
 
 export const getCategorieName = (t: any, row: IRequest) => {
   const cat = (id: number) => getRequestCategorieById(t, row.requestType, id)
-
   switch (row.requestType) {
     case 'bill':
       return row?.bill?.categorie != null ? cat(row.bill.categorie) : ''
+
+   case 'divers':
+      return row?.divers?.categorie != null ? cat(row.divers.categorie) : ''   
 
     case 'capex':
       return row?.capex?.categorie != null ? cat(row.capex.categorie) : ''
@@ -255,7 +265,6 @@ export const getCategorieName = (t: any, row: IRequest) => {
       return row?.transport_logistique?.categorie != null
         ? cat(row.transport_logistique.categorie)
         : ''
-
     case 'bank_renovation':
       return row?.bank_renovation?.categorie != null
         ? cat(row.bank_renovation.categorie)
@@ -265,7 +274,6 @@ export const getCategorieName = (t: any, row: IRequest) => {
       return row?.lease_payment?.categorie != null
         ? cat(row.lease_payment.categorie)
         : ''
-
     default:
       return ''
   }
@@ -311,7 +319,6 @@ export const requestType = (t: any, type: boolean = false) => [
     ],
     documentType: [],
   },
-
   {
     id: 3,
     value: type ? 3 : RequestTypeEnum.telecom,
@@ -341,7 +348,6 @@ export const requestType = (t: any, type: boolean = false) => [
       { value: 0, label: t("request.type.4.categories.0") },
     ],
   },
-
   {
     id: 5,
     value: type ? 5 : RequestTypeEnum.capex,
@@ -362,17 +368,6 @@ export const requestType = (t: any, type: boolean = false) => [
       },
     ],
   },
-
-
-  // {
-  //   id: 7,
-  //   value: type ? 7 : RequestTypeEnum.legal,
-  //   key: RequestTypeEnum.legal,
-  //   label: t("request.type.7.label"),
-  //   description: t("request.type.7.description"),
-  //   documentType: [],
-  // },
-
   {
     id: 8,
     value: type ? 8 : RequestTypeEnum.lease_payment,
@@ -384,7 +379,6 @@ export const requestType = (t: any, type: boolean = false) => [
       { value: 1, label: t("request.type.8.categories.1") },
     ],
   },
-
   {
     id: 9,
     value: type ? 9 : RequestTypeEnum.bank_renovation,
@@ -437,5 +431,44 @@ export const requestType = (t: any, type: boolean = false) => [
       },
     ],
   },
-
+  {
+    id: 10,
+    value: type ? 10 : RequestTypeEnum.divers,
+    key: RequestTypeEnum.divers,
+    label: t("request.type.10.label"),
+    description: t("request.type.10.description"),
+    documentType: [],
+    categories: [
+      {
+        value: 1,
+        label: t("request.type.10.categories.1"),
+        type: billType[1]
+      },
+      {
+        value: 2,
+        label: t("request.type.10.categories.2"),
+        type: billType[2]
+      },
+        {
+        value: 3,
+        label: t("request.type.10.categories.3"),
+        type: billType[3]
+      },
+      {
+        value: 4,
+        label: t("request.type.10.categories.4"),
+        type: billType[4]
+      },
+        {
+        value: 5,
+        label: t("request.type.10.categories.5"),
+        type: billType[5]
+      },
+      {
+        value: 6,
+        label: t("request.type.10.categories.6"),
+        type: billType[6]
+      },
+    ],
+  },
 ];
