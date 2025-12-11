@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ---- Primitive / enum-like types ----
-
 export type OnBehalfApprove = "pending" | "approve" | "reject";
-
 export type PaymentMethod = "bank_transfer" | "cash" | "check";
 export type Currency = "HTG" | "USD" | "PESOS";
 export type TypePayment = "partial" | "full";

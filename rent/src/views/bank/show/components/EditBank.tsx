@@ -23,15 +23,12 @@ function EditBank( { docRef , onChangeBank , id , userId} : Props) {
     const [alert, setAlert] = useState("success") as any;
     const update = async (data: any)  => {
       return new Promise((resolve, reject) => {
-        console.log("Bank ID: ", docRef);
         const docRefs = getBankDoc(id);
-        console.log("Document Reference: ", docRefs);
         updateDoc(docRefs, data).then((d: any) => {
         setMessage("Informations saved successfully.");
         setAlert("success");
         return resolve(d);
       }).catch ((error) => {
-            console.error("Error updating document:", error);
             setMessage(error.message);
             setAlert("danger");
             return reject(error);
@@ -43,7 +40,6 @@ function EditBank( { docRef , onChangeBank , id , userId} : Props) {
   type StepData = Record<string, any>;
   
   const nextStep = async (step: number, data: StepData) => {
-    console.log(`Step Data (${step}) =>`, data);
     let payload: StepData = {  updateBy: userId, uploadedAt: Timestamp.now()};
     try {
       switch (step) {
@@ -86,10 +82,8 @@ function EditBank( { docRef , onChangeBank , id , userId} : Props) {
       if (Object.keys(payload).length > 0) {
         await update(payload);
         onChangeBank(payload as any, step);
-        console.log(`Document updated with ID: ${docRef.id}`, docRef);
       }
     } catch (error: any) {
-      console.error("Error updating document:", error);
       setMessage(error.message);
       setAlert("danger");
     }
@@ -97,7 +91,6 @@ function EditBank( { docRef , onChangeBank , id , userId} : Props) {
    
   
    const onError = (error: any) => {
-      console.error("Error:", error);
       setMessage(error.message);
       setAlert("danger");
   }
