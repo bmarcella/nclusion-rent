@@ -101,12 +101,12 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
           await fetchLandlords();
           setValue("landlord", new_data.id);
       }
+
       useEffect(() => {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const { latitude, longitude } = position.coords;
             setLocation({ lat: latitude, lng: longitude });
-            // console.log("Location:", { lat: latitude, lng: longitude });
           },
           (err) => {
             onError(`Error: ${err.message}`);
@@ -123,7 +123,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
         }
       } , []);
 
-          useEffect(() => {
+      useEffect(() => {
             if (!authority || authority.length === 0) return;
             const auth = authority[0];
             const manage = async () => {
@@ -191,6 +191,7 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
       
       const onSubmitInfo = async (data: FormValuesInfo) => {
         setSubmitting(true);
+        
         setValue("bank", data);
           if (isEdit) {
              nextStep(1, data);
@@ -259,32 +260,32 @@ function InfoBank({ nextStep, onError, defaultValues, isEdit = false, userId } :
         } />
       </FormItem>
 
-<FormItem
-  className="w-full"
-  label={t('bank.landlord')}
-  invalid={!!errors.landlord}
-  errorMessage={errors.landlord?.message as string}
->
-  <Controller
-    name="landlord"
-    control={control}
-    render={({ field }) => {
-      return (
-        <div className="flex items-center gap-2">
-          <Select
-            isLoading={ploading}
-            className='w-full'
-            placeholder="Please Select"
-            options={landlordsOptions}
-            value={refsOptions.find(option => option.value == field.value) || null}
-            onChange={(option) => field.onChange(option?.value)}
-          />
-          <AddProprioPopup done={addNewProprio} />
-        </div>
-      );
-    }}
-  />
-</FormItem>
+      <FormItem
+      className="w-full"
+      label={t('bank.landlord')}
+      invalid={!!errors.landlord}
+      errorMessage={errors.landlord?.message as string}
+      >
+      <Controller
+        name="landlord"
+        control={control}
+        render={({ field }) => {
+          return (
+            <div className="flex items-center gap-2">
+              <Select
+                isLoading={ploading}
+                className='w-full'
+                placeholder="Please Select"
+                options={landlordsOptions}
+                value={refsOptions.find(option => option.value == field.value) || null}
+                onChange={(option) => field.onChange(option?.value)}
+              />
+              <AddProprioPopup done={addNewProprio} />
+            </div>
+          );
+        }}
+      />
+      </FormItem>
 
            
  

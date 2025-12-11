@@ -39,12 +39,12 @@ function HistoticView({ data } : Props) {
                     return (
                         <Timeline.Item key={index} className="mb-4" media = {
                         <TimelineAvatar className="bg-amber-500">
-                           { step.by_who && <UserName userId={step.by_who } sub_str={0} /> }
+                           { step.by_who && <UserName userId={step.by_who } sub_str={0} /> } 
                         </TimelineAvatar>
                         }>
                             <p className="my-1 flex ">
                                     <span className="font-semibold text-gray-900 dark:text-gray-100">
-                                       { step.by_who && <UserName userId={step.by_who }  /> }
+                                       { step.by_who && <UserName userId={step.by_who }  /> } - ({ String(step.by_who).substring(0,4) })
                                     </span>
                                     <span className="mx-2"> a changé le statut  { step?.status_from && <> de <Badge className={getColor(step?.status_to)} >
                                     {t('bank.'+step.status_from)}
