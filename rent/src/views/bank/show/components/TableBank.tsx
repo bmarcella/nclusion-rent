@@ -203,14 +203,14 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                         </div>);
                     else return (
                         <div className="min-w-[200px]">
-                            {(hasAuthority(authority, 'admin') || hasAuthority(authority, 'super_manager')) &&
-                                <Button variant="solid" shape="circle" size="xs" className='mr-1 ' onClick={() => openDialog(row.original)}>
-                                    <PiEyeLight />
-                                </Button>}
+                        {(hasAuthority(authority, 'coordonator') || hasAuthority(authority, 'admin') || hasAuthority(authority, 'super_manager')) &&
+                            <Button variant="solid" shape="circle" size="xs" className='mr-1 ' onClick={() => openDialog(row.original)}>
+                                <PiEyeLight />
+                            </Button> }
                             <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs" onClick={() => navigate("/bank/" + row.original.id)}>
                                 <PiCheck />
                             </Button>
-                            {<YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
+                        {<YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
                         </div>);
                 }
             },
@@ -347,15 +347,6 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
         // (optional) update totalData properly if you fetched total separately
     };
 
-    // useEffect(() => {
-    //     if (fetchedRef.current) return;
-    //      fetchBanks(currentPage); // load first page
-    //   }, []);
-
-
-
-
-
     const table: any = useReactTable({
         data: banks,
         columns,
@@ -368,25 +359,16 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
 
 
     useEffect(() => {
-        //table.setPageSize(Number(pageSize))
         setCurrentPage(1); // reset first
         fetchBanks(1);
     }, [start, end, regions, agents, steps, name]);
 
-    // const onPaginationChange = (page: number) => {
-    //         if (page !== currentPage) {
-    //             fetchBanks(page); // ✅ Use the new value directly
-    //         }
-    //         table.setPageIndex(page - 1);
-    // }
 
     const onPaginationChange = async (page: number) => {
         if (page !== currentPage) {
             await fetchBanks(page);
         }
         //  table.setPageIndex(page - 1);
-
-
     };
 
     const onSelectChange = (value = 0) => {
@@ -450,7 +432,6 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
         setEnd(end);
     }
     const onChangeStep = async (step: BankStep) => {
-        console.log("onChangeStep: ", step);
         setSteps(step);
     }
 
