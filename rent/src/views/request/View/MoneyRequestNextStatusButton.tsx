@@ -20,9 +20,11 @@ export default function MoneyRequestNextStatusButton({
   rules,
   action
 }: Props) {
-  const currentStatus = (request as any)?.status ?? (request as any)?.state ?? "";
+  const currentStatus = String(request.status!);
   const { t } = useTranslation();
-  const nextStep = getNextNodeV2(currentStatus, t, request?.general?.approvalFlow);
+  const nextStep = getNextNodeV2(currentStatus as any, t, request?.general?.approvalFlow);
+  console.log("Next Step:", nextStep);
+  console.log("Flow:",  request?.general?.approvalFlow);
   const [comment, setComment] = useState<string>();
   const handleClick = async () => {
     if (!nextStep) return;
@@ -44,7 +46,7 @@ export default function MoneyRequestNextStatusButton({
           </div>
           { nextStep ? (<>
             {  (request.status != "approved") &&  <StatusPopup Ok={yes} id={"rejected"} title={"Voulez-vous vraiment rejetter ceci ?"} btnText = {"Rejetté"} ></StatusPopup> }
-            {  (request.status == "approved") && <StatusPopup Ok={yes} id={"canceled"} title={"Voulez-vous vraiment annuller ceci ?"} btnText = {"Annullé"} ></StatusPopup> }
+            {  (request.status == "approved") &&  <StatusPopup Ok={yes} id={"cancelled"} title={"Voulez-vous vraiment annuller ceci ?"} btnText = {"Annullé"} ></StatusPopup> }
             {  <Button variant="solid" className="ml-2 mr-2 col-end-1 col-span-2"  onClick={handleClick}>
                   { (request.status != "approved") ?  "Approuvé" : "Livré" }
               </Button> }

@@ -240,7 +240,9 @@ export interface IRequest {
   preApproval_by: string,
   accountantApproval: string,
   managerGlobalApproval: string,
- comments?: {
+  rejectedBy?: string,
+  cancelledBy?: string,
+  comments?: {
     by_who: string,
     status: string,
     text : string , 

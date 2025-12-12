@@ -25,7 +25,7 @@
     "divers": "Divers",
     "general":{
       "bank_transfer":"Transfert bancaire",
-      "cash": "Agent Comptant",
+      "cash": "Argent Cash",
       "check":"Chèque"
     },
     "status": {
