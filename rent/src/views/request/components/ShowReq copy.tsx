@@ -82,132 +82,114 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
     );
   };
 
-const constraints = useMemo<AnyConstraint[]>(() => {
-  const role = authority![0];
-  const reg = regions.map((r: any) => r.id);
+  const constraints = useMemo<any[]>(() => {
 
-  const filters: any[] = []; // only where/or/and stuff
-  const orderings: any[] = []; // orderBy stuff
- 
-  const rg = ( !filter?.regions || filter?.regions == null || filter?.regions == 0 ) ? reg : [filter.regions];
-  // REGION
-  if (role !== "admin" && rg.length > 0) {
+    const role = authority![0];
+    const reg = regions.map((r: any) => r.id);
+    const cs: any[] = [];
 
-    if(rg.length == 1) {
-        filters.push(
-        where(
-          "general.id_region_user",
-          "==",
-          rg[0]
-         )
-        );
+    if (role != "admin" && reg.length > 0) {
+      if (!filter?.regions) {
+        cs.push(where("general.id_region_user", "in", reg));
+      } else {
+        cs.push(where("general.id_region_user", "in", [filter?.regions]));
+      }
     }
 
-    if(rg.length > 1) {
-        filters.push(
-        where(
-          "general.id_region_user",
-          "in",
-          rg
-         )
-        );
+    if (role == "admin" && filter?.regions) {
+      cs.push(where("general.id_region_user", "in", [filter?.regions]));
     }
-  }
 
-  if (role === "admin" && filter?.regions) {
-      filters.push(where("general.id_region_user", "in", [filter.regions]));
-  }
+    if (status && status.length > 0) {
+      cs.push(where("status", "==", status));
+    }
 
-  // STATUS exact
-  if (status && status.length > 0) {
-      filters.push(where("status", "==", status));
-  }
-
-  // FOR ME
-  if (forMe) {
-    filters.push(
-      or(
-        where("preApproval_by", "==", userId!),
-        where("regionalApproved_by", "==", userId),
-        where("managerGlobalApproval", "==", userId),
-        where("approvedBy", "==", userId),
-        where("completedBy", "==", userId)
-      )
-    );
-  }
-
-  // REJECTED
-  if (rejected) {
-      filters.push(
+    // If I APPROVE A REQUEST  
+    if (forMe) {
+      cs.push(
         or(
-          where("rejectedBy","==", userId),
-          where("cancelledBy","==", userId)
+          where("preApproval_by", "==", userId!),
+          where("regionalApproved_by", "==", userId),
+          where("accountantApproval", "==", userId),
+          where("managerGlobalApproval", "==", userId),
+          where("approvedBy", "==", userId),
+          where("completedBy", "==", userId)
         )
       );
-  }
+    };
+    // If I REJECT OR CANCELD A REQUEST  
+    if (rejected) {
+        cs.push(
+          or(
+            where("rejectedBy", "==", userId),
+            where("cancelledBy", "==", userId),
+          )
+        );
+    }
+    // If I SENT A REQUEST  
+    if (sentByMe) {
+      cs.push(
+        where("createdBy", "==", userId),
+      );
+    } else {
+      if (filter?.user) {
+        cs.push(
+          where("createdBy", "==", filter?.user),
+        );
+      }
+    }
 
-  // CREATED BY
-  if (sentByMe) {
-    filters.push(where("createdBy", "==", userId));
-  } else if (filter?.user) {
-    filters.push(where("createdBy", "==", filter.user));
-  }
+    if (recieve) {
+      if (!filter?.status) {
+        cs.push(where("status", "in", recieve.status));
+      } else {
+        cs.push(where("status", "in", [filter?.status]));
+      }
+      if (!filter?.reqType) {
+        cs.push(where("requestType", "in", recieve.reqType))
+      } else {
+        cs.push(where("requestType", "in", [filter?.reqType]))
+      }
+    } else {
+      if (filter?.status) {
+        cs.push(where("status", "in", [filter?.status]));
+      }
+      if (filter?.reqType) {
+        cs.push(where("requestType", "in", [filter?.reqType]))
+      }
+    }
 
-  // RECIEVE (status/type IN)
-// RECIEVE (status/type IN)
-if (recieve) {
-  const statusValues = !filter?.status
-    ? recieve.status
-    : [filter.status];
+    // AMOUNT
+    if (filter?.amount.min) {
+      cs.push(where("amount", ">=", filter?.amount.min))
+    }
 
-  // status: if only one, use '==' (no change in behavior, fewer disjunctions)
-  if (statusValues.length === 1) {
-    filters.push(where("status", "==", statusValues[0]));
-   } else if (statusValues.length > 1) {
-    filters.push(where("status", "in", statusValues));
-  }
+    if (filter?.amount.max) {
+      cs.push(where("amount", "<=", filter?.amount.max))
+    }
 
-  // requestType:
-  // - if user explicitly selected one type -> filter by that
-  // - if not (meaning "All") -> DO NOT add a requestType filter
-  if (filter?.reqType) {
-    filters.push(where("requestType", "==", filter.reqType));
-  }
-} else {
-  if (filter?.status) {
-    filters.push(where("status", "==", filter.status));
-  }
-  if (filter?.reqType) {
-    filters.push(where("requestType", "==", filter.reqType));
-  }
-}
+    // Date
+    if (filter?.date?.start) {
+      cs.push(where("createdAt", ">=", filter?.date?.start))
+    }
 
-  // AMOUNT
-  if (filter?.amount?.min != null) filters.push(where("amount", ">=", filter.amount.min));
-  if (filter?.amount?.max != null) filters.push(where("amount", "<=", filter.amount.max));
-
-  // DATE
-  if (filter?.date?.start) filters.push(where("createdAt", ">=", filter.date.start));
-  if (filter?.date?.end) filters.push(where("createdAt", "<=", filter.date.end));
-
-  // ORDER BY (not inside and/or)
-  switch (sortKey) {
-    case "created-desc":
-      orderings.push(orderBy("createdAt", "desc"));
-      break;
-    case "created-asc":
-      orderings.push(orderBy("createdAt", "asc"));
-      break;
-    case "status-asc":
-      orderings.push(orderBy("status", "asc"), orderBy("createdAt", "desc"));
-      break;
-  }
-
-  const topLevelFilter =
-    filters.length === 0 ? [] : [and(...filters)];
-
-  return [...topLevelFilter, ...orderings];
-}, [status, forMe, sentByMe, recieve, filter, sortKey, userId, regions, authority, rejected]);
+    if (filter?.date?.end) {
+      cs.push(where("createdAt", "<=", filter?.date?.end))
+    }
+    // Sorting (ensure Firestore indexes exist)
+    switch (sortKey) {
+      case "created-desc":
+        cs.push(orderBy("createdAt", "desc"));
+        break;
+      case "created-asc":
+        cs.push(orderBy("createdAt", "asc"));
+        break;
+      case "status-asc":
+        cs.push(orderBy("status", "asc"), orderBy("createdAt", "desc")); // optional second order
+        break;
+    }
+    return cs;
+  }, [status, forMe, sentByMe, recieve?.status, recieve?.reqType, filter, sortKey, userId, regions, authority]);
 
   // total count for pagination UI
   useEffect(() => {
@@ -215,7 +197,7 @@ if (recieve) {
     (async () => {
       try {
         const base = ExpenseRequestDoc as CollectionReference<DocumentData>;
-        const cnt = await getCountFromServer(query(base, ...constraints as any));
+        const cnt = await getCountFromServer(query(base, ...constraints));
         const total = Number(cnt.data().count || 0);
         if (!cancelled) setTotalCount(total);
       } catch {
@@ -234,14 +216,14 @@ if (recieve) {
       const base = ExpenseRequestDoc as CollectionReference<DocumentData>;
       let q: Query<DocumentData>;
       if (pageNumber === 1) {
-        q = query(base, ...constraints as any, limit(pageSize));
+        q = query(base, ...constraints, limit(pageSize));
       } else {
         const prevCursor = pageCursors[pageNumber - 2];
         if (!prevCursor) {
           setLoading(false);
           return;
         }
-        q = query(base, ...constraints as any, startAfter(prevCursor), limit(pageSize));
+        q = query(base, ...constraints, startAfter(prevCursor), limit(pageSize));
       }
       const snap = await getDocs(q);
       const items: IRequest[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
