@@ -90,33 +90,23 @@ const constraints = useMemo<AnyConstraint[]>(() => {
   const orderings: any[] = []; // orderBy stuff
  
   const rg = ( !filter?.regions || filter?.regions == null || filter?.regions == 0 ) ? reg : [filter.regions];
+  console.log("Regions for filter:", rg);
+
   // REGION
   if (role !== "admin" && rg.length > 0) {
-
-    if(rg.length == 1) {
-        filters.push(
-        where(
-          "general.id_region_user",
-          "==",
-          rg[0]
-         )
-        );
-    }
-
-    if(rg.length > 1) {
-        filters.push(
-        where(
-          "general.id_region_user",
-          "in",
-          rg
-         )
-        );
-    }
+     filters.push(
+      where(
+        "general.id_region_user",
+        "in",
+        rg
+      )
+    );
   }
 
   if (role === "admin" && filter?.regions) {
       filters.push(where("general.id_region_user", "in", [filter.regions]));
   }
+
 
   // STATUS exact
   if (status && status.length > 0) {
@@ -154,33 +144,25 @@ const constraints = useMemo<AnyConstraint[]>(() => {
   }
 
   // RECIEVE (status/type IN)
-// RECIEVE (status/type IN)
-if (recieve) {
-  const statusValues = !filter?.status
-    ? recieve.status
-    : [filter.status];
-
-  // status: if only one, use '==' (no change in behavior, fewer disjunctions)
-  if (statusValues.length === 1) {
-    filters.push(where("status", "==", statusValues[0]));
-   } else if (statusValues.length > 1) {
-    filters.push(where("status", "in", statusValues));
+  if (recieve) {
+    filters.push(
+      where(
+        "status",
+        "in",
+        !filter?.status ? recieve.status : [filter.status]
+      )
+    );
+    filters.push(
+      where(
+        "requestType",
+        "in",
+        !filter?.reqType ? recieve.reqType : [filter.reqType]
+      )
+    );
+  } else {
+    if (filter?.status) filters.push(where("status", "in", [filter.status]));
+    if (filter?.reqType) filters.push(where("requestType", "in", [filter.reqType]));
   }
-
-  // requestType:
-  // - if user explicitly selected one type -> filter by that
-  // - if not (meaning "All") -> DO NOT add a requestType filter
-  if (filter?.reqType) {
-    filters.push(where("requestType", "==", filter.reqType));
-  }
-} else {
-  if (filter?.status) {
-    filters.push(where("status", "==", filter.status));
-  }
-  if (filter?.reqType) {
-    filters.push(where("requestType", "==", filter.reqType));
-  }
-}
 
   // AMOUNT
   if (filter?.amount?.min != null) filters.push(where("amount", ">=", filter.amount.min));

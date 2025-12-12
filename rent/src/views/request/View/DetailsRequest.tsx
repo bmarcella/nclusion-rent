@@ -97,19 +97,33 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
         createdAt: new Date(),
       });
     }
+    
     hist.unshift({
       status_to: nextStatus,
       status_from: data.status,
       by_who: userId!,
       createdAt: new Date(),
     });
-    const prev = getPrev(prevStatus);
-    const payload: Record<string, any> = {
-      status: nextStatus,
-      historicApproval: hist,
-      comments,
-      [prev]: userId
-    };
+
+    let payload: Record<string, any> = {}
+
+     if (validated) {
+        const prev = getPrev(prevStatus);
+        payload = {
+          status: nextStatus,
+          historicApproval: hist,
+          comments,
+          [prev]: userId
+        } 
+      } else {
+        const prev = getPrev(nextStatus);
+        payload = {
+          status: nextStatus,
+          historicApproval: hist,
+          comments,
+          [prev]: userId
+      }
+    }
     await updateDoc(ref, payload);
     //Fetch the updated document
     const snapshot = await getDoc(ref);
@@ -645,9 +659,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
       </Card>
     );
   };
-
-  // ---- Choose which main section to show -----------------------------------
-
+  
   const renderMainSection = (t: any) => {
     switch (typeRequest) {
       case 'bill':

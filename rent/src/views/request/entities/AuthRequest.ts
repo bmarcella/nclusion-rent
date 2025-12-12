@@ -89,6 +89,7 @@ const STATUS_TRAIN_ORDER_2: RequestStatusValue[] = [
 
 const STATUS_TRAIN_ORDER_3: RequestStatusValue[] = [
   'preApproval',
+  'accountantRegionalApproval',
   'managerGlobalApproval',
   'approved',
   'completed',

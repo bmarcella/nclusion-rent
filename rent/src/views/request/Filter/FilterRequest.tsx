@@ -59,7 +59,7 @@ function FilterRequest({ onChange, data }: Props) {
     const fetchData = async () => {
       const { regions } = await manageAuth(authority[0], proprio, t);
       const regs = convertToSelectOptionsRegion(regions) as any;
-      regs.unshift({ label: 'All', value: null });
+      regs.unshift({ label: 'All', value: undefined });
       setRegions(regs);
       await fetchProprio();
     };
@@ -97,7 +97,7 @@ function FilterRequest({ onChange, data }: Props) {
         end
       },
       user: selectedAgent,
-      regions: selectedRegions ?? null,
+      regions: selectedRegions!,
       amount: {
         min,
         max
@@ -140,11 +140,11 @@ function FilterRequest({ onChange, data }: Props) {
             placeholder="Region"
             options={regions}
             onChange={(options: OptionType) => {
+              setSelectedAgent(undefined)
               if (!options) {
                 setSelectedRegions(null);
                 return;
               }
-              setSelectedAgent(undefined)
               setSelectedRegions(options.value as number);
             }}
           />
