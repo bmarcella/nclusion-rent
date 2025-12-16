@@ -112,7 +112,7 @@ export const protectedRoutes: Routes = [
         key: 'reqMenu.action',
         path: '/request/action',
         component: lazy(() => import('@/views/request/AccountantAction')),
-        authority: ['assist_accoutant', 'accoutant', 'admin', "super_accountant"],
+        authority: ['assist_accountant', 'accountant', 'admin', "super_accountant", "manager"],
     },
     {
         key: 'reqMenu.print',
