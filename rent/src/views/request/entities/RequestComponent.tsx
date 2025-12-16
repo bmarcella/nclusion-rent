@@ -775,33 +775,43 @@ export function OpexFields({ t, categories }: any) {
   const { control, register, watch, setValue } = useFormContextTyped();
   const { fields, append, remove } = useFieldArray({ name: "opex.items", control });
 
-  const items = useWatch({ control, name: "opex.items" }) || [];
-  const cat = watch("opex.categorie");
-  useEffect(() => {
-    if (!items) return;
+// Only watch what affects totals (NOT total_price)
+  const rows = useWatch({ control, name: "opex.items" }) ?? [];
 
+  // Build a lightweight dependency: just qty + unit_price
+  const calcDeps = rows.map(r => [r?.quantity, r?.unit_price]);
+
+  const cat = watch("opex.categorie");
+    useEffect(() => {
     let totalAmount = 0;
 
-    items.forEach((item: any, index: number) => {
-      const qty = Number(item?.quantity) || 0;
-      const price = Number(item?.unit_price) || 0;
-
-      const total = qty * price;
-
-      // update each row total_price
-      setValue(`opex.items.${index}.total_price`, total, {
-        shouldDirty: true,
-        shouldValidate: false,
-        shouldTouch: false,
-      });
+    rows.forEach((row: any, index: number) => {
+      const qty = Number(row?.quantity) || 0;
+      const price = Number(row?.unit_price) || 0;
+      const total = Math.round(qty * price * 100) / 100;
 
       totalAmount += total;
+
+      // Only set if changed to avoid churn
+      if (Number(row?.total_price) !== total) {
+        setValue(`opex.items.${index}.total_price`, total, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        });
+      }
     });
 
-    // update global amount
-    setValue("opex.amount", totalAmount, { shouldValidate: true });
-  }, [items]);
-  // Every time the items array changes -> recalculation runs
+    const currentAmount = Number(watch("opex.amount")) || 0;
+    if (currentAmount !== totalAmount) {
+      setValue("opex.amount", totalAmount, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setValue, watch, JSON.stringify(calcDeps)]);
 
   return (
     <Section title="Opex (Achat de Matériel / Fournitures)">

@@ -23,16 +23,19 @@ export default function MoneyRequestNextStatusButton({
   const currentStatus = String(request.status!);
   const { t } = useTranslation();
   const nextStep = getNextNodeV2(currentStatus as any, t, request?.general?.approvalFlow);
-  console.log("Next Step:", nextStep);
-  console.log("Flow:",  request?.general?.approvalFlow);
   const [comment, setComment] = useState<string>();
+  const [canClick, setCanClick] = useState<boolean>(true);
   const handleClick = async () => {
     if (!nextStep) return;
+    setCanClick(false);
     await onNextStatus(nextStep.value, true, currentStatus, comment);
   };
+  
   const yes  = async  (data: string) => {
+     setCanClick(false);
      await onNextStatus(data, false, currentStatus, comment);       
   }
+
   return ( <>
       {(rules.length > 0 && rules[0]?.max_amount >= request.amount || action ) && 
         <Card className="grid grid-cols-1 gap-4"> 
@@ -44,7 +47,7 @@ export default function MoneyRequestNextStatusButton({
                 }}></Input>
               </div>
           </div>
-          { nextStep ? (<>
+          { nextStep && canClick ? (<>
             {  (request.status != "approved") &&  <StatusPopup Ok={yes} id={"rejected"} title={"Voulez-vous vraiment rejetter ceci ?"} btnText = {"Rejetté"} ></StatusPopup> }
             {  (request.status == "approved") &&  <StatusPopup Ok={yes} id={"cancelled"} title={"Voulez-vous vraiment annuller ceci ?"} btnText = {"Annullé"} ></StatusPopup> }
             {  <Button variant="solid" className="ml-2 mr-2 col-end-1 col-span-2"  onClick={handleClick}>
@@ -52,9 +55,9 @@ export default function MoneyRequestNextStatusButton({
               </Button> }
         </>
         ) : (
-              <div className="text-xs text-muted-foreground">
-                This request is already at the final step.
-              </div>
+             (<div className="text-xs text-muted-foreground">
+               { (canClick )? "This request is already at the final step." : "Processing, please wait..." }
+             </div>)
         )}
         </Card> 
       }

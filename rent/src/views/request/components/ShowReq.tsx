@@ -245,6 +245,7 @@ if (recieve) {
       }
       const snap = await getDocs(q);
       const items: IRequest[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+      
       if (snap.docs.length > 0) {
         setPageCursors((prev) => {
           const next = [...prev];
@@ -308,7 +309,6 @@ if (recieve) {
           </div>
         ),
       },
-
       {
         header: 'Status',
         cell: ({ row }) => (
@@ -334,7 +334,7 @@ if (recieve) {
         ),
       },
       {
-        header: 'Creation',
+        header: 'Création',
         cell: ({ row }) => (
           <div className="min-w-[160px]">
             <div className="font-medium"> {formatRelative(row.original?.createdAt.toDate?.() || row.original.createdAt, new Date(), { locale: fr })}</div>
@@ -384,7 +384,7 @@ if (recieve) {
     table.setPageSize(num);
     setPageSize(num);
   }
-
+  
   useEffect(() => {
     setPage(1);
     setPageCursors([]);
@@ -400,6 +400,10 @@ if (recieve) {
     }
     run();
   }, []);
+
+  const approved = ()=>{
+    fetchPage(currentPage);
+  }
 
   return (
     <>
@@ -500,7 +504,7 @@ if (recieve) {
             </h5>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <TabView data={cObj!} onDialogClose={onDialogClose} action={action} />
+            <TabView data={cObj!} onDialogClose={onDialogClose} action={action} approved={approved}/>
           </div>
           <div className="text-right mt-6">
             <Button
