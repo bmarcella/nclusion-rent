@@ -22,10 +22,11 @@ interface Props {
   rules: AuthRequest[]
   getNewreq: (data: IRequest) => void,
   action: boolean,
-  auth?: boolean
+  auth?: boolean,
+  approved?: () => void,
 }
 
-function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) {
+function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved }: Props) {
   
   const [request, setRequest] = useState<IRequest>(data) as any;
   const type = useMemo(() => request?.requestType, [request?.requestType]);
@@ -51,7 +52,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
   const onNextStatus = (data: string, validated: boolean, prevStatus: string, comment?: string ) => {
       updateMoneyRequestStatus(data, validated, prevStatus, comment);
   }
-
+  
   const getPrev = (prevStatus: string) => {
     switch (prevStatus) {
       case 'preApproval':
@@ -81,9 +82,11 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
     prevStatus: string,
     comment?: string
   ) => {
+    
     if (!data.id) {
       throw new Error("updateMoneyRequestStatus: requestId is required");
     }
+
     const ref = getExpenseRequestDoc(data.id)
     // Clone the array to avoid mutating original state directly (React rule)
     const hist = [...data.historicApproval];
@@ -97,7 +100,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
         createdAt: new Date(),
       });
     }
-    
+  
     hist.unshift({
       status_to: nextStatus,
       status_from: data.status,
@@ -124,12 +127,15 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true }: Props) 
           [prev]: userId
       }
     }
+
     await updateDoc(ref, payload);
-    //Fetch the updated document
+    // Fetch the updated document
     const snapshot = await getDoc(ref);
     const new_req = { id: snapshot.id, ...snapshot.data() } as IRequest;
     setRequest(new_req);
     getNewreq(new_req);
+    if(approved) approved?.();
+
   };
 
   const renderBill = () => {
