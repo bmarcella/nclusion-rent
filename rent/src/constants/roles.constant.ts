@@ -43,10 +43,11 @@ export const getRolesByAhth = (auth: string ) => {
                roles  = [...USER_ROLES];
               break;
           case "coordonator":
-            roles = roles.concat(["agent_immobilier","assist_coordonator"])
+            roles = roles.concat(["agent_immobilier","assist_coordonator", "vendeur"])
             break;
           case "assist_coordonator":
             roles.push("agent_immobilier");
+            roles.push("vendeur");
             break;
       
           case "manager":
