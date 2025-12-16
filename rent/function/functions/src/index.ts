@@ -1,63 +1,69 @@
+/**
+ * Import function triggers from their respective submodules:
+ *
+ * import {onCall} from "firebase-functions/v2/https";
+ * import {onDocumentWritten} from "firebase-functions/v2/firestore";
+ *
+ * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ */
+import {setGlobalOptions} from "firebase-functions";
+import {onRequest} from "firebase-functions/https";
+import * as logger from "firebase-functions/logger";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
+// Start writing functions
+// https://firebase.google.com/docs/functions/typescript
+
+// For cost control, you can set the maximum number of containers that can be
+// running at the same time. This helps mitigate the impact of unexpected
+// traffic spikes by instead downgrading performance. This limit is a
+// per-function limit. You can override the limit for each function using the
+// `maxInstances` option in the function's options, e.g.
+// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
+// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
+// functions should each use functions.runWith({ maxInstances: 10 }) instead.
+// In the v1 API, each function can only serve one request per container, so
+// this will be the maximum concurrent request count.
+setGlobalOptions({ maxInstances: 10 });
+
+// export const helloWorld = onRequest((request, response) => {
+//   logger.info("Hello logs!", {structuredData: true});
+//   response.send("Hello from Firebase!");
+// });
+
 admin.initializeApp();
 
-type UpdateUserPasswordData = {
-  // If omitted, defaults to the caller's UID
-  uid?: string;
-  newPassword: string;
-};
+export const updateUserPassword = functions.https.onCall(async (data, context) => {
+    
+  if (!context.auth?.uid) {
+    throw new functions.https.HttpsError("unauthenticated", "Sign in required.");
+  }
 
-export const updateUserPassword = functions.https.onCall(
-  async (data: UpdateUserPasswordData, context) => {
-    // 1) Must be signed in
-    if (!context.auth?.uid) {
+  const newPassword = String(data?.newPassword ?? "").trim();
+  if (newPassword.length < 12) {
+    throw new functions.https.HttpsError("invalid-argument", "Password too short.");
+  }
+
+  const callerUid = context.auth.uid;
+  const targetUid = String(data?.uid ?? callerUid).trim();
+
+  // Only allow changing someone else's password if admin
+  if (targetUid !== callerUid) {
+    const isAdmin = (context.auth.token as any)?.admin === true;
+    if (!isAdmin) {
       throw new functions.https.HttpsError(
-        "unauthenticated",
-        "You must be signed in to update a password."
-      );
-    }
-
-    // 2) Validate inputs
-    const newPassword = (data?.newPassword ?? "").trim();
-    if (!newPassword || newPassword.length < 12) {
-      // For banking apps you usually enforce stronger rules
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "Password must be at least 12 characters."
-      );
-    }
-
-    // 3) Decide whose password is being updated
-    const callerUid = context.auth.uid;
-    const targetUid = (data?.uid ?? callerUid).trim();
-
-    // 4) Security: only allow self-update unless caller is admin
-    if (targetUid !== callerUid) {
-      // Example: require custom claim { admin: true }
-      const token = context.auth.token as any;
-      if (!token?.admin) {
-        throw new functions.https.HttpsError(
-          "permission-denied",
-          "Not allowed to update another user's password."
-        );
-      }
-    }
-
-    // 5) Update password using Admin SDK
-    try {
-      await admin.auth().updateUser(targetUid, { password: newPassword });
-
-      // Optional: revoke refresh tokens so user must re-login
-      await admin.auth().revokeRefreshTokens(targetUid);
-
-      return { ok: true };
-    } catch (err: any) {
-      throw new functions.https.HttpsError(
-        "internal",
-        err?.message ?? "Failed to update password."
+        "permission-denied",
+        "Not allowed to update another user's password."
       );
     }
   }
-);
+
+  try {
+    await admin.auth().updateUser(targetUid, { password: newPassword });
+    await admin.auth().revokeRefreshTokens(targetUid);
+    return { ok: true };
+  } catch (err: any) {
+    throw new functions.https.HttpsError("internal", err?.message ?? "Update failed.");
+  }
+});
