@@ -143,7 +143,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.reqMenu.action',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['assist_accountant', 'accountant', 'admin'],
+                authority: ['assist_accountant', 'accountant', 'admin', "super_accountant"],
                 subMenu: [],
             },
            
