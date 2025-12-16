@@ -10,7 +10,7 @@ import HistoticView from './Histotic'
 import ImageReq from '../components/ImageReq'
 import { useSessionUser } from '@/store/authStore'
 import { useEffect, useState } from 'react'
-import { getDocs, orderBy, query, where } from 'firebase/firestore'
+import { getDocs, query, where } from 'firebase/firestore'
 import { AuthRequestDoc } from '@/services/Landlord'
 import { AuthRequest, RequestTypeEnum } from '../entities/AuthRequest'
 import { manageAuth } from '@/constants/roles.constant'
@@ -21,9 +21,10 @@ interface Props {
   data: IRequest
   onDialogClose: (close: boolean, data: IRequest) => void,
   action: boolean
+  approved?: () => void,
 }
 
-function TabView({ data, onDialogClose, action }: Props) {
+function TabView({ data, onDialogClose, action, approved }: Props) {
   const { userId, proprio, authority } = useSessionUser((state) => state.user);
   const [request, setRequest] = useState<IRequest>(data);
   const [rules, setRules] = useState<AuthRequest[] | undefined>([]) as any;
@@ -77,9 +78,9 @@ function TabView({ data, onDialogClose, action }: Props) {
           ? rule.reqType.includes(request.requestType as RequestTypeEnum)
           : false
       );
-
     setRules(objs);
   };
+
   const see = (rules.length > 0 || (request.status != 'regionalApproval' && request.status != 'accountantRegionalApproval' && request.status != 'accountantRegionalApproval'))
   const end = request.status == 'completed' || request.status == 'rejected' || request.status == 'cancelled'
   // cd ui
@@ -89,18 +90,19 @@ function TabView({ data, onDialogClose, action }: Props) {
         <TabList>
           <TabNav value="tab1"> {request.requestType.toUpperCase()}</TabNav>
           { <><TabNav value="tab2"> Documents</TabNav>
-             <TabNav value="tab3"> Historique</TabNav> 
+              <TabNav value="tab3"> Historique</TabNav> 
             </>
             }
         </TabList>
         <div className="p-4">
           <TabContent value="tab1">
-            <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} />
+            <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} approved={approved} />
           </TabContent>
            <>
             <TabContent value="tab3"> 
               <HistoticView data={request}></HistoticView>
             </TabContent>
+
             <TabContent value="tab2">
               <ImageReq reqId={request.id} userId={userId || ''} isEdit={true} owner={data.createdBy == userId} end={end} ></ImageReq>
             </TabContent>
@@ -115,8 +117,8 @@ function TabView({ data, onDialogClose, action }: Props) {
         </>}
 
         {!loadingRules && <>
-          <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} auth={false} />
-        </>}
+          <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} auth={false} approved={approved}/>
+        </> }
       </>}
     </>
   )
