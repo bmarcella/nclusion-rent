@@ -47,6 +47,7 @@ export const billType = {
   "Bureaux : nouveaux baux",
   "Bureaux : renouvellement des baux ",
   "Bureaux : paiement mensuel",
+  "Bureaux : paiement d'installation ou de réparation de systemes électriques",
 ],
 6: [
   "Frais de transport des opérateurs de terrain",
