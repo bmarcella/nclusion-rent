@@ -40,6 +40,8 @@ export const billType = {
   ],
   5:[
   "Banques : renouvellement des baux",
+  "Banques : construction — comptoire ",
+  "Banques : construction — peinture ",
   "Banques : construction — kiosques côté rue ",
   "Banques : construction — baraques métalliques (Gerit) ",
   "Terrain : nouveaux baux (pour installer des baraques)",
