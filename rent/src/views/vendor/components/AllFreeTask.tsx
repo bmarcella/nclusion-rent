@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     getDocs,
     query,
@@ -161,7 +162,7 @@ const pageSizeOption = [
                     ),
             },
             {
-                header: 'Action',
+                header: 'Actions',
                 cell: ({ row }) => {
 
                  if (!step && !all) return (
@@ -169,10 +170,15 @@ const pageSizeOption = [
                         <Button variant="solid"  shape="circle" size="xs" onClick={() => openDialog(row.original)}>
                             <PiEyeLight />
                          </Button>
+                          <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" 
+                                 variant="solid" shape="circle" size="xs"  
+                                 onClick={() => navigate("/bank/"+row.original.id) }>
+                            <PiCheck />
+                         </Button>
                     </div>);
                  else return (
                     <div className="min-w-[200px]">
-                        { (hasAuthority(authority, 'admin'))&&
+                        { (hasAuthority(authority, 'admin')) &&
                          <Button variant="solid"  shape="circle" size="xs" className='mr-1 '  onClick={() => openDialog(row.original)}>
                             <PiEyeLight />
                          </Button> }
@@ -463,7 +469,6 @@ const pageSizeOption = [
 
             </div>
         </div>
-
       </div>
     );
   }
