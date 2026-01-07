@@ -199,30 +199,30 @@ export function GeneralFields({ t, newRegionSet }: any) {
     manage();
   }, [authority, proprio, t]);
 
-  const flows = useMemo(()=> {
-    return [ 
+  const flows = useMemo(() => {
+    return [
       {
-       value: 1,
-       label: 'Tout le monde'
-     },
-     {
-       value: 2,
-       label: 'Coordonateur'
-     },
-     {
-       value: 3,
-       label: 'Comptable'
-     },
-     {
-       value: 4,
-       label: 'Manager'
-     } 
-  ]
+        value: 1,
+        label: 'Tout le monde'
+      },
+      {
+        value: 2,
+        label: 'Coordonateur'
+      },
+      {
+        value: 3,
+        label: 'Comptable'
+      },
+      {
+        value: 4,
+        label: 'Manager'
+      }
+    ]
   }, []);
 
-   useEffect(() => {
-     if (!flows || flows.length==0) return;
-     setValue("general.approvalFlow", flows[0]?.value || null)
+  useEffect(() => {
+    if (!flows || flows.length == 0) return;
+    setValue("general.approvalFlow", flows[0]?.value || null)
   }, [flows]);
 
   const paymentMethod = watch("general.paymentMethod");
@@ -241,7 +241,7 @@ export function GeneralFields({ t, newRegionSet }: any) {
         id: doc.id,
         ...doc.data(),
       })) as Proprio[];
-      
+
       const a = convertToSelectOptionsProprio(landlords);
       setManagers(a);
       setLoading(false);
@@ -402,7 +402,7 @@ export function GeneralFields({ t, newRegionSet }: any) {
             </Field>
           )}
 
-          { flows && flows.length> 0 && <Field
+          {flows && flows.length > 0 && <Field
             label="Envoyer a/au"
             errors={{
               key: "approvalFlow",
@@ -414,10 +414,10 @@ export function GeneralFields({ t, newRegionSet }: any) {
               name="general.approvalFlow"
               render={({ field }) => (
                 <Select
-                  value={flows.find((f)=>f.value == field.value)}
+                  value={flows.find((f) => f.value == field.value)}
                   options={flows}
                   onChange={(option) => {
-                     field.onChange(Number(option?.value))
+                    field.onChange(Number(option?.value))
                   }
                   }
                 />
@@ -775,14 +775,14 @@ export function OpexFields({ t, categories }: any) {
   const { control, register, watch, setValue } = useFormContextTyped();
   const { fields, append, remove } = useFieldArray({ name: "opex.items", control });
 
-// Only watch what affects totals (NOT total_price)
+  // Only watch what affects totals (NOT total_price)
   const rows = useWatch({ control, name: "opex.items" }) ?? [];
 
   // Build a lightweight dependency: just qty + unit_price
   const calcDeps = rows.map(r => [r?.quantity, r?.unit_price]);
 
   const cat = watch("opex.categorie");
-    useEffect(() => {
+  useEffect(() => {
     let totalAmount = 0;
 
     rows.forEach((row: any, index: number) => {
@@ -1515,7 +1515,8 @@ export function BankRenovationFields({ t, categories }: any) {
   useEffect(() => {
     const run = async () => {
       if (contrat && can) {
-        const total = contrat.montant_total + contrat.transport;
+        console.log(contrat);
+        const total = Number(contrat.montant_total) + Number(contrat.transport);
         const start = formatForInput(contrat.startDate);
         const end = formatForInput(contrat.endDate);
         setValue("bank_renovation.total_amount", total);
@@ -1652,9 +1653,8 @@ export function BankRenovationFields({ t, categories }: any) {
                 }
                 }
                 options={contrats.map((c: any) => {
-                  console.log(c);
                   const tb = c?.banksId?.length;
-                  const l = `Contrat- ${c?.firstBank?.bankName} ${(tb - 1 > 0) ? '(+' + (tb-1) + ')' : ''} - ${c.landlord.fullName} - (${c.montant_total} HTG)`
+                  const l = `Contrat- ${c?.firstBank?.bankName} ${(tb - 1 > 0) ? '(+' + (tb - 1) + ')' : ''} - ${c.landlord.fullName} - (${c.montant_total} HTG) + (${c.transport} HTG) `
                   return {
                     value: c?.id,
                     label: l
