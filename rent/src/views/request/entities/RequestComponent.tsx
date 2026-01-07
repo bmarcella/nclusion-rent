@@ -1515,6 +1515,7 @@ export function BankRenovationFields({ t, categories }: any) {
   useEffect(() => {
     const run = async () => {
       if (contrat && can) {
+        console.log(contrat);
         const total = Number(contrat.montant_total) + Number(contrat.transport);
         const start = formatForInput(contrat.startDate);
         const end = formatForInput(contrat.endDate);
@@ -1652,9 +1653,8 @@ export function BankRenovationFields({ t, categories }: any) {
                 }
                 }
                 options={contrats.map((c: any) => {
-                  console.log(c);
                   const tb = c?.banksId?.length;
-                  const l = `Contrat- ${c?.firstBank?.bankName} ${(tb - 1 > 0) ? '(+' + (tb - 1) + ')' : ''} - ${c.landlord.fullName} - (${c.montant_total} HTG)`
+                  const l = `Contrat- ${c?.firstBank?.bankName} ${(tb - 1 > 0) ? '(+' + (tb - 1) + ')' : ''} - ${c.landlord.fullName} - (${c.montant_total} HTG) + (${c.transport} HTG) `
                   return {
                     value: c?.id,
                     label: l
