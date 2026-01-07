@@ -4,6 +4,7 @@ import Layout from '@/components/layouts'
 import { AuthProvider } from '@/auth'
 import Views from '@/views'
 import appConfig from './configs/app.config'
+import { MailProvider } from './provider/MailProvider'
 
 if (appConfig.enableMock) {
     import('./mock')
@@ -14,9 +15,11 @@ function App() {
         <Theme>
             <BrowserRouter>
                 <AuthProvider>
-                    <Layout>
-                        <Views />
-                    </Layout>
+                    <MailProvider>
+                        <Layout>
+                            <Views />
+                        </Layout>
+                    </MailProvider>
                 </AuthProvider>
             </BrowserRouter>
         </Theme>

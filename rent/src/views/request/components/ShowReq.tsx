@@ -21,7 +21,7 @@ import Tr from "@/components/ui/Table/Tr"; // or wherever your Select is
 import { useTranslation } from "react-i18next";
 import { hasAuthority } from "@/utils/RoleChecker";
 import { useSessionUser } from "@/store/authStore";
-import { PiCheck, PiEyeLight, PiPaperPlane } from "react-icons/pi";
+import { PiEyeLight, PiPaperPlane } from "react-icons/pi";
 import { useWindowSize } from "@/utils/hooks/useWindowSize";
 import TabView from "../View/TabView";
 import { getRegionsById } from "@/views/Entity/Regions";
@@ -82,132 +82,132 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
     );
   };
 
-const constraints = useMemo<AnyConstraint[]>(() => {
-  const role = authority![0];
-  const reg = regions.map((r: any) => r.id);
+  const constraints = useMemo<AnyConstraint[]>(() => {
+    const role = authority![0];
+    const reg = regions.map((r: any) => r.id);
 
-  const filters: any[] = []; // only where/or/and stuff
-  const orderings: any[] = []; // orderBy stuff
- 
-  const rg = ( !filter?.regions || filter?.regions == null || filter?.regions == 0 ) ? reg : [filter.regions];
-  // REGION
-  if (role !== "admin" && rg.length > 0) {
+    const filters: any[] = []; // only where/or/and stuff
+    const orderings: any[] = []; // orderBy stuff
 
-    if(rg.length == 1) {
+    const rg = (!filter?.regions || filter?.regions == null || filter?.regions == 0) ? reg : [filter.regions];
+    // REGION
+    if (role !== "admin" && rg.length > 0) {
+
+      if (rg.length == 1) {
         filters.push(
-        where(
-          "general.id_region_user",
-          "==",
-          rg[0]
-         )
+          where(
+            "general.id_region_user",
+            "==",
+            rg[0]
+          )
         );
+      }
+
+      if (rg.length > 1) {
+        filters.push(
+          where(
+            "general.id_region_user",
+            "in",
+            rg
+          )
+        );
+      }
     }
 
-    if(rg.length > 1) {
-        filters.push(
-        where(
-          "general.id_region_user",
-          "in",
-          rg
-         )
-        );
-    }
-  }
-
-  if (role === "admin" && filter?.regions) {
+    if (role === "admin" && filter?.regions) {
       filters.push(where("general.id_region_user", "in", [filter.regions]));
-  }
+    }
 
-  // STATUS exact
-  if (status && status.length > 0) {
+    // STATUS exact
+    if (status && status.length > 0) {
       filters.push(where("status", "==", status));
-  }
+    }
 
-  // FOR ME
-  if (forMe) {
-    filters.push(
-      or(
-        where("preApproval_by", "==", userId!),
-        where("regionalApproved_by", "==", userId),
-        where("managerGlobalApproval", "==", userId),
-        where("approvedBy", "==", userId),
-        where("completedBy", "==", userId)
-      )
-    );
-  }
-
-  // REJECTED
-  if (rejected) {
+    // FOR ME
+    if (forMe) {
       filters.push(
         or(
-          where("rejectedBy","==", userId),
-          where("cancelledBy","==", userId)
+          where("preApproval_by", "==", userId!),
+          where("regionalApproved_by", "==", userId),
+          where("managerGlobalApproval", "==", userId),
+          where("approvedBy", "==", userId),
+          where("completedBy", "==", userId)
         )
       );
-  }
+    }
 
-  // CREATED BY
-  if (sentByMe) {
-    filters.push(where("createdBy", "==", userId));
-  } else if (filter?.user) {
-    filters.push(where("createdBy", "==", filter.user));
-  }
+    // REJECTED
+    if (rejected) {
+      filters.push(
+        or(
+          where("rejectedBy", "==", userId),
+          where("cancelledBy", "==", userId)
+        )
+      );
+    }
 
-  // RECIEVE (status/type IN)
-// RECIEVE (status/type IN)
-if (recieve) {
-  const statusValues = !filter?.status
-    ? recieve.status
-    : [filter.status];
+    // CREATED BY
+    if (sentByMe) {
+      filters.push(where("createdBy", "==", userId));
+    } else if (filter?.user) {
+      filters.push(where("createdBy", "==", filter.user));
+    }
 
-  // status: if only one, use '==' (no change in behavior, fewer disjunctions)
-  if (statusValues.length === 1) {
-    filters.push(where("status", "==", statusValues[0]));
-   } else if (statusValues.length > 1) {
-    filters.push(where("status", "in", statusValues));
-  }
+    // RECIEVE (status/type IN)
+    // RECIEVE (status/type IN)
+    if (recieve) {
+      const statusValues = !filter?.status
+        ? recieve.status
+        : [filter.status];
 
-  // requestType:
-  // - if user explicitly selected one type -> filter by that
-  // - if not (meaning "All") -> DO NOT add a requestType filter
-  if (filter?.reqType) {
-    filters.push(where("requestType", "==", filter.reqType));
-  }
-} else {
-  if (filter?.status) {
-    filters.push(where("status", "==", filter.status));
-  }
-  if (filter?.reqType) {
-    filters.push(where("requestType", "==", filter.reqType));
-  }
-}
+      // status: if only one, use '==' (no change in behavior, fewer disjunctions)
+      if (statusValues.length === 1) {
+        filters.push(where("status", "==", statusValues[0]));
+      } else if (statusValues.length > 1) {
+        filters.push(where("status", "in", statusValues));
+      }
 
-  // AMOUNT
-  if (filter?.amount?.min != null) filters.push(where("amount", ">=", filter.amount.min));
-  if (filter?.amount?.max != null) filters.push(where("amount", "<=", filter.amount.max));
+      // requestType:
+      // - if user explicitly selected one type -> filter by that
+      // - if not (meaning "All") -> DO NOT add a requestType filter
+      if (filter?.reqType) {
+        filters.push(where("requestType", "==", filter.reqType));
+      }
+    } else {
+      if (filter?.status) {
+        filters.push(where("status", "==", filter.status));
+      }
+      if (filter?.reqType) {
+        filters.push(where("requestType", "==", filter.reqType));
+      }
+    }
 
-  // DATE
-  if (filter?.date?.start) filters.push(where("createdAt", ">=", filter.date.start));
-  if (filter?.date?.end) filters.push(where("createdAt", "<=", filter.date.end));
+    // AMOUNT
+    if (filter?.amount?.min != null) filters.push(where("amount", ">=", filter.amount.min));
+    if (filter?.amount?.max != null) filters.push(where("amount", "<=", filter.amount.max));
 
-  // ORDER BY (not inside and/or)
-  switch (sortKey) {
-    case "created-desc":
-      orderings.push(orderBy("createdAt", "desc"));
-      break;
-    case "created-asc":
-      orderings.push(orderBy("createdAt", "asc"));
-      break;
-    case "status-asc":
-      orderings.push(orderBy("status", "asc"), orderBy("createdAt", "desc"));
-      break;
-  }
+    // DATE
+    if (filter?.date?.start) filters.push(where("createdAt", ">=", filter.date.start));
+    if (filter?.date?.end) filters.push(where("createdAt", "<=", filter.date.end));
 
-  const topLevelFilter =
-    filters.length === 0 ? [] : [and(...filters)];
+    // ORDER BY (not inside and/or)
+    switch (sortKey) {
+      case "created-desc":
+        orderings.push(orderBy("createdAt", "desc"));
+        break;
+      case "created-asc":
+        orderings.push(orderBy("createdAt", "asc"));
+        break;
+      case "status-asc":
+        orderings.push(orderBy("status", "asc"), orderBy("createdAt", "desc"));
+        break;
+    }
 
-  return [...topLevelFilter, ...orderings];
-}, [status, forMe, sentByMe, recieve, filter, sortKey, userId, regions, authority, rejected]);
+    const topLevelFilter =
+      filters.length === 0 ? [] : [and(...filters)];
+
+    return [...topLevelFilter, ...orderings];
+  }, [status, forMe, sentByMe, recieve, filter, sortKey, userId, regions, authority, rejected]);
 
   // total count for pagination UI
   useEffect(() => {
@@ -245,7 +245,7 @@ if (recieve) {
       }
       const snap = await getDocs(q);
       const items: IRequest[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
-      
+
       if (snap.docs.length > 0) {
         setPageCursors((prev) => {
           const next = [...prev];
@@ -287,8 +287,8 @@ if (recieve) {
               )}>{t("request." + row.original.requestType)}</Tag>
 
             </div>
-             <div className="font-medium" title={getCategorieName(t, row.original)}>
-                <Tag className="mt-1" >  { String(getCategorieName(t, row.original)).substring(0,30)} </Tag>
+            <div className="font-medium" title={getCategorieName(t, row.original)}>
+              <Tag className="mt-1" >  {String(getCategorieName(t, row.original)).substring(0, 30)} </Tag>
             </div>
           </div>
         ),
@@ -315,31 +315,33 @@ if (recieve) {
           <div className="min-w-auto">
             {t('request.status.' + row.original.status)}
             <br />
-          {transition && (
-           <>
-              {row.original.historicApproval
-              ?.filter((a) => a.by_who === userId)
-              .map((a) => {
-              if (!a?.status_from) return null;
-              const k = `${a.by_who}-${a.status_from}-${a.status_to}`; // add more fields if needed for uniqueness
-              return (
-              <div key={k} className="mt-1">
-              <Badge content={`${a.status_from} <=> ${a.status_to}`} />
-              </div>
-              );
-              })}
-           </>
-          )}
+            {transition && (
+              <>
+                {row.original.historicApproval
+                  ?.filter((a) => a.by_who === userId)
+                  .map((a) => {
+                    if (!a?.status_from) return null;
+                    const k = `${a.by_who}-${a.status_from}-${a.status_to}`; // add more fields if needed for uniqueness
+                    return (
+                      <div key={k} className="mt-1">
+                        <Badge content={`${a.status_from} <=> ${a.status_to}`} />
+                      </div>
+                    );
+                  })}
+              </>
+            )}
           </div>
         ),
       },
       {
-        header: 'Création',
+        header: 'Meta',
         cell: ({ row }) => (
           <div className="min-w-[160px]">
-            <div className="font-medium"> {formatRelative(row.original?.createdAt.toDate?.() || row.original.createdAt, new Date(), { locale: fr })}</div>
+            <div className="font-medium">Crée {formatRelative(row.original?.createdAt.toDate?.() || row.original.createdAt, new Date(), { locale: fr })}</div>
             <div className="font-medium"> par {row.original?.createdBy != userId ?
               (row.original?.createdBy) ? <UserName userId={row.original.createdBy} /> : "" : "Moi"}
+            </div>
+            <div className="font-medium"> pour  <b>{row.original?.general?.beneficiaryName}</b >
             </div>
           </div>
         ),
@@ -384,7 +386,7 @@ if (recieve) {
     table.setPageSize(num);
     setPageSize(num);
   }
-  
+
   useEffect(() => {
     setPage(1);
     setPageCursors([]);
@@ -401,7 +403,7 @@ if (recieve) {
     run();
   }, []);
 
-  const approved = ()=>{
+  const approved = () => {
     fetchPage(currentPage);
   }
 
@@ -504,7 +506,7 @@ if (recieve) {
             </h5>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <TabView data={cObj!} onDialogClose={onDialogClose} action={action} approved={approved}/>
+            <TabView data={cObj!} onDialogClose={onDialogClose} action={action} approved={approved} />
           </div>
           <div className="text-right mt-6">
             <Button
