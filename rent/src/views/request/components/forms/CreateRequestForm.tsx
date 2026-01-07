@@ -22,6 +22,7 @@ import { getNextNodeV2, requestStatusAll, RequestType, RequestTypeEnum } from '.
 import { MoneyRequest, MoneyRequestSchema } from '../../entities/SchemaRequest';
 import { ViewReqForm } from './ViewReqForm';
 import { IRequest } from '../../entities/IRequest';
+import ProcessNewMail from '@/views/mail/ProcessNewMail';
 
 interface Props {
   typeRequest: RequestType
@@ -45,6 +46,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [message, setMessage] = useTimeOutMessage()
   const [alert, setAlert] = useState("success") as any;
+  const [newReq, setNewReq] = useState() as any;
   const methods = useForm<MoneyRequest>({
     resolver: zodResolver(MoneyRequestSchema),
     defaultValues: {
@@ -229,8 +231,8 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
 
   const getAmount = (data: MoneyRequest, type: string): number | undefined => {
     switch (type) {
-       case "divers":
-        return data.divers!.price!; 
+      case "divers":
+        return data.divers!.price!;
       case "legal":
         return data.legal!.price!;
       case "bill":
@@ -255,17 +257,17 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
   const onSubmit: SubmitHandler<MoneyRequest> = async (data) => {
     try {
       let new_status = undefined
-      if(data.general?.is_for_other) {
-         new_status = statuses[0].value;
+      if (data.general?.is_for_other) {
+        new_status = statuses[0].value;
       } else {
-            const flow = data?.general?.approvalFlow;
-              if (flow == 1 || flow == 2) {
-                 new_status = statuses[1].value; 
-              }  else if (flow == 4 ) {
-                 new_status = statuses[3].value; 
-              }  else  {
-               new_status = statuses[2].value;
-              }
+        const flow = data?.general?.approvalFlow;
+        if (flow == 1 || flow == 2) {
+          new_status = statuses[1].value;
+        } else if (flow == 4) {
+          new_status = statuses[3].value;
+        } else {
+          new_status = statuses[2].value;
+        }
       }
       setSubmitting(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -295,10 +297,14 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
       } as unknown as Partial<IRequest>;
       // console.log(request);
       const docRef = await addDoc(ExpenseRequestDoc, request);
+
       reset();
       setStep(1);
       await updateDoc(docRef, { id: docRef.id });
       setRequest(docRef.id);
+
+      setNewReq({ ...request, id: docRef.id });
+
       setMessage("Requête enregistrée avec succes");
       setAlert("success")
       setTimeout(() => setSubmitting(false), 1000);
@@ -311,6 +317,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
   };
   return (
     <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
+
       <Steps current={step}>
         <Steps.Item title={"Ajouter requête  " + typeRequest.label} />
         <Steps.Item title={"Document  " + typeRequest.label} />

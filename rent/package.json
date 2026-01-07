@@ -67,6 +67,7 @@
     "react-to-pdf": "^2.0.0",
     "react-to-print": "^3.0.5",
     "react-tooltip": "^5.28.0",
+    "resend": "^6.6.0",
     "simplebar-react": "^3.3.0",
     "swr": "^2.3.0",
     "tailwind-merge": "^2.5.2",

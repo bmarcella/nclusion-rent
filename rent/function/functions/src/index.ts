@@ -1,69 +1,51 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-import {setGlobalOptions} from "firebase-functions";
-import {onRequest} from "firebase-functions/https";
-import * as logger from "firebase-functions/logger";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
-
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
-
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
 admin.initializeApp();
 
-export const updateUserPassword = functions.https.onCall(async (data, context) => {
-    
-  if (!context.auth?.uid) {
-    throw new functions.https.HttpsError("unauthenticated", "Sign in required.");
-  }
-
-  const newPassword = String(data?.newPassword ?? "").trim();
-  if (newPassword.length < 12) {
-    throw new functions.https.HttpsError("invalid-argument", "Password too short.");
-  }
-
-  const callerUid = context.auth.uid;
-  const targetUid = String(data?.uid ?? callerUid).trim();
-
-  // Only allow changing someone else's password if admin
-  if (targetUid !== callerUid) {
-    const isAdmin = (context.auth.token as any)?.admin === true;
-    if (!isAdmin) {
+export const updateUserPassword = functions.https.onCall(
+  async (data: any, context: any) => {
+    // Must be signed in
+    if (!context?.auth?.uid) {
       throw new functions.https.HttpsError(
-        "permission-denied",
-        "Not allowed to update another user's password."
+        "unauthenticated",
+        "Sign in required."
+      );
+    }
+
+    const newPassword = String(data?.newPassword ?? "").trim();
+
+    if (newPassword.length < 6) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Password too short."
+      );
+    }
+
+    const callerUid = context.auth.uid;
+    const targetUid = String(data?.uid ?? callerUid).trim();
+
+    // Only allow changing someone else's password if admin
+    if (targetUid !== callerUid) {
+      const isAdmin = (context.auth.token as any)?.admin === true;
+      if (!isAdmin) {
+        throw new functions.https.HttpsError(
+          "permission-denied",
+          "Not allowed to update another user's password."
+        );
+      }
+    }
+
+    try {
+      await admin.auth().updateUser(targetUid, { password: newPassword });
+      // Forces re-auth on clients by invalidating refresh tokens
+      await admin.auth().revokeRefreshTokens(targetUid);
+      return { ok: true };
+    } catch (err: any) {
+      throw new functions.https.HttpsError(
+        "internal",
+        err?.message ?? "Update failed."
       );
     }
   }
-
-  try {
-    await admin.auth().updateUser(targetUid, { password: newPassword });
-    await admin.auth().revokeRefreshTokens(targetUid);
-    return { ok: true };
-  } catch (err: any) {
-    throw new functions.https.HttpsError("internal", err?.message ?? "Update failed.");
-  }
-});
+);

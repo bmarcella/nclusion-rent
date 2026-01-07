@@ -66,8 +66,7 @@ function UserEnt( { onChange , lord } : Props) {
         return
     }
     try {
-        const res = await updateUserPassword(lord.id_user, data.password);
-        console.log("User password updated", res);
+        await updateUserPassword(lord.id_user, data.password);
         reset();
         setMessage("User password updated successfully");
         setAlert("success");

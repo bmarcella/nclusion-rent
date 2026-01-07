@@ -53,7 +53,6 @@ function SecEnt( { lord , onChange} : Props) {
 
   const onSubmit = async (data: any) => {
     setSubmitting(true)
-    console.log('Renovation Details:', data);
     try {
          data.updatedBy = userId;
          const landlordRef = getLandlordDoc(lord.id);

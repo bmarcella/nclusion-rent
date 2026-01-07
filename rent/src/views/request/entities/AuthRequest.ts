@@ -104,7 +104,7 @@ const STATUS_TRAIN_ORDER_4: RequestStatusValue[] = [
 
 export const StatusTrain = (t: TFunction): StatusNode => {
   let next: StatusNode | undefined;
-  const train  =  STATUS_TRAIN_ORDER;
+  const train = STATUS_TRAIN_ORDER;
   // Build the chain from the end to the start
   for (let i = train.length - 1; i >= 0; i--) {
     const value = train[i];
@@ -163,7 +163,7 @@ export const StatusTrainV2 = (t: TFunction, flow?: number): StatusNode => {
 
   // Build the chain from the end to the start
   for (let i = train.length - 1; i >= 0; i--) {
-    const value = train[i];
+    const value: any = train[i];
     head = {
       value,
       label: t(`request.status.${value}`),
@@ -236,7 +236,7 @@ export const getRequestCategorieTypeById = (t: any, tReq: string, catId: number)
 }
 
 export const getRequestType = (t: any, tReq: string, catId: number, type: string): any => {
-  if(!type) return '-';
+  if (!type) return '-';
   const atype = getRequestCategorieTypeById(t, tReq, catId) as any[];
   return atype.find((t) => t == type);
 }
@@ -247,8 +247,8 @@ export const getCategorieName = (t: any, row: IRequest) => {
     case 'bill':
       return row?.bill?.categorie != null ? cat(row.bill.categorie) : ''
 
-   case 'divers':
-      return row?.divers?.categorie != null ? cat(row.divers.categorie) : ''   
+    case 'divers':
+      return row?.divers?.categorie != null ? cat(row.divers.categorie) : ''
 
     case 'capex':
       return row?.capex?.categorie != null ? cat(row.capex.categorie) : ''
@@ -316,7 +316,7 @@ export const requestType = (t: any, type: boolean = false) => [
       { value: 9, label: t("request.type.2.categories.9") },
       { value: 10, label: t("request.type.2.categories.10") },
       { value: 0, label: t("request.type.2.categories.0") },
-   
+
     ],
     documentType: [],
   },
@@ -410,7 +410,7 @@ export const requestType = (t: any, type: boolean = false) => [
         label: t("request.type.6.categories.2"),
         type: billType[2]
       },
-        {
+      {
         value: 3,
         label: t("request.type.6.categories.3"),
         type: billType[3]
@@ -420,7 +420,7 @@ export const requestType = (t: any, type: boolean = false) => [
         label: t("request.type.6.categories.4"),
         type: billType[4]
       },
-        {
+      {
         value: 5,
         label: t("request.type.6.categories.5"),
         type: billType[5]
@@ -450,7 +450,7 @@ export const requestType = (t: any, type: boolean = false) => [
         label: t("request.type.10.categories.2"),
         type: billType[2]
       },
-        {
+      {
         value: 3,
         label: t("request.type.10.categories.3"),
         type: billType[3]
@@ -460,7 +460,7 @@ export const requestType = (t: any, type: boolean = false) => [
         label: t("request.type.10.categories.4"),
         type: billType[4]
       },
-        {
+      {
         value: 5,
         label: t("request.type.10.categories.5"),
         type: billType[5]
