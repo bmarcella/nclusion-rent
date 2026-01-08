@@ -4,8 +4,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
-import { Alert, Steps } from '@/components/ui';
-import { useEffect, useState } from 'react';
+import { Alert, Button, Steps } from '@/components/ui';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/utils/hooks/useTranslation';
 import { useSessionUser } from '@/store/authStore';
 import { manageAuth } from '@/constants/roles.constant';
@@ -23,6 +23,7 @@ import { MoneyRequest, MoneyRequestSchema } from '../../entities/SchemaRequest';
 import { ViewReqForm } from './ViewReqForm';
 import { IRequest } from '../../entities/IRequest';
 import ProcessNewMail from '@/views/mail/ProcessNewMail';
+import { ApiSendMail } from '@/services/MailService';
 
 interface Props {
   typeRequest: RequestType
@@ -47,6 +48,8 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
   const [message, setMessage] = useTimeOutMessage()
   const [alert, setAlert] = useState("success") as any;
   const [newReq, setNewReq] = useState() as any;
+  const mailRef = useRef(null);
+
   const methods = useForm<MoneyRequest>({
     resolver: zodResolver(MoneyRequestSchema),
     defaultValues: {
@@ -176,7 +179,6 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
         id: doc.id,
         ...doc.data(),
       })) as Proprio[];
-      console.log('landlords:', landlords);
       const a = convertToSelectOptionsProprio(landlords);
       setAgents(a);
     } catch (error) {
@@ -186,6 +188,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
 
   const nextStep = (step: number, data?: any) => {
     setStep(step);
+    if (step >= 2) setNewReq(undefined);
   }
 
 
@@ -302,12 +305,19 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
       setStep(1);
       await updateDoc(docRef, { id: docRef.id });
       setRequest(docRef.id);
-
-      setNewReq({ ...request, id: docRef.id });
+      const newReq: any = { ...request, id: docRef.id };
+      setNewReq(newReq);
 
       setMessage("Requête enregistrée avec succes");
       setAlert("success")
       setTimeout(() => setSubmitting(false), 1000);
+
+      try {
+        initMail(newReq);
+      } catch (error) {
+        console.error("Error initializing mail after submit:", error);
+      }
+
     } catch (error) {
       // console.error("Error adding document: ", error);
       setSubmitting(false);
@@ -315,6 +325,20 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
       setAlert("danger")
     }
   };
+
+  const initMail = async (req: IRequest) => {
+    try {
+      if (mailRef.current && (mailRef.current as any).init) {
+        (mailRef.current as any).init(req);
+      } else {
+        console.log("Mail component not yet initialized")
+      }
+    } catch (error) {
+      console.error("Error initializing mail:", error);
+    }
+
+  }
+
   return (
     <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
 
@@ -328,9 +352,13 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
           <span className="break-all">{message}</span>
         </Alert>
       )}
+
+      <ProcessNewMail type='new' ref={mailRef} />
+
       {step == 0 && (<ViewReqForm
         onSubmit={onSubmit}
-        methods={methods} stype={typeRequest} goBack={goBack} ></ViewReqForm>)}
+        methods={methods} stype={typeRequest} goBack={goBack} ></ViewReqForm>)
+      }
       {step == 1 && (
         <ImageReq nextStep={nextStep} reqId={request} userId={userId || ''} end={false} isEdit={false} ></ImageReq>
       )}
