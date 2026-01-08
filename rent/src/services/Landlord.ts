@@ -17,6 +17,7 @@ const reqPictures = "RequetePictures";
 const Expenserequest = "ExpenseRequest";
 const otherBankPictures = "OtherBankPictures";
 const authRequest = "AuthRequest";
+const mailNotification = "MailNotification";
 // 
 export const contractsDoc = collection(db, contracts);
 export const TaskDoc = collection(db, task);
@@ -34,6 +35,7 @@ export const taskCollection = collection(db, task);
 export const ExpenseRequestDoc = collection(db, Expenserequest)
 export const ReqPicturesDoc = collection(db, reqPictures);
 export const AuthRequestDoc = collection(db, authRequest);
+export const MailNotificationDoc = collection(db, mailNotification);
 
 
 

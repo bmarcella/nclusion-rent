@@ -1,4 +1,5 @@
-import { resend } from ".";
+import { Proprio } from "../Entity";
+import { IRequest } from "../request/entities/IRequest";
 
 const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
@@ -7,7 +8,7 @@ export type TemplateVars = Record<
     string | number | boolean | null | undefined
 >;
 
-export const DefaultEmailFrom = "AjiMobil <mail@ajimobil.com>";
+export const DefaultEmailFrom = "AjiMobil <admin@mail.ajimobil.com>";
 
 export interface BatchEmail {
     from: string;
@@ -16,14 +17,35 @@ export interface BatchEmail {
     html: string;
 }
 
+
+interface LocalBatchEmailContent {
+    to: string[];
+    html: string;
+}
+
+export interface LocalBatchEmail {
+    from: string;
+    subject: string;
+    contents: LocalBatchEmailContent[]
+}
+export type TypeEmail = 'new' | 'approved' | "paid" | 'reject' | 'canceled' | 'reminder';
+
 export interface EmailReceiver {
     email: string;
     vars: TemplateVars;
 }
 
+export interface MailData {
+    request: IRequest,
+    landlords: Proprio[],
+    type: TypeEmail,
+    proprio: Proprio
+}
+
 export default class MailSender {
     private invalidEmails: string[] = [];
-    private batches: BatchEmail[] = [];
+    private batches: LocalBatchEmailContent[] = [];
+    private data!: MailData;
 
     constructor(
         private readonly subject: string,
@@ -33,6 +55,44 @@ export default class MailSender {
 
     private isValidEmail(email: string): boolean {
         return emailRegex.test(email);
+    }
+
+    addData(data: MailData) {
+        this.data = data;
+        return this.prepareData();
+    }
+
+    private prepareData() {
+        const emcs: EmailReceiver[] = [];
+        const request = this.data.request;
+        const proprio = this.data.proprio;
+        for (const p of this.data.landlords) {
+            const emc: EmailReceiver = {
+                email: p.email!,
+                vars: {
+                    fullName: p.fullName,
+                    type_request: request.requestType,
+                    amount: request.amount,
+                    currency: request.general?.currency,
+                    createdAt: request.createdAt.toDateString(),
+                    createdBy: proprio.fullName,
+                    beneficiary: request.general?.beneficiaryName,
+                    reqUrl: `${window.location.origin}/request/${request.id}`,
+                    reqUrlText: "Voir la requête",
+                    status: request.status
+                }
+            }
+            emcs.push(emc);
+        }
+        const report = this.addReceivers(emcs);
+        const contents = this.done();
+
+        const batches: LocalBatchEmail = {
+            from: this.from,
+            subject: this.subject,
+            contents: contents
+        }
+        return { report, batches }
     }
 
     private escapeHtml(value: string): string {
@@ -60,7 +120,7 @@ export default class MailSender {
         });
     }
 
-    addReceivers(receivers: EmailReceiver[] | EmailReceiver) {
+    private addReceivers(receivers: EmailReceiver[] | EmailReceiver) {
         // reset per run
         this.invalidEmails = [];
         this.batches = [];
@@ -76,21 +136,17 @@ export default class MailSender {
             const html = this.renderEmailTemplate(this.template, r.vars);
 
             this.batches.push({
-                from: this.from,
                 to: [r.email],
-                subject: this.subject,
                 html,
             });
         }
-
         return { emails: this.invalidEmails, total: this.invalidEmails.length };
     }
 
-    async done(): Promise<void> {
+    private done(): LocalBatchEmailContent[] {
         if (!this.batches.length) {
             throw new Error("No batches to send");
         }
-
-        await resend.batch.send(this.batches);
+        return this.batches;
     }
 }

@@ -1,0 +1,328 @@
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   Retool Tailwind Framework (scoped, semantic, token-based)
+   Usage:
+     - Put class "rt-scope" on a top-level Container (recommended)
+     - Apply semantic classes to components via the Class field:
+         rt-card, rt-btn-primary, rt-input, rt-badge, etc.
+   ========================================================= */
+
+/* ---------- Tokens (Dark default) ---------- */
+:root {
+    /* surfaces */
+    --rt-bg: #0b1020;
+    --rt-surface: #0f1730;
+    --rt-surface-2: #111d3b;
+    --rt-overlay: rgba(0, 0, 0, 0.45);
+
+    /* text */
+    --rt-text: #e9eefc;
+    --rt-muted: rgba(233, 238, 252, 0.72);
+    --rt-faint: rgba(233, 238, 252, 0.55);
+
+    /* borders / rings */
+    --rt-border: rgba(255, 255, 255, 0.12);
+    --rt-border-strong: rgba(255, 255, 255, 0.18);
+    --rt-ring: rgba(59, 130, 246, 0.38);
+
+    /* brand */
+    --rt-primary: #3b82f6;
+    --rt-primary-2: #60a5fa;
+
+    /* states */
+    --rt-success: #22c55e;
+    --rt-warning: #f59e0b;
+    --rt-danger: #ef4444;
+
+    /* radii */
+    --rt-radius-sm: 10px;
+    --rt-radius-md: 14px;
+    --rt-radius-lg: 18px;
+
+    /* shadow */
+    --rt-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+
+    /* typography */
+    --rt-font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji",
+        "Segoe UI Emoji";
+}
+
+/* Optional light theme (apply class rt-theme-light to wrapper) */
+.rt-theme-light {
+    --rt-bg: #f7f8fc;
+    --rt-surface: #ffffff;
+    --rt-surface-2: #f3f5ff;
+    --rt-overlay: rgba(0, 0, 0, 0.22);
+
+    --rt-text: #0b1020;
+    --rt-muted: rgba(11, 16, 32, 0.68);
+    --rt-faint: rgba(11, 16, 32, 0.52);
+
+    --rt-border: rgba(11, 16, 32, 0.12);
+    --rt-border-strong: rgba(11, 16, 32, 0.18);
+    --rt-ring: rgba(59, 130, 246, 0.28);
+
+    --rt-shadow: 0 10px 25px rgba(11, 16, 32, 0.10);
+}
+
+/* ---------- Scope wrapper ---------- */
+.rt-scope {
+    font-family: var(--rt-font);
+    color: var(--rt-text);
+}
+
+/* =========================================================
+   Semantic Components
+   ========================================================= */
+@layer components {
+
+    /* ----- Layout / surfaces ----- */
+    .rt-panel {
+        background: var(--rt-bg);
+    }
+
+    .rt-card {
+        @apply tw-border tw-p-4 tw-transition;
+        border-color: var(--rt-border);
+        border-radius: var(--rt-radius-md);
+        background: var(--rt-surface);
+        box-shadow: none;
+    }
+
+    .rt-card-hover {
+        @apply tw-transition;
+    }
+
+    .rt-card-hover:hover {
+        border-color: var(--rt-border-strong);
+        box-shadow: var(--rt-shadow);
+        transform: translateY(-1px);
+    }
+
+    .rt-divider {
+        height: 1px;
+        background: var(--rt-border);
+    }
+
+    /* ----- Typography ----- */
+    .rt-h1 {
+        @apply tw-font-semibold tw-tracking-tight;
+        font-size: 24px;
+        line-height: 1.2;
+    }
+
+    .rt-h2 {
+        @apply tw-font-semibold tw-tracking-tight;
+        font-size: 18px;
+        line-height: 1.25;
+    }
+
+    .rt-body {
+        @apply tw-text-sm;
+        color: var(--rt-text);
+    }
+
+    .rt-muted {
+        @apply tw-text-sm;
+        color: var(--rt-muted);
+    }
+
+    .rt-faint {
+        @apply tw-text-sm;
+        color: var(--rt-faint);
+    }
+
+    /* ----- Badges ----- */
+    .rt-badge {
+        @apply tw-inline-flex tw-items-center tw-gap-1 tw-border tw-px-2 tw-py-1 tw-text-xs tw-font-medium;
+        border-radius: 999px;
+        border-color: var(--rt-border);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--rt-text);
+    }
+
+    .rt-badge-success {
+        @apply rt-badge;
+        border-color: rgba(34, 197, 94, 0.35);
+        background: rgba(34, 197, 94, 0.12);
+        color: var(--rt-text);
+    }
+
+    .rt-badge-warning {
+        @apply rt-badge;
+        border-color: rgba(245, 158, 11, 0.38);
+        background: rgba(245, 158, 11, 0.14);
+        color: var(--rt-text);
+    }
+
+    .rt-badge-danger {
+        @apply rt-badge;
+        border-color: rgba(239, 68, 68, 0.38);
+        background: rgba(239, 68, 68, 0.14);
+        color: var(--rt-text);
+    }
+
+    /* ----- Buttons ----- */
+    .rt-btn {
+        @apply tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-text-sm tw-font-medium tw-border tw-px-3 tw-py-2 tw-transition;
+        border-radius: var(--rt-radius-sm);
+        border-color: var(--rt-border);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--rt-text);
+    }
+
+    .rt-btn:hover {
+        border-color: var(--rt-border-strong);
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .rt-btn:active {
+        transform: translateY(0.5px);
+    }
+
+    .rt-btn-primary {
+        @apply rt-btn;
+        border-color: transparent;
+        background: var(--rt-primary);
+        color: white;
+    }
+
+    .rt-btn-primary:hover {
+        filter: brightness(1.08);
+    }
+
+    .rt-btn-soft {
+        @apply rt-btn;
+        border-color: rgba(59, 130, 246, 0.35);
+        background: rgba(59, 130, 246, 0.14);
+    }
+
+    .rt-btn-ghost {
+        @apply tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-text-sm tw-font-medium tw-transition tw-px-3 tw-py-2;
+        border-radius: var(--rt-radius-sm);
+        background: transparent;
+        color: var(--rt-text);
+    }
+
+    .rt-btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .rt-btn-danger {
+        @apply rt-btn;
+        border-color: transparent;
+        background: var(--rt-danger);
+        color: white;
+    }
+
+    .rt-btn-danger:hover {
+        filter: brightness(1.06);
+    }
+
+    /* ----- Inputs ----- */
+    .rt-input {
+        @apply tw-w-full tw-border tw-px-3 tw-py-2 tw-text-sm tw-outline-none tw-transition;
+        border-radius: var(--rt-radius-sm);
+        border-color: var(--rt-border);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--rt-text);
+    }
+
+    .rt-input:hover {
+        border-color: var(--rt-border-strong);
+    }
+
+    .rt-input:focus {
+        border-color: rgba(59, 130, 246, 0.65);
+        box-shadow: 0 0 0 3px var(--rt-ring);
+    }
+
+    .rt-textarea {
+        @apply rt-input;
+        min-height: 96px;
+    }
+
+    .rt-select {
+        @apply rt-input;
+        padding-right: 36px;
+    }
+
+    /* ----- Tables ----- */
+    .rt-table {
+        @apply tw-w-full tw-text-sm;
+    }
+
+    .rt-table th {
+        @apply tw-text-left tw-font-semibold tw-py-2;
+        color: var(--rt-muted);
+    }
+
+    .rt-table td {
+        @apply tw-py-2;
+        border-top: 1px solid var(--rt-border);
+    }
+
+    .rt-row-hover tbody tr:hover td {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* ----- Alerts ----- */
+    .rt-alert {
+        @apply tw-border tw-p-3 tw-text-sm;
+        border-radius: var(--rt-radius-md);
+        border-color: var(--rt-border);
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .rt-alert-success {
+        @apply rt-alert;
+        border-color: rgba(34, 197, 94, 0.35);
+        background: rgba(34, 197, 94, 0.12);
+    }
+
+    .rt-alert-warning {
+        @apply rt-alert;
+        border-color: rgba(245, 158, 11, 0.38);
+        background: rgba(245, 158, 11, 0.14);
+    }
+
+    .rt-alert-danger {
+        @apply rt-alert;
+        border-color: rgba(239, 68, 68, 0.38);
+        background: rgba(239, 68, 68, 0.14);
+    }
+
+    /* ----- Utility helpers ----- */
+    .rt-stack {
+        @apply tw-flex tw-flex-col tw-gap-3;
+    }
+
+    .rt-row {
+        @apply tw-flex tw-items-center tw-gap-3;
+    }
+
+    .rt-grid-2 {
+        @apply tw-grid tw-gap-3;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rt-grid-3 {
+        @apply tw-grid tw-gap-3;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* =========================================================
+   Optional: Retool-ish component nudges (safe + minimal)
+   These selectors may vary by Retool version. Keep minimal.
+   If something doesn't apply, remove it.
+   ========================================================= */
+.rt-scope a {
+    color: var(--rt-primary-2);
+}
+
+.rt-scope a:hover {
+    filter: brightness(1.08);
+}

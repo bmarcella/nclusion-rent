@@ -1,0 +1,12 @@
+{
+    "name": "retool-tailwind-framework",
+    "private": true,
+    "devDependencies": {
+        "tailwindcss": "^3.4.0",
+        "postcss": "^8.4.0",
+        "autoprefixer": "^10.4.0"
+    },
+    "scripts": {
+        "build": "tailwindcss -c tailwind.config.js -i ./src/retool.css -o ./dist/retool.css --minify"
+    }
+}
