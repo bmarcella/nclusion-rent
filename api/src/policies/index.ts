@@ -1,5 +1,6 @@
-import { DEvent } from '@App/damba.import';
-import { Policy } from '@Damba/v1/policies';
+import { Policy } from "src/common/Damba/v2/policies";
+import { DEvent } from "src/damba.import";
+
 
 export const must_have_org_access: Policy = async (e: DEvent) => {
   const orgId = e.in.payload?.orgId;
