@@ -6,7 +6,7 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "build": "npx tsc && docker build -t damba/api . && docker-compose up",
+    "build": "npx tsc",
     "start": "node src/index.js",
     "dev-2": "nodemon ./src/index.ts",
     "dev": "nodemon --watch src --ext ts,js,json --exec ts-node -r tsconfig-paths/register src/index.ts",
