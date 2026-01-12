@@ -74,10 +74,10 @@ async function main() {
 
   app.use(AppConfig.call.helper!(undefined as any, extras));
 
-  if (AppConfig.path.docs?.extras)
-    app.use(AppConfig.path.docs?.extras, AppConfig.call.extrasDoc!(extras));
+  // if (AppConfig.path.docs?.extras)
+  //   app.use(AppConfig.path.docs?.extras, AppConfig.call.extrasDoc!(extras));
 
-  if (AppConfig.path.docs?.api) app.use(AppConfig.path.docs?.api, AppConfig.call.apiDoc!(doc));
+  // if (AppConfig.path.docs?.api) app.use(AppConfig.path.docs?.api, AppConfig.call.apiDoc!(doc));
 
   app.use(AppConfig.path.basic, route);
   app.use("/", (req, res) => {

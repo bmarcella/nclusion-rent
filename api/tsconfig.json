@@ -113,6 +113,6 @@
     "../common/mail/MailService.ts",
     "../common/index/Helper.ts",
     "../common/extractCode.ts",
-    "../common/error/error.ts"
+    "../common/error/error.ts",
   ]
 }
