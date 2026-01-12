@@ -2,24 +2,19 @@
 // config/app-config.ts
 import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
-import { extrasToJSON } from '@Damba/v1/Extras';
 import { Resend } from "resend";
 
-import {
-  parseBoolean,
-  SameSiteOption,
-  mustEnv,
-  AppShutdownParams,
-} from '@Damba/v1/config/ConfigHelper';
-import { IAppConfig } from '@Damba/v1/config/IAppConfig';
 import { Server } from 'http';
-import { DambaTypeOrm } from '@Damba/v2/dao/DambaDb';
 import { DataSource } from 'typeorm';
 
-import { DEvent } from '@App/damba.import';
-import { authorize } from '@Damba/v1/auth/AuthMiddleware';
+import { DEvent } from '../damba.import';
 import jwt from 'jsonwebtoken';
 import { DBConfig } from './db';
+import { DambaTypeOrm } from '../common/Damba/v2/dao/DambaDb';
+import { authorize } from '../common/Damba/v1/auth/AuthMiddleware';
+import { parseBoolean, SameSiteOption, mustEnv, AppShutdownParams } from '../common/Damba/v1/config/ConfigHelper';
+import { IAppConfig } from '../common/Damba/v1/config/IAppConfig';
+import { extrasToJSON } from '../common/Damba/v1/Extras';
 
 dotenv.config();
 

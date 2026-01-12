@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IAppConfig } from "@Damba/v1/config/IAppConfig";
+import { IAppConfig } from "../config/IAppConfig";
+import { toHttpEnum } from "../service/DambaHelper";
 import {
   Http,
   IDActionConfig,
   IServiceComplete,
   IServiceProvider,
 } from "../service/IServiceDamba";
-import { toHttpEnum } from "@Damba/v1/service/DambaHelper";
 import {
   normalizePath,
   makeExtrasMiddleware,

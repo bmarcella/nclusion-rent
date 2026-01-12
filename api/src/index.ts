@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { SessionUser } from '../common/Entity/UserDto';
 import 'reflect-metadata';
 import 'tsconfig-paths/register';
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -15,9 +14,10 @@ import { JwtPayload } from 'jsonwebtoken';
 import OpenAI from 'openai';
 import { _SPS_ } from './services';
 import { DambaServices } from './damba.import';
-import { ExtrasMap } from '@Damba/v1/route/DambaRoute';
-import { DambaRepository } from '@Damba/v2/dao';
-import { Mail } from '@Damba/mail';
+import { SessionUser } from './common/Entity/UserDto';
+import { Mail } from './common/Damba/mail';
+import { ExtrasMap } from './common/Damba/v1/service/IServiceDamba';
+import { DambaRepository } from './common/Damba/v2/dao';
 
 declare global {
   namespace Express {
