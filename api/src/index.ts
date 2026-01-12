@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { SessionUser } from '../../common/Entity/UserDto';
+import { SessionUser } from '../common/Entity/UserDto';
 import 'reflect-metadata';
 import 'tsconfig-paths/register';
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -70,7 +70,7 @@ async function main() {
   app.use(bodyParser.json(AppConfig.json));
   app.use(bodyParser.urlencoded(AppConfig.urlencoded));
   app.use(session(AppConfig.session));
-  const { route, extras, doc } = DambaServices(_SPS_, AppConfig);
+  const { route, extras } = DambaServices(_SPS_, AppConfig);
 
   app.use(AppConfig.call.helper!(undefined as any, extras));
 
