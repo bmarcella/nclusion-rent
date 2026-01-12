@@ -113,8 +113,6 @@
     "../common/mail/MailService.ts",
     "../common/index/Helper.ts",
     "../common/extractCode.ts",
-    "../common/error/error.ts",
-    "../rent/src/views/mail/template",
-    "../rent/src/views/mail/MailSender.ts"
+    "../common/error/error.ts"
   ]
 }
