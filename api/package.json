@@ -6,8 +6,8 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "build-2": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
-    "build": "tsup src/index.ts --platform node --format cjs --target node18 --bundle --clean",
+    "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
+    "build-2": "tsup src/index.ts --platform node --format cjs --target node18 --bundle --clean",
     "build-x": "npx tsc",
     "start": "node src/index.js",
     "dev-2": "nodemon ./src/index.ts",
