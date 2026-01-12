@@ -27,7 +27,9 @@ import { Spinner } from "@/components/ui";
 import { ReqApprovedEmailTemplate } from "./template/ReqApprovedEmailTemplate ";
 import { ReqPaidEmailTemplate } from "./template/ReqPaidEmailTemplate";
 import { ReqRejectedEmailTemplate } from "./template/ReqRejectedEmailTemplate ";
-import { ReqStatusChangeEmailTemplate } from "./template/ReqStatusChangeEmailTemplate ";
+import { ReqStatusMyChangeEmailTemplate } from "./template/IReqStatusMyChangeEmailTemplate ";
+import { getProprioById } from "@/services/AuthService";
+import { ReqStatusChangeEmailTemplate } from "./template/ReqStatusChangeEmailTemplate";
 
 interface Props {
   type: TypeEmail;
@@ -45,12 +47,14 @@ export const STATUS_MAP = {
   paid: { label: "Paid", subject: "Requête Payée", template: ReqPaidEmailTemplate },
   reject: { label: "Rejected", subject: "Requête Rejettée", template: ReqRejectedEmailTemplate },
   canceled: { label: "Canceled", subject: "Requête Annullée", template: ReqStatusChangeEmailTemplate },
-  reminder: { label: "Canceled", subject: "Requête Annullée", template: ReqStatusChangeEmailTemplate },
+  reminder: { label: "Canceled", subject: "Requête - Nouvelle status ", template: ReqStatusChangeEmailTemplate },
+  ac: { label: "Canceled", subject: "Requête - Nouvelle status ", template: ReqStatusMyChangeEmailTemplate },
 } as const satisfies Record<Props["type"], StatusMapValue>;
+
 
 type AlertType = "success" | "info" | "warning" | "error";
 
-const ProcessNewMail = forwardRef<HTMLDivElement, Props>(({ type }, ref) => {
+const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
   const { proprio, authority } = useSessionUser((state) => state.user);
   const { t } = useTranslation();
 
@@ -65,22 +69,21 @@ const ProcessNewMail = forwardRef<HTMLDivElement, Props>(({ type }, ref) => {
   const [alert, setAlert] = useState("success") as any;
   const [isSubmitting, setSubmitting] = useState(false);
 
-  const init = (data: IRequest) => {
-    console.log(data);
-    if (data) {
+  const init = (data: IRequest, type: TypeEmail, previousStatus?: string) => {
+
+    if (data && type) {
       setRequest(data);
-      fetchRule(data);
+      fetchRule(data, type, previousStatus);
     } else {
       console.log('No request provided to started fetching rules');
     }
-  }
-
+  };
 
   useImperativeHandle(ref, () => ({
     init
   }));
 
-  const fetchRule = async (request: IRequest) => {
+  const fetchRule = async (request: IRequest, type: TypeEmail, previousStatus?: string) => {
 
     if (!proprio?.type_person) return;
     if (!authority?.length) return;
@@ -132,17 +135,20 @@ const ProcessNewMail = forwardRef<HTMLDivElement, Props>(({ type }, ref) => {
       const nroles = [...roleSet];
 
       const landlords = await fetchProprio(nsregions, nroles);
-      console.log("Fetched landlords for mail:", landlords);
+      let landlords_2: any[] = [];
+
+      if (request?.status == 'approved') {
+        landlords_2 = await fetchProprio(nsregions, ['assist_accoutant', 'accoutant', 'super_accoutant']);
+      }
 
       if (sendMail.current) return; // prevent duplicates
       sendMail.current = true;
-
       sendMailNotificationToApi({
         type,
         request,
         landlords,
         proprio,
-      });
+      }, previousStatus, landlords_2);
 
     } finally {
       setLoadingRules(false);
@@ -150,18 +156,163 @@ const ProcessNewMail = forwardRef<HTMLDivElement, Props>(({ type }, ref) => {
     }
   };
 
-  const sendMailNotificationToApi = async (payload: MailData) => {
+  const sendMailNotificationToApi = async (payload: MailData, previousStatus?: string, proprios: any = []) => {
+
+    if (payload.landlords.length > 0) {
+      // to all new receiver 
+      try {
+        const meta = STATUS_MAP[payload.type];
+        const sender = new MailSender(meta.subject, meta.template);
+        const res = sender.addData(payload);
+        if (!res.batches) return;
+        sendMailToApi(res.batches);
+        saveEmailNotification(res.batches, payload.request, payload.type);
+        // console.log("TRANSITION", payload.type, res);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    // send email to creator of the request 
     try {
-      const meta = STATUS_MAP[type];
-      const sender = new MailSender(meta.subject, meta.template);
-      const res = sender.addData(payload);
-      sendMailToApi(res.batches);
-      saveEmailNotification(res.batches, payload.request, type);
+      if (previousStatus) {
+        const creator = await getProprioById(payload.request.createdBy);
+        if (creator) {
+          const ntype = await getNewType(payload.request.status, payload.request);
+          const type = ntype.res as TypeEmail;
+          const meta = STATUS_MAP[type];
+          const sender = new MailSender(meta.subject, meta.template);
+          const res = sender.addData({
+            type: type,
+            request: payload.request,
+            proprio: payload.proprio,
+            landlords: [creator],
+            action: {
+              oldStatus: previousStatus
+            }
+          });
+          if (!res.batches) return;
+          sendMailToApi(res.batches);
+          saveEmailNotification(res.batches, payload.request, payload.type);
+          // console.log("AC", type, res);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    // send email to approver of the request 
+    try {
+      if (previousStatus) {
+        const creator = await getProprioById(payload.request.createdBy);
+        if (creator) {
+          const type = 'ac' as TypeEmail;
+          const meta = STATUS_MAP[type];
+          const sender = new MailSender(meta.subject, meta.template);
+          const res = sender.addData({
+            type: type,
+            request: payload.request,
+            proprio: payload.proprio,
+            landlords: [payload.proprio],
+            action: {
+              oldStatus: previousStatus
+            }
+          });
+          if (!res.batches) return;
+          sendMailToApi(res.batches);
+          saveEmailNotification(res.batches, payload.request, payload.type);
+          //console.log("AC", type, res);
+        }
+      }
     } catch (error) {
       console.log(error);
     }
 
+    if (proprios.length > 0) {
+      try {
+        if (previousStatus) {
+          const type = 'approved' as TypeEmail;
+          const meta = STATUS_MAP[type];
+          const sender = new MailSender(meta.subject, meta.template);
+          const res = sender.addData({
+            type: type,
+            request: payload.request,
+            proprio: payload.proprio,
+            landlords: proprios,
+            action: {
+              oldStatus: previousStatus
+            }
+          });
+          if (!res.batches) return;
+          sendMailToApi(res.batches);
+          saveEmailNotification(res.batches, payload.request, payload.type);
+          // console.log("APPROVED", type, res);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (request?.status == 'completed') {
+      try {
+        if (previousStatus) {
+          const creator = await getProprioById(payload.request.createdBy);
+          const type = 'paid' as TypeEmail;
+          const meta = STATUS_MAP[type];
+          const sender = new MailSender(meta.subject, meta.template);
+          const res = sender.addData({
+            type: type,
+            request: payload.request,
+            proprio: payload.proprio,
+            landlords: [creator],
+            action: {
+              oldStatus: previousStatus
+            }
+          });
+          if (!res.batches) return;
+          sendMailToApi(res.batches);
+          saveEmailNotification(res.batches, payload.request, payload.type);
+          console.log("COMPLETED", type, res);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
   };
+
+  const getNewType = async (status: string, request: IRequest) => {
+    //let createdBy;
+    let creator = {};
+    switch (status) {
+      case 'approved':
+        // createdBy = request.managerGlobalApproval;
+        // creator = await getProprioById(createdBy);
+        return { res: 'approved', creator };
+        break
+      case 'completed':
+        // createdBy = request.updatedBy;
+        // creator = await getProprioById(createdBy);
+        return { res: 'paid', creator }
+        break
+      case 'rejected':
+        // createdBy = request?.rejectedBy;
+        // creator = await getProprioById(createdBy!);
+        return { res: 'reject', creator }
+        break
+      case 'cancelled':
+        // createdBy = request?.cancelledBy;
+        // creator = await getProprioById(createdBy!);
+        return { res: 'canceled', creator }
+        break
+      default:
+        // createdBy = request.updatedBy;
+        // creator = await getProprioById(createdBy);
+        return { res: 'reminder', creator }
+        break;
+    }
+  }
+
+
 
   const saveEmailNotification = async (res: LocalBatchEmail, req: IRequest, type: string) => {
     try {
@@ -174,10 +325,11 @@ const ProcessNewMail = forwardRef<HTMLDivElement, Props>(({ type }, ref) => {
   }
 
   const sendMailToApi = async (res: LocalBatchEmail) => {
+    setSubmitting(false)
     try {
       ApiSendMail(res).then((apiRes) => {
         console.log("Mail sent successfully:", apiRes);
-        setMessage("Requête enregistrée avec succes");
+        setMessage("Email envoyé avec succès!");
         setAlert("success")
         setTimeout(() => setSubmitting(false), 1000);
       }).catch((error) => {
@@ -202,7 +354,6 @@ const ProcessNewMail = forwardRef<HTMLDivElement, Props>(({ type }, ref) => {
         where("regions", "array-contains-any", sregion),
         where("type_person", "in", roles)
       );
-
       const snapshot = await getDocs(q);
       return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Proprio[];
     } catch (error) {
@@ -216,7 +367,6 @@ const ProcessNewMail = forwardRef<HTMLDivElement, Props>(({ type }, ref) => {
       {loadingRules && <div className="flex justify-center mt-2">
         <Spinner />
       </div>}
-
       {message && (
         <Alert showIcon className="mb-2 mt-2" type={alert}>
           <span className="break-all">{message}</span>

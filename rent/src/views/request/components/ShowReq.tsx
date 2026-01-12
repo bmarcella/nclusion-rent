@@ -23,12 +23,13 @@ import { hasAuthority } from "@/utils/RoleChecker";
 import { useSessionUser } from "@/store/authStore";
 import { PiEyeLight, PiPaperPlane } from "react-icons/pi";
 import { useWindowSize } from "@/utils/hooks/useWindowSize";
-import TabView from "../View/TabView";
+import TabView, { ParamsApprove } from "../View/TabView";
 import { getRegionsById } from "@/views/Entity/Regions";
 import { manageAuth } from "@/constants/roles.constant";
 import FilterRequest, { RequestFilter } from "../Filter/FilterRequest";
 import { useNavigate } from "react-router-dom";
 import { getCategorieName, getRequestCategorieById } from "../entities/AuthRequest";
+import ProcessNewMail from "@/views/mail/ProcessNewMail";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const PAGE_SIZE_OPTIONS = [
@@ -60,6 +61,7 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
   const [regions, setRegions] = useState([]) as any;
   const [filter, setFilter] = useState<RequestFilter>();
   const navigate = useNavigate()
+  const mailRef = useRef(null);
 
   const openDialog = (obj: IRequest) => {
     setCObj(obj as any);
@@ -253,7 +255,6 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
           return next;
         });
       }
-      console.log("Fetched items:", items);
       setRows(items);
       setPage(pageNumber);
       setHasNext(snap.docs.length == pageSize);
@@ -403,12 +404,42 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
     run();
   }, []);
 
-  const approved = () => {
+  const approved = (p: ParamsApprove) => {
     fetchPage(currentPage);
+    switch (p.request.status) {
+      case 'approved':
+        sendMail(p, 'approved');
+        break
+      case 'completed':
+        sendMail(p, 'paid');
+        break
+      case 'rejected':
+        sendMail(p, 'reject');
+        break
+      case 'cancelled':
+        sendMail(p, 'canceled');
+        break
+      default:
+        sendMail(p, 'reminder');
+        break;
+    }
+  }
+
+  const sendMail = (p: ParamsApprove, type: string) => {
+    try {
+      if (mailRef.current && (mailRef.current as any).init) {
+        (mailRef.current as any).init(p.request, type, p.old_status);
+      } else {
+        console.log("Mail component not yet initialized")
+      }
+    } catch (error) {
+      console.error("Error initializing mail:", error);
+    }
   }
 
   return (
     <>
+      <ProcessNewMail ref={mailRef} />
       <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
         <div className={classNames('rounded-2xl p-4 flex flex-col justify-center', 'bg-green-100')} >
           <div className="flex justify-between items-center relative">

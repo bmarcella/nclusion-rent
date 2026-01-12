@@ -34,6 +34,23 @@ export const REQUEST_STATUS_VALUES = [
   'cancelled',
 ] as const;
 
+export type RequestStatus = typeof REQUEST_STATUS_VALUES[number];
+
+const REQUEST_STATUS_FR: Record<RequestStatus, string> = {
+  preApproval: 'Pré-approbation',
+  regionalApproval: 'Approbation régionale',
+  accountantRegionalApproval: 'Approbation comptable régionale',
+  managerGlobalApproval: 'Approbation manager global',
+  approved: 'Approuvée',
+  completed: 'Terminée',
+  rejected: 'Rejetée',
+  cancelled: 'Annulée',
+};
+
+export function getRequestStatusLabelFR(status: RequestStatus): string {
+  return REQUEST_STATUS_FR[status];
+}
+
 export type RequestStatusValue = (typeof REQUEST_STATUS_VALUES)[number];
 
 export type StatusOption = {

@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import UserName from '@/views/bank/show/components/UserName';
 import classNames from 'classnames';
 import CommentReq from './CommentReq';
+import { ParamsApprove } from './TabView';
 
 interface Props {
   data: IRequest;
@@ -23,11 +24,11 @@ interface Props {
   getNewreq: (data: IRequest) => void,
   action: boolean,
   auth?: boolean,
-  approved?: () => void,
+  approved?: (params: ParamsApprove) => void,
 }
 
 function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved }: Props) {
-  
+
   const [request, setRequest] = useState<IRequest>(data) as any;
   const type = useMemo(() => request?.requestType, [request?.requestType]);
   const { t } = useTranslation();
@@ -49,10 +50,10 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
     return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const onNextStatus = (data: string, validated: boolean, prevStatus: string, comment?: string ) => {
-      updateMoneyRequestStatus(data, validated, prevStatus, comment);
+  const onNextStatus = (data: string, validated: boolean, prevStatus: string, comment?: string) => {
+    updateMoneyRequestStatus(data, validated, prevStatus, comment);
   }
-  
+
   const getPrev = (prevStatus: string) => {
     switch (prevStatus) {
       case 'preApproval':
@@ -82,7 +83,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
     prevStatus: string,
     comment?: string
   ) => {
-    
+
     if (!data.id) {
       throw new Error("updateMoneyRequestStatus: requestId is required");
     }
@@ -91,16 +92,16 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
     // Clone the array to avoid mutating original state directly (React rule)
     const hist = [...data.historicApproval];
     const coms = data?.comments || [];
-    const comments = (data?.comments) ?  [...coms] : [];
-    if(comment) {
+    const comments = (data?.comments) ? [...coms] : [];
+    if (comment) {
       comments.unshift({
         by_who: userId!,
         status: prevStatus,
-        text : comment , 
+        text: comment,
         createdAt: new Date(),
       });
     }
-  
+
     hist.unshift({
       status_to: nextStatus,
       status_from: data.status,
@@ -110,21 +111,21 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
 
     let payload: Record<string, any> = {}
 
-     if (validated) {
-        const prev = getPrev(prevStatus);
-        payload = {
-          status: nextStatus,
-          historicApproval: hist,
-          comments,
-          [prev]: userId
-        } 
-      } else {
-        const prev = getPrev(nextStatus);
-        payload = {
-          status: nextStatus,
-          historicApproval: hist,
-          comments,
-          [prev]: userId
+    if (validated) {
+      const prev = getPrev(prevStatus);
+      payload = {
+        status: nextStatus,
+        historicApproval: hist,
+        comments,
+        [prev]: userId
+      }
+    } else {
+      const prev = getPrev(nextStatus);
+      payload = {
+        status: nextStatus,
+        historicApproval: hist,
+        comments,
+        [prev]: userId
       }
     }
 
@@ -134,7 +135,8 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
     const new_req = { id: snapshot.id, ...snapshot.data() } as IRequest;
     setRequest(new_req);
     getNewreq(new_req);
-    if(approved) approved?.();
+
+    if (approved) approved?.({ request: new_req, old_status: data.status });
 
   };
 
@@ -204,7 +206,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
 
   const renderCapex = () => {
     if (!request.capex) return null;
-    const {  quantity, price, provider, target_date, decripstion, categorie } = request.capex;
+    const { quantity, price, provider, target_date, decripstion, categorie } = request.capex;
     return (
       <Card className="p-4 space-y-2">
         <h3 className="text-lg font-semibold">Capex</h3>
@@ -285,18 +287,18 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
       <Card className="p-4 space-y-3">
         <h3 className="text-lg font-semibold">Telecom</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mt-4 mb-4">
-              <div className="text-sm">
-                  <div className="font-bold">Total price</div>
-                  <div>{formatMoney(total_price)} {general.currency}</div>
-                </div>
-                 <div>
+          <div className="text-sm">
+            <div className="font-bold">Total price</div>
+            <div>{formatMoney(total_price)} {general.currency}</div>
+          </div>
+          <div>
             <div className="font-bold">Categorie</div>
             <div>{getRequestCategorieById(t, type, categorie)} </div>
           </div>
-         { <div>
+          {<div>
             <div className="font-bold">Type</div>
             <div>{getRequestType(t, type, categorie, request.telecom.type)} </div>
-          </div> }
+          </div>}
         </div>
         <div>
           <div className="font-bold mb-1">Description</div>
@@ -354,7 +356,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
       <Card className="p-4 space-y-3">
         <h3 className="text-lg font-semibold">Opex</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-         <div>
+          <div>
             <div className="font-bold">Categorie</div>
             <div>{getRequestCategorieById(t, type, categorie)} </div>
           </div>
@@ -363,8 +365,8 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
               <div className="font-bold">Other category</div>
               <div>{other_categorie || '-'}</div>
             </div>
-          ) }
-           <div>
+          )}
+          <div>
             <div className="font-bold">Type</div>
             <div>{getRequestType(t, type, categorie, request.opex.type)} </div>
           </div>
@@ -650,28 +652,13 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
     );
   };
 
-  const renderDocuments = () => {
-    if (!Array.isArray(request.documents) || request.documents.length === 0) return null;
-    return (
-      <Card className="p-4 space-y-2">
-        <h3 className="text-lg font-semibold">Documents</h3>
-        <ul className="list-disc list-inside text-sm space-y-1">
-          {request.documents.map((d: any, idx: number) => (
-            <li key={idx}>
-              <span className="font-bold">Type:</span> {d.type}
-            </li>
-          ))}
-        </ul>
-      </Card>
-    );
-  };
-  
+
   const renderMainSection = (t: any) => {
     switch (typeRequest) {
       case 'bill':
         return renderBill();
       case 'divers':
-        return renderDivers();  
+        return renderDivers();
       case 'capex':
         return renderCapex();
       case 'locomotif':
@@ -698,8 +685,10 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
         );
     }
   };
+
   return (
     <div className="space-y-4">
+
       <Card className="p-4 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="mb-4">
@@ -751,14 +740,14 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
           </div>
         )}
       </Card>
-     {renderBankInfo()}
-     {renderMainSection(t)}
-     {data && data?.comments && data.comments.length>0 && 
-       <>
-        <CommentReq userId={userId || "" } comments={data.comments || []}></CommentReq> 
-       </> 
-     } 
-     {auth && <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus} rules={rules} action={action} />} 
+      {renderBankInfo()}
+      {renderMainSection(t)}
+      {data && data?.comments && data.comments.length > 0 &&
+        <>
+          <CommentReq userId={userId || ""} comments={data.comments || []}></CommentReq>
+        </>
+      }
+      {auth && <MoneyRequestNextStatusButton request={request} onNextStatus={onNextStatus} rules={rules} action={action} />}
     </div>
   );
 }

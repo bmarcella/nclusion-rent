@@ -329,7 +329,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
   const initMail = async (req: IRequest) => {
     try {
       if (mailRef.current && (mailRef.current as any).init) {
-        (mailRef.current as any).init(req);
+        (mailRef.current as any).init(req, 'new');
       } else {
         console.log("Mail component not yet initialized")
       }
@@ -353,7 +353,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
         </Alert>
       )}
 
-      <ProcessNewMail type='new' ref={mailRef} />
+      <ProcessNewMail ref={mailRef} />
 
       {step == 0 && (<ViewReqForm
         onSubmit={onSubmit}

@@ -1,4 +1,4 @@
-export const ReqApprovedEmailTemplate = `
+export const ReqStatusChangeEmailTemplate = `
 <!doctype html>
 <html>
   <body style="font-family: Arial, sans-serif; padding:24px;">
@@ -10,24 +10,21 @@ export const ReqApprovedEmailTemplate = `
               <td>
                 <h2>Bonjour {{fullName}},</h2>
                 <p>
-                  La requête de type <strong>{{type_request}}</strong>,
-                  d’un montant de <strong>{{amount}} {{currency}}</strong>,
-                  a été <strong style="color:#16a34a;">approuvée</strong>.
-                  Vous pouvez désormais procéder au paiement de la requête. Nous vous remercions par avance.
+                  La requête de type <strong>{{type_request}}</strong>
+                  est passée de l’état <strong>{{oldStatus}}</strong>
+                  à <strong>{{newStatus}}</strong>.
                 </p>
-
                 <p style="margin:24px 0;">
-                  <a href="{{reqUrl}}" style="background:#16a34a;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;">
-                    Consulter la requête
+                  <a href="{{reqUrl}}" style="background:#2563eb;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;">
+                    Voir les détails
                   </a>
                 </p>
 
                 <hr />
 
                 <p style="font-size:12px;color:#6b7280;">
-                  Approuvée le {{madeAt}} par {{madeBy}}
+                  Mise à jour le {{updatedAt}} par {{updatedBy}}
                 </p>
-            
               </td>
             </tr>
           </table>

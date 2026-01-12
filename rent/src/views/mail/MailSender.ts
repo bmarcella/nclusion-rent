@@ -1,4 +1,5 @@
 import { Proprio } from "../Entity";
+import { getRequestStatusLabelFR } from "../request/entities/AuthRequest";
 import { IRequest } from "../request/entities/IRequest";
 
 const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -28,7 +29,7 @@ export interface LocalBatchEmail {
     subject: string;
     contents: LocalBatchEmailContent[]
 }
-export type TypeEmail = 'new' | 'approved' | "paid" | 'reject' | 'canceled' | 'reminder';
+export type TypeEmail = 'new' | 'approved' | "paid" | 'reject' | 'canceled' | 'reminder' | 'ac';
 
 export interface EmailReceiver {
     email: string;
@@ -39,7 +40,13 @@ export interface MailData {
     request: IRequest,
     landlords: Proprio[],
     type: TypeEmail,
-    proprio: Proprio
+    proprio: Proprio,
+    action?: {
+        madeAt?: Date
+        madeBy?: string,
+        oldStatus?: string
+    }
+
 }
 
 export default class MailSender {
@@ -62,11 +69,32 @@ export default class MailSender {
         return this.prepareData();
     }
 
+    toDate(date: any): string {
+        if (!date) return '';
+
+        // Firestore Timestamp
+        if (typeof date.toDate === 'function') {
+            return date.toDate().toDateString();
+        }
+
+        // JS Date
+        if (date instanceof Date) {
+            return date.toDateString();
+        }
+
+        // String / number
+        return new Date(date).toDateString();
+    }
+
+
+
     private prepareData() {
         const emcs: EmailReceiver[] = [];
         const request = this.data.request;
         const proprio = this.data.proprio;
+        const action = this.data?.action;
         for (const p of this.data.landlords) {
+            const text = request?.comments?.[request.comments?.length - 1]?.text || '';
             const emc: EmailReceiver = {
                 email: p.email!,
                 vars: {
@@ -74,25 +102,35 @@ export default class MailSender {
                     type_request: request.requestType,
                     amount: request.amount,
                     currency: request.general?.currency,
-                    createdAt: request.createdAt.toDateString(),
+                    createdAt: this.toDate(request.createdAt),
                     createdBy: proprio.fullName,
                     beneficiary: request.general?.beneficiaryName,
                     reqUrl: `${window.location.origin}/request/${request.id}`,
                     reqUrlText: "Voir la requête",
-                    status: request.status
+                    status: getRequestStatusLabelFR(request.status as any),
+                    oldStatus: getRequestStatusLabelFR(action?.oldStatus || request.status as any),
+                    madeAt: this.toDate(request.updatedAt),
+                    madeBy: proprio.fullName,
+                    paymentMethod: request.general?.paymentMethod,
+                    rejectionReason: text
                 }
             }
             emcs.push(emc);
         }
-        const report = this.addReceivers(emcs);
-        const contents = this.done();
-
-        const batches: LocalBatchEmail = {
-            from: this.from,
-            subject: this.subject,
-            contents: contents
+        if (emcs.length > 0) {
+            const report = this.addReceivers(emcs);
+            const contents = this.done();
+            const batches: LocalBatchEmail = {
+                from: this.from,
+                subject: this.subject,
+                contents: contents
+            }
+            return { report, batches }
+        } else {
+            return {
+                report: { emails: [], total: 0 }, batches: undefined
+            }
         }
-        return { report, batches }
     }
 
     private escapeHtml(value: string): string {

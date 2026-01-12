@@ -16,12 +16,12 @@ import { AuthRequest, RequestTypeEnum } from '../entities/AuthRequest'
 import { manageAuth } from '@/constants/roles.constant'
 import { useTranslation } from 'react-i18next'
 import { Spinner } from '@/components/ui';
-
+export type ParamsApprove = { request: IRequest, old_status: string }
 interface Props {
   data: IRequest
   onDialogClose: (close: boolean, data: IRequest) => void,
   action: boolean
-  approved?: () => void,
+  approved?: (params: ParamsApprove) => void,
 }
 
 function TabView({ data, onDialogClose, action, approved }: Props) {
@@ -89,17 +89,17 @@ function TabView({ data, onDialogClose, action, approved }: Props) {
       {see && <Tabs defaultValue="tab1" className="w-full">
         <TabList>
           <TabNav value="tab1"> {request.requestType.toUpperCase()}</TabNav>
-          { <><TabNav value="tab2"> Documents</TabNav>
-              <TabNav value="tab3"> Historique</TabNav> 
-            </>
-            }
+          {<><TabNav value="tab2"> Documents</TabNav>
+            <TabNav value="tab3"> Historique</TabNav>
+          </>
+          }
         </TabList>
         <div className="p-4">
           <TabContent value="tab1">
             <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} approved={approved} />
           </TabContent>
-           <>
-            <TabContent value="tab3"> 
+          <>
+            <TabContent value="tab3">
               <HistoticView data={request}></HistoticView>
             </TabContent>
 
@@ -117,8 +117,8 @@ function TabView({ data, onDialogClose, action, approved }: Props) {
         </>}
 
         {!loadingRules && <>
-          <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} auth={false} approved={approved}/>
-        </> }
+          <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} auth={false} approved={approved} />
+        </>}
       </>}
     </>
   )
