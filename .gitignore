@@ -1,6 +1,9 @@
 # Log
 /template
 /rent/node_modules
-/rent/function/functtions/node_modules
+/rent/function/functions/node_modules
 /rent/.env
+/api/node_modules
+/api/env
 /report/node_modules
+/retool/node_modules
