@@ -1,29 +1,9 @@
 # Log
 /template
 /rent/node_modules
-/rent/function/functtions/node_modules
+/rent/function/functions/node_modules
 /rent/.env
-<<<<<<< HEAD
 /api/node_modules
+/api/env
 /report/node_modules
 /retool/node_modules
-# env
-.env
-**/.env
-
-
-.env
-**/.env
-
-
-.env
-**/.env
-
-=======
-/report/node_modules
-/retool/node_modules
-/api
-/report
-/retool
-/common
->>>>>>> 722ee0fbca86e3e99ee1c68284a658e545812e28
