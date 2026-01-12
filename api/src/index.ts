@@ -80,6 +80,9 @@ async function main() {
   if (AppConfig.path.docs?.api) app.use(AppConfig.path.docs?.api, AppConfig.call.apiDoc!(doc));
 
   app.use(AppConfig.path.basic, route);
+  app.use("/", (req, res) => {
+    res.send("API ALIVE");
+  });
 
   const server = app.listen(AppConfig.port, AppConfig.call.launch);
 
