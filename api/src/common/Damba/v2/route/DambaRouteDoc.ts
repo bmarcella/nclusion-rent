@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { IAppConfig } from "@Damba/v1/config/IAppConfig";
+import { IAppConfig } from "../../v1/config/IAppConfig";
+import { toHttpEnum } from "../service/DambaHelper";
 import { IDActionConfig, IServiceComplete, IServiceProvider, TimeoutType } from "../service/IServiceDamba";
-import { toHttpEnum } from "@Damba/v1/service/DambaHelper";
 
 const normalizePath = (p?: string) => {
   if (!p || p === "/") return "/";
@@ -69,7 +69,7 @@ const DambaApiDocNested = <REQ, RES, NEXT>(
 
       const routeMws = toArray((value as any)?.middleware);
       const handler = (value as any)?.behavior;
-      const config  = (value as any)?.config as IDActionConfig;
+      const config = (value as any)?.config as IDActionConfig;
 
       extras = makeExtrasMiddleware(extras, name, (value as any)?.extras);
 
