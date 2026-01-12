@@ -1,4 +1,5 @@
 import { Proprio } from "../Entity";
+import { getRequestStatusLabelFR } from "../request/entities/AuthRequest";
 import { IRequest } from "../request/entities/IRequest";
 
 const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -106,8 +107,8 @@ export default class MailSender {
                     beneficiary: request.general?.beneficiaryName,
                     reqUrl: `${window.location.origin}/request/${request.id}`,
                     reqUrlText: "Voir la requête",
-                    status: request.status,
-                    oldStatus: action?.oldStatus,
+                    status: getRequestStatusLabelFR(request.status as any),
+                    oldStatus: getRequestStatusLabelFR(action?.oldStatus || request.status as any),
                     madeAt: this.toDate(request.updatedAt),
                     madeBy: proprio.fullName,
                     paymentMethod: request.general?.paymentMethod,
