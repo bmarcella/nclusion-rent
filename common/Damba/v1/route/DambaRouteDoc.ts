@@ -37,7 +37,7 @@ const DambaApiDocNested = <REQ, RES, NEXT>(
   _SPS_: IServiceProvider<REQ, RES, NEXT>,
   AppConfig?: IAppConfig
 ): { doc: NestedApiDoc; extras: any } => {
-  const basePath = AppConfig?.base_path ?? "";
+  const basePath = AppConfig?.path.basic ?? "";
   const doc: NestedApiDoc = {};
   let extras: any = {};
 
@@ -69,7 +69,7 @@ const DambaApiDocNested = <REQ, RES, NEXT>(
 
       const routeMws = toArray((value as any)?.middleware);
       const handler = (value as any)?.behavior;
-      const config  = (value as any)?.config as IDActionConfig;
+      const config = (value as any)?.config as IDActionConfig;
 
       extras = makeExtrasMiddleware(extras, name, (value as any)?.extras);
 

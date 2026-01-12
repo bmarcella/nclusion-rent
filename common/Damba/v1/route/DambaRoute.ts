@@ -39,7 +39,7 @@ export const DambaRoute = <REQ, RES, NEXT, ROUTER>({ root, sub }: any, _SPS_: IS
   for (const [serviceMount, serviceComplete] of Object.entries(_SPS_)) {
     // eslint-disable-next-line no-console
     if (AppConfig?.logRoute)
-       console.debug('Mount service:', serviceMount);
+      console.debug('Mount service:', serviceMount);
 
     const { service, middleware } = serviceComplete as IServiceComplete<REQ, RES, NEXT>;
 
@@ -61,26 +61,26 @@ export const DambaRoute = <REQ, RES, NEXT, ROUTER>({ root, sub }: any, _SPS_: IS
       const name = serviceMount.replace("/", "").toLowerCase();
 
       extras = makeExtrasMiddleware(extras, name, value.extras);
-      const config  = (value as any)?.config as IDActionConfig;
-     
+      const config = (value as any)?.config as IDActionConfig;
+
       const mws = [...toArray(value.middleware)];
       if (config?.timeout) {
-         mws.push((req: REQ, res: RES, next: NEXT) => {
-                  (req as any).setTimeout(config.timeout);
-                  (res as any).setTimeout(config.timeout);
-                  (next as any)();
-         });
+        mws.push((req: REQ, res: RES, next: NEXT) => {
+          (req as any).setTimeout(config.timeout);
+          (res as any).setTimeout(config.timeout);
+          (next as any)();
+        });
       }
 
-      if (config?.validators){
+      if (config?.validators) {
 
       }
       const handler = value?.behavior;
-     
+
 
       // eslint-disable-next-line no-console
       if (AppConfig?.logRoute)
-        console.debug(method, ':', `${AppConfig?.base_path}${serviceMount}${routePath}`);
+        console.debug(method, ':', `${AppConfig?.path.basic}${serviceMount}${routePath}`);
 
       switch (method) {
         case Http.GET:
