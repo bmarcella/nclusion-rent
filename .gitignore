@@ -5,6 +5,7 @@
 /rent/.env
 /report/node_modules
 /retool/node_modules
-/api/node_modules
-/api/.env
-/api/.env
+/api
+/report
+/retool
+/common

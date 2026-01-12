@@ -27,6 +27,9 @@ export const ReqApprovedEmailTemplate = `
                 <p style="font-size:12px;color:#6b7280;">
                   Approuvée le {{approvedAt}} par {{approvedBy}}
                 </p>
+                 <p style="font-size:12px;color:#6b7280;">
+                  Approuvée le {{approvedAt}} par {{approvedBy}}
+                </p>
               </td>
             </tr>
           </table>
