@@ -2,7 +2,6 @@
 // config/app-config.ts
 import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
-import type { ExtrasMap } from '@Damba/v1/service/IServiceDamba';
 import { extrasToJSON } from '@Damba/v1/Extras';
 import { Resend } from "resend";
 
@@ -29,6 +28,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const CORS = (process.env.CORS ?? '').trim().split("|");
 
 const SESSION_SECRET = (process.env.SESSION_SECRET ?? '').trim();
+
 if (!SESSION_SECRET) {
   console.warn('SESSION_SECRET is empty. Set it in your environment.');
 }

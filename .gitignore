@@ -4,6 +4,6 @@
 /rent/function/functions/node_modules
 /rent/.env
 /api/node_modules
-/api/env
+/api/.env
 /report/node_modules
 /retool/node_modules
