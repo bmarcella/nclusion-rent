@@ -1,4 +1,5 @@
-import { Http } from "@Damba/v1/service/IServiceDamba";
+import { Http } from "../Damba/v2/service/IServiceDamba";
+
 
 export type Behavior = {
   id?: string;
