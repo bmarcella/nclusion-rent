@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { createService, DEvent } from "@/src/damba.import";
+import { createService, DEvent } from "../../../damba.import";
+
 
 const api = createService('/mail');
 api.DPost(

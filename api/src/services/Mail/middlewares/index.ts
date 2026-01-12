@@ -1,4 +1,5 @@
-import { DEvent } from "@/src/damba.import";
+import { DEvent } from "src/damba.import";
+
 
 
 // middlewares barrel
