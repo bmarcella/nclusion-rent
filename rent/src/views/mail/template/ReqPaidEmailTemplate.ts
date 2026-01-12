@@ -18,7 +18,7 @@ export const ReqPaidEmailTemplate = `
                 </p>
 
                 <p style="margin:0 0 24px 0;">
-                  Le paiement a été effectué le <strong>{{paidAt}}</strong>
+                  Le paiement a été effectué le <strong>{{madeAt}}</strong>
                   via <strong>{{paymentMethod}}</strong>.
                 </p>
 
@@ -37,7 +37,7 @@ export const ReqPaidEmailTemplate = `
                 <hr style="border:none; border-top:1px solid #e5e7eb; margin:20px 0;" />
 
                 <p style="margin:0; font-size:12px; color:#6b7280;">
-                  Payée le {{paidAt}} par {{paidBy}}
+                  Payée le {{madeAt}} par {{madeBy}}
                 </p>
               </td>
             </tr>

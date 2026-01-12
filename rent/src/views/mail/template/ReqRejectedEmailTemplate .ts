@@ -11,7 +11,7 @@ export const ReqRejectedEmailTemplate = `
                 <h2>Bonjour {{fullName}},</h2>
 
                 <p>
-                  Votre requête de type <strong>{{type_request}}</strong>,
+                  La requête de type <strong>{{type_request}}</strong>,
                   d’un montant de <strong>{{amount}} {{currency}}</strong>,
                   a été <strong style="color:#dc2626;">rejetée</strong>.
                 </p>
@@ -30,7 +30,7 @@ export const ReqRejectedEmailTemplate = `
                 <hr />
 
                 <p style="font-size:12px;color:#6b7280;">
-                  Rejetée le {{rejectedAt}} par {{rejectedBy}}
+                  Rejetée le {{madeAt}} par {{madeBy}}
                 </p>
               </td>
             </tr>
