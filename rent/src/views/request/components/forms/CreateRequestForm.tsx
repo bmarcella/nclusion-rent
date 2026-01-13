@@ -336,7 +336,6 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
     } catch (error) {
       console.error("Error initializing mail:", error);
     }
-
   }
 
   return (

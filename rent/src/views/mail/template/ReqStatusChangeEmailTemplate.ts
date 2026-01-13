@@ -12,7 +12,7 @@ export const ReqStatusChangeEmailTemplate = `
                 <p>
                   La requête de type <strong>{{type_request}}</strong>
                   est passée de l’état <strong>{{oldStatus}}</strong>
-                  à <strong>{{newStatus}}</strong>.
+                  à <strong>{{status}}</strong>.
                 </p>
                 <p style="margin:24px 0;">
                   <a href="{{reqUrl}}" style="background:#2563eb;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;">
@@ -23,7 +23,7 @@ export const ReqStatusChangeEmailTemplate = `
                 <hr />
 
                 <p style="font-size:12px;color:#6b7280;">
-                  Mise à jour le {{updatedAt}} par {{updatedBy}}
+                  Mise à jour le {{madeAt}} par {{madeBy}}
                 </p>
               </td>
             </tr>
