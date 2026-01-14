@@ -17,7 +17,7 @@ import {
 } from "firebase/firestore";
 import { AuthRequestDoc } from "@/services/Landlord";
 import type { AuthRequest } from "../entities/AuthRequest";
-import { Button, Pagination, Select, Tag } from "@/components/ui";
+import { Button, Pagination, Tag } from "@/components/ui";
 import UserName from "@/views/bank/show/components/UserName";
 import { getRegionsById } from "@/views/Entity/Regions";
 
@@ -64,14 +64,14 @@ export const ViewAuthRequest: React.FC = () => {
 
   // ---------- Columns ----------
   const columns = [
-    { key: "status",      label: "Status" },
-    { key: "max_amount",  label: "Max Amount" },
-    { key: "roles",       label: "Roles" },
-    { key: "reqType",     label: "Req Types" },
-    { key: "region_id",   label: "Region" },
-    { key: "created_by",  label: "Created By" },
-    { key: "created_at",  label: "Created At" },
-    { key: "canApprove",  label: "Can Approve" },
+    { key: "status", label: "Status" },
+    { key: "max_amount", label: "Max Amount" },
+    { key: "roles", label: "Roles" },
+    { key: "reqType", label: "Req Types" },
+    { key: "region_id", label: "Region" },
+    { key: "created_by", label: "Created By" },
+    { key: "created_at", label: "Created At" },
+    { key: "canApprove", label: "Can Approve" },
   ] as const;
 
   // ---------- Constraints ----------
@@ -217,7 +217,7 @@ export const ViewAuthRequest: React.FC = () => {
   return (
     <div className="flex flex-col gap-4">
       {/* Filters */}
-      <div className="flex flex-wrap items-end gap-3">
+      {/* <div className="flex flex-wrap items-end gap-3">
         <div>
           <label className="block text-sm mb-1">Created by</label>
           <input
@@ -305,7 +305,7 @@ export const ViewAuthRequest: React.FC = () => {
             }
           />
         </div>
-      </div>
+      </div> */}
 
       <div className="w-full mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
         {/* Table */}
@@ -328,27 +328,27 @@ export const ViewAuthRequest: React.FC = () => {
                 <Tr key={r.id}>
                   <Td>
                     <span className="inline-flex items-center gap-2">
-                       <Tag className="bg-emerald-100 text-emerald-700 border-0">
-                           {r.status}
-                        </Tag>
+                      <Tag className="bg-emerald-100 text-emerald-700 border-0">
+                        {r.status}
+                      </Tag>
                     </span>
                   </Td>
                   <Td>{r.max_amount}</Td>
                   <Td>{Array.isArray(r.roles) ? r.roles.join(", ") : "-"}</Td>
                   <Td>{Array.isArray(r.reqType) ? r.reqType.join(", ") : "-"}</Td>
-                  <Td>{ r.region_id ? getRegionsById(r.region_id).capital : "-"}</Td>
+                  <Td>{r.region_id ? getRegionsById(r.region_id).capital : "-"}</Td>
                   <Td><UserName userId={r.created_by ?? "-"}></UserName></Td>
                   <Td>{fmt(r.created_at)}</Td>
                   <Td>{String()}
-                    {  (r.canApprove) &&
+                    {(r.canApprove) &&
                       <Tag className="bg-emerald-100 text-emerald-700 border-0">
-                          Oui
-                        </Tag>
+                        Oui
+                      </Tag>
                     }
-                     {  (!r.canApprove) &&
+                    {(!r.canApprove) &&
                       <Tag className="bg-red-100 text-red-700 border-0">
-                           Non
-                      </Tag> }
+                        Non
+                      </Tag>}
                   </Td>
                 </Tr>
               ))}

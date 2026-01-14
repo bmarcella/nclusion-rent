@@ -14,6 +14,10 @@ export const ReqStatusChangeEmailTemplate = `
                   est passée de l’état <strong>{{oldStatus}}</strong>
                   à <strong>{{status}}</strong>.
                 </p>
+
+                 {{request}} 
+
+                 
                 <p style="margin:24px 0;">
                   <a href="{{reqUrl}}" style="background:#2563eb;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;">
                     Voir les détails

@@ -30,6 +30,7 @@ import { ReqRejectedEmailTemplate } from "./template/ReqRejectedEmailTemplate ";
 import { ReqStatusMyChangeEmailTemplate } from "./template/IReqStatusMyChangeEmailTemplate ";
 import { getProprioById } from "@/services/AuthService";
 import { ReqStatusChangeEmailTemplate } from "./template/ReqStatusChangeEmailTemplate";
+import { buildRequestEmailDetailsSection } from "./RequestMailSection";
 
 interface Props {
   type: TypeEmail;
@@ -52,7 +53,6 @@ export const STATUS_MAP = {
 } as const satisfies Record<Props["type"], StatusMapValue>;
 
 
-type AlertType = "success" | "info" | "warning" | "error";
 
 const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
   const { proprio, authority } = useSessionUser((state) => state.user);
@@ -62,7 +62,6 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
 
   const [loadingRules, setLoadingRules] = useState(false);
 
-  const hasFetchedRef = useRef(false);
   const sendMail = useRef(false);
 
   const [message, setMessage] = useTimeOutMessage()
@@ -138,16 +137,20 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
       let landlords_2: any[] = [];
 
       if (request?.status == 'approved') {
-        landlords_2 = await fetchProprio(nsregions, ['assist_accoutant', 'accoutant', 'super_accoutant']);
+         landlords_2 = await fetchProprio(nsregions, ['assist_accoutant', 'accoutant', 'super_accoutant', 'super_manager']);
       }
 
       if (sendMail.current) return; // prevent duplicates
       sendMail.current = true;
+      const reqText = buildRequestEmailDetailsSection(request, t);
       sendMailNotificationToApi({
         type,
         request,
         landlords,
         proprio,
+        action: {
+          request: reqText
+        }
       }, previousStatus, landlords_2);
 
     } finally {
@@ -157,9 +160,11 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
   };
 
   const sendMailNotificationToApi = async (payload: MailData, previousStatus?: string, proprios: any = []) => {
+  
+    const reqText = payload.action?.request || '';
 
     if (payload.landlords.length > 0) {
-      // to all new receiver 
+      // to all new receiver
       try {
         const meta = STATUS_MAP[payload.type];
         const sender = new MailSender(meta.subject, meta.template);
@@ -178,7 +183,7 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
       if (previousStatus) {
         const creator = await getProprioById(payload.request.createdBy);
         if (creator) {
-          const ntype = await getNewType(payload.request.status, payload.request);
+          const ntype = await getNewType(payload.request.status);
           const type = ntype.res as TypeEmail;
           const meta = STATUS_MAP[type];
           const sender = new MailSender(meta.subject, meta.template);
@@ -188,7 +193,8 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
             proprio: payload.proprio,
             landlords: [creator],
             action: {
-              oldStatus: previousStatus
+              oldStatus: previousStatus,
+              request:  reqText
             }
           });
           if (!res.batches) return;
@@ -214,7 +220,8 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
             proprio: payload.proprio,
             landlords: [payload.proprio],
             action: {
-              oldStatus: previousStatus
+              oldStatus: previousStatus,
+              request:  reqText
             }
           });
           if (!res.batches) return;
@@ -223,7 +230,7 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
           //console.log("AC", type, res);
         }
       }
-    } catch (error) {
+     } catch (error) {
       console.log(error);
     }
 
@@ -239,7 +246,8 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
             proprio: payload.proprio,
             landlords: proprios,
             action: {
-              oldStatus: previousStatus
+              oldStatus: previousStatus,
+              request:  reqText
             }
           });
           if (!res.batches) return;
@@ -265,13 +273,14 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
             proprio: payload.proprio,
             landlords: [creator],
             action: {
-              oldStatus: previousStatus
+              oldStatus: previousStatus,
+              request:  reqText
             }
           });
           if (!res.batches) return;
           sendMailToApi(res.batches);
           saveEmailNotification(res.batches, payload.request, payload.type);
-          console.log("COMPLETED", type, res);
+          // console.log("COMPLETED", type, res);
         }
       } catch (error) {
         console.log(error);
@@ -280,9 +289,9 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
 
   };
 
-  const getNewType = async (status: string, request: IRequest) => {
+  const getNewType = async (status: string) => {
     //let createdBy;
-    let creator = {};
+    const creator = {};
     switch (status) {
       case 'approved':
         // createdBy = request.managerGlobalApproval;

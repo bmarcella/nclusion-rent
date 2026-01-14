@@ -21,6 +21,8 @@ export const ReqRejectedEmailTemplate = `
                   {{rejectionReason}}
                 </p>
 
+                 {{request}}
+
                 <p style="margin:24px 0;">
                   <a href="{{reqUrl}}" style="background:#dc2626;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;">
                     Consulter la requête
