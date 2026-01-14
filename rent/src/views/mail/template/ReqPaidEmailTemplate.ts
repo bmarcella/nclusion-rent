@@ -22,6 +22,8 @@ export const ReqPaidEmailTemplate = `
                   via <strong>{{paymentMethod}}</strong>.
                 </p>
 
+                 {{request}}
+
                 <p style="margin:0 0 24px 0;">
                   <a href="{{reqUrl}}"
                      style="display:inline-block; background:#16a34a; color:#fff;

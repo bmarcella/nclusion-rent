@@ -16,6 +16,8 @@ export const ReqApprovedEmailTemplate = `
                   Vous pouvez désormais procéder au paiement de la requête. Nous vous remercions par avance.
                 </p>
 
+                {{request}}
+
                 <p style="margin:24px 0;">
                   <a href="{{reqUrl}}" style="background:#16a34a;color:#fff;padding:12px 16px;border-radius:10px;text-decoration:none;">
                     Consulter la requête

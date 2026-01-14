@@ -18,7 +18,6 @@ api.DPost(
         to: data.contents[i].to,
         html: data.contents[i].html
       };
-      console.log(batch);
       batches.push(batch);
     }
 

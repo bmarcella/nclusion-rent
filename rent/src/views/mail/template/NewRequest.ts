@@ -17,6 +17,8 @@ export const NewReqEmailTemplate = `
                 <p style="margin:0 0 12px 0;">
                  Une nouvelle requête de type {{ type_request }}, pour un montant de {{ amount }} {{ currency }}, a été enregistrée sur AjiMobil et requiert votre validation.
                 </p>
+
+                {{request}}
           
                 <p style="margin:0 0 24px 0;">
                   <a href="{{reqUrl}}"

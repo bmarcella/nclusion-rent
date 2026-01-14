@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Proprio } from "../Entity";
 import { getRequestStatusLabelFR } from "../request/entities/AuthRequest";
 import { IRequest } from "../request/entities/IRequest";
@@ -9,7 +10,8 @@ export type TemplateVars = Record<
     string | number | boolean | null | undefined
 >;
 
-export const DefaultEmailFrom = "AjiMobil <admin@mail.ajimobil.com>";
+//export const DefaultEmailFrom = "AjiMobil <admin@mail.ajimobil.com>";
+export const DefaultEmailFrom = "admin@mail.ajimobil.com";
 
 export interface BatchEmail {
     from: string;
@@ -44,7 +46,8 @@ export interface MailData {
     action?: {
         madeAt?: Date
         madeBy?: string,
-        oldStatus?: string
+        oldStatus?: string,
+        request?: string
     }
 
 }
@@ -57,7 +60,7 @@ export default class MailSender {
     constructor(
         private readonly subject: string,
         private readonly template: string,
-        private readonly from: string = DefaultEmailFrom
+        private  from: string = DefaultEmailFrom
     ) { }
 
     private isValidEmail(email: string): boolean {
@@ -93,6 +96,7 @@ export default class MailSender {
         const request = this.data.request;
         const proprio = this.data.proprio;
         const action = this.data?.action;
+        this.from = `AjiMobil - ${proprio.fullName} - (${request.id.substring(0,8)}) <${this.from}>`;
         for (const p of this.data.landlords) {
             const text = request?.comments?.[request.comments?.length - 1]?.text || '';
             const emc: EmailReceiver = {
@@ -112,7 +116,8 @@ export default class MailSender {
                     madeAt: this.toDate(request.updatedAt),
                     madeBy: proprio.fullName,
                     paymentMethod: request.general?.paymentMethod,
-                    rejectionReason: text
+                    rejectionReason: text,
+                    request: action?.request || '',
                 }
             }
             emcs.push(emc);
@@ -142,44 +147,48 @@ export default class MailSender {
             .replaceAll("'", "&#39;");
     }
 
-    private renderEmailTemplate(
-        template: string,
-        vars: TemplateVars,
-        options?: { escape?: boolean }
-    ): string {
-        const shouldEscape = options?.escape ?? true;
+   private renderEmailTemplate(
+    template: string,
+    vars: TemplateVars,
+    options?: { escape?: boolean; unsafeKeys?: string[] }
+  ): string {
+    const shouldEscape = options?.escape ?? true;
+    const unsafe = new Set(options?.unsafeKeys ?? []);
 
-        return template.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (match, key: string) => {
-            const raw = vars[key];
-            if (raw === null || raw === undefined) return match;
+    return template.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (match, key: string) => {
+      const raw = vars[key];
+      if (raw === null || raw === undefined) return match;
 
-            const str = String(raw);
-            return shouldEscape ? this.escapeHtml(str) : str;
-        });
+      const str = String(raw);
+
+      // ✅ do not escape HTML for keys explicitly marked unsafe
+      if (unsafe.has(key)) return str;
+
+      return shouldEscape ? this.escapeHtml(str) : str;
+    });
+  }
+
+private addReceivers(receivers: EmailReceiver[] | EmailReceiver) {
+    this.invalidEmails = [];
+    this.batches = [];
+
+    const list = Array.isArray(receivers) ? receivers : [receivers];
+
+    for (const r of list) {
+      if (!this.isValidEmail(r.email)) {
+        this.invalidEmails.push(r.email);
+        continue;
+      }
+
+      const html = this.renderEmailTemplate(this.template, r.vars, {
+        escape: true,
+        unsafeKeys: ["request"], // ✅ allow raw HTML injection
+      });
+
+      this.batches.push({ to: [r.email], html });
     }
-
-    private addReceivers(receivers: EmailReceiver[] | EmailReceiver) {
-        // reset per run
-        this.invalidEmails = [];
-        this.batches = [];
-
-        const list = Array.isArray(receivers) ? receivers : [receivers];
-
-        for (const r of list) {
-            if (!this.isValidEmail(r.email)) {
-                this.invalidEmails.push(r.email);
-                continue;
-            }
-
-            const html = this.renderEmailTemplate(this.template, r.vars);
-
-            this.batches.push({
-                to: [r.email],
-                html,
-            });
-        }
-        return { emails: this.invalidEmails, total: this.invalidEmails.length };
-    }
+    return { emails: this.invalidEmails, total: this.invalidEmails.length };
+  }
 
     private done(): LocalBatchEmailContent[] {
         if (!this.batches.length) {
