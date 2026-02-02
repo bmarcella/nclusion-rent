@@ -10,6 +10,9 @@ import { getRequestCategorieById, getRequestType } from "../entities/AuthRequest
 import { useTranslation } from "react-i18next";
 import UserName from "@/views/bank/show/components/UserName";
 import { getRegionsById } from "@/views/Entity/Regions";
+import { CollapsSection } from "../entities/RequestComponent";
+import ImageReq from "../components/ImageReq";
+import { useSessionUser } from "@/store/authStore";
 
 interface Props {
     request: IRequest;
@@ -18,6 +21,7 @@ interface Props {
 const PrintRequest: React.FC<Props> = ({ request }) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const type = useMemo(() => request?.requestType, [request?.requestType]);
+    const { userId } = useSessionUser((state) => state.user);
     const { t } = useTranslation();
     const [pdf, setPdf] = useState(false);
     const formatDate = (value: any) => {
@@ -521,6 +525,16 @@ const PrintRequest: React.FC<Props> = ({ request }) => {
         }
     };
 
+
+     const renderImage = () => {
+        const end = request.status == 'completed' || request.status == 'rejected' || request.status == 'cancelled'
+        return <CollapsSection title={"Documents"}>
+           <ImageReq reqId={request.id} userId={userId || ''} isEdit={true} owner={request.createdBy == userId} end={end} ></ImageReq>
+        </CollapsSection>;
+    };
+
+      
+
     return (
         <div>
             <div className="w-full flex justify-end mb-4 pr-4"  >
@@ -543,6 +557,7 @@ const PrintRequest: React.FC<Props> = ({ request }) => {
                 </Card>
                 {renderBankInfo()}
                 {renderMainSection()}
+                {renderImage() }
                 {renderSignatures()}
             </div>
         </div>
