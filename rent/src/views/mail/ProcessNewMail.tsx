@@ -137,7 +137,7 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
       let landlords_2: any[] = [];
 
       if (request?.status == 'approved') {
-         landlords_2 = await fetchProprio(nsregions, ['assist_accoutant', 'accoutant', 'super_accoutant', 'super_manager']);
+         landlords_2 = await fetchProprio(nsregions, ['assist_accountant', 'accountant', 'super_accountant', 'super_manager']);
       }
 
       if (sendMail.current) return; // prevent duplicates

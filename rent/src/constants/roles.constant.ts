@@ -5,9 +5,9 @@ import { getRegionsByValues, Regions } from "@/views/Entity/Regions"
 import { USER_ROLES } from "@/views/shared/schema"
 
 export const ADMIN = 'admin'
-export const ASSIST_ACCOUNTANT = 'assist_accoutant'
-export const ACCOUNTANT = 'accoutant'
-export const SUPER_ACCOUNTANT = 'super_accoutant'
+export const ASSIST_ACCOUNTANT = 'assist_accountant'
+export const ACCOUNTANT = 'accountant'
+export const SUPER_ACCOUNTANT = 'super_accountant'
 export const SUPER_MANAGER = 'super_manager'
 export const AGENT_IMMOBILLIER= 'agent_immobilier'
 export const COORDONATOR = 'coordonator'
@@ -67,11 +67,11 @@ export const getRolesByAhth = (auth: string ) => {
           case "super_manager":
             roles = roles.concat(["vendeur","agent_immobilier","assist_manager", "assist_coordonator", "coordonator"]);  
          break;
-         case "accoutant":
-            roles = roles.concat(["vendeur", "assist_accoutant"]);  
+         case "accountant":
+            roles = roles.concat(["vendeur", "assist_accountant"]);  
          break;
-         case "super_accoutant":
-            roles = roles.concat(["vendeur", "assist_accoutant", "accoutant"]);  
+         case "super_accountant":
+            roles = roles.concat(["vendeur", "assist_accountant", "accountant"]);  
          break;
           default:
             roles  = ["proprietaire", "reference"];
