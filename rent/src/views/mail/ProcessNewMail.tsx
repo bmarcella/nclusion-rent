@@ -52,8 +52,6 @@ export const STATUS_MAP = {
   ac: { label: "Canceled", subject: "Requête - Nouvelle status ", template: ReqStatusMyChangeEmailTemplate },
 } as const satisfies Record<Props["type"], StatusMapValue>;
 
-
-
 const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
   const { proprio, authority } = useSessionUser((state) => state.user);
   const { t } = useTranslation();
@@ -137,7 +135,7 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
       let landlords_2: any[] = [];
 
       if (request?.status == 'approved') {
-         landlords_2 = await fetchProprio(nsregions, ['assist_accountant', 'accountant', 'super_accountant', 'super_manager']);
+          landlords_2 = await fetchProprio(nsregions, ['assist_accountant', 'accountant', 'super_accountant', 'super_manager']);
       }
 
       if (sendMail.current) return; // prevent duplicates
