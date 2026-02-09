@@ -56,7 +56,12 @@ const LeaseContractForm = ({ bank }: Props) => {
                         <p>
                             <strong>NYLC S.A.</strong>, société anonyme constituée en vertu des lois haïtiennes, ayant son siège
                             social au #11, rue Ogé, Pétion-Ville, Delmas, Haiti. Représentée par Monsieur
-                            <span className="inline-block w-auto border-b border-gray-400 ml-2"><UserName userId={bank.finalDecision?.createdBy} /></span> en qualité de
+                            <span className="inline-block w-auto border-b border-gray-400 ml-2">
+                                {/* <UserName userId={bank.finalDecision?.createdBy} /> */}
+                                </span>
+                                <span className="inline-block w-100 border-b border-gray-400 mx-2" />
+                                
+                                 en qualité de
                             coordonnateur/superviseur, ci-après dénommée la <strong>« Preneuse »</strong>, d’autre part.
                         </p>
                     </div>
