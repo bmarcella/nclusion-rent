@@ -132,10 +132,15 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
       const nroles = [...roleSet];
 
       const landlords = await fetchProprio(nsregions, nroles);
+      
       let landlords_2: any[] = [];
+      let landlords_3: any[] = [];
+      let landlords_4: any[] = [];
 
       if (request?.status == 'approved') {
-          landlords_2 = await fetchProprio(nsregions, ['assist_accountant', 'accountant', 'super_accountant', 'super_manager']);
+          landlords_2 = await fetchProprio(nsregions, ['assist_accountant', 'accountant']);
+          landlords_3 = await fetchProprioByRole(['super_accountant', 'super_manager']);
+          landlords_4 = landlords_3.concat(landlords_2 || []);
       }
 
       if (sendMail.current) return; // prevent duplicates
@@ -149,7 +154,7 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
         action: {
           request: reqText
         }
-      }, previousStatus, landlords_2);
+      }, previousStatus, landlords_4);
 
     } finally {
       setLoadingRules(false);
@@ -178,30 +183,30 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
 
     // send email to creator of the request 
     try {
-      if (previousStatus) {
-        const creator = await getProprioById(payload.request.createdBy);
-        if (creator) {
-          const ntype = await getNewType(payload.request.status);
-          const type = ntype.res as TypeEmail;
-          const meta = STATUS_MAP[type];
-          const sender = new MailSender(meta.subject, meta.template);
-          const res = sender.addData({
-            type: type,
-            request: payload.request,
-            proprio: payload.proprio,
-            landlords: [creator],
-            action: {
-              oldStatus: previousStatus,
-              request:  reqText
-            }
-          });
-          if (!res.batches) return;
-          sendMailToApi(res.batches);
-          saveEmailNotification(res.batches, payload.request, payload.type);
-          // console.log("AC", type, res);
+        if (previousStatus) {
+          const creator = await getProprioById(payload.request.createdBy);
+          if (creator) {
+            const ntype = await getNewType(payload.request.status);
+            const type = ntype.res as TypeEmail;
+            const meta = STATUS_MAP[type];
+            const sender = new MailSender(meta.subject, meta.template);
+            const res = sender.addData({
+              type: type,
+              request: payload.request,
+              proprio: payload.proprio,
+              landlords: [creator],
+              action: {
+                oldStatus: previousStatus,
+                request:  reqText
+              }
+            });
+            if (!res.batches) return;
+            sendMailToApi(res.batches);
+            saveEmailNotification(res.batches, payload.request, payload.type);
+            // console.log("AC", type, res);
+          }
         }
-      }
-    } catch (error) {
+      } catch (error) {
       console.log(error);
     }
     // send email to approver of the request 
@@ -248,10 +253,11 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
               request:  reqText
             }
           });
-          if (!res.batches) return;
-          sendMailToApi(res.batches);
-          saveEmailNotification(res.batches, payload.request, payload.type);
-          // console.log("APPROVED", type, res);
+          if (res.batches) {
+            sendMailToApi(res.batches);
+            saveEmailNotification(res.batches, payload.request, payload.type);
+          }
+          console.log("APPROVED");
         }
       } catch (error) {
         console.log(error);
@@ -344,6 +350,22 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
       });
     } catch (error) {
       console.log(error);
+    }
+  };
+
+    const fetchProprioByRole = async ( roles: string[]) => {
+    try {
+      const baseQuery: Query<DocumentData> = Landlord as CollectionReference<DocumentData>;
+      const q = query(
+        baseQuery,
+        orderBy("fullName"),
+        where("type_person", "in", roles)
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Proprio[];
+    } catch (error) {
+      console.error("Error fetching landlords:", error);
+      return [];
     }
   };
 
