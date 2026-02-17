@@ -132,29 +132,42 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
       const nroles = [...roleSet];
 
       const landlords = await fetchProprio(nsregions, nroles);
-      
+
       let landlords_2: any[] = [];
       let landlords_3: any[] = [];
-      let landlords_4: any[] = [];
+      let landlords2: any[] = [];
+      const reqText = buildRequestEmailDetailsSection(request, t);
 
-      if (request?.status == 'approved') {
-          landlords_2 = await fetchProprio(nsregions, ['assist_accountant', 'accountant']);
-          landlords_3 = await fetchProprioByRole(['super_accountant', 'super_manager']);
-          landlords_4 = landlords_3.concat(landlords_2 || []);
-      }
+     
 
       if (sendMail.current) return; // prevent duplicates
       sendMail.current = true;
-      const reqText = buildRequestEmailDetailsSection(request, t);
+
+       if (request?.status == 'approved') {
+
+          landlords_2 = await fetchProprio(nsregions, ['assist_accountant', 'accountant']);
+          landlords_3 = await fetchProprioByRole(['super_accountant', 'super_manager']);
+          landlords2 = landlords_3.concat(landlords_2 || []);
+          console.log("NOTIFY ACCOUNTANT : "+ landlords2.length);
+          sendforApproval({
+              type,
+              request,
+              landlords,
+              proprio,
+              action: {
+                request: reqText
+              }
+            }, previousStatus, landlords2);
+      }
       sendMailNotificationToApi({
-        type,
-        request,
-        landlords,
-        proprio,
-        action: {
-          request: reqText
-        }
-      }, previousStatus, landlords_4);
+          type,
+          request,
+          landlords,
+          proprio,
+          action: {
+            request: reqText
+          }
+        }, previousStatus);
 
     } finally {
       setLoadingRules(false);
@@ -162,7 +175,39 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
     }
   };
 
-  const sendMailNotificationToApi = async (payload: MailData, previousStatus?: string, proprios: any = []) => {
+  const sendforApproval = async (payload: MailData, previousStatus?: string, proprios: any = []) => {
+     const reqText = payload.action?.request || '';
+     if (proprios.length > 0) {
+      try {
+        if (previousStatus) {
+          const type = 'approved' as TypeEmail;
+          const meta = STATUS_MAP[type];
+          const sender = new MailSender(meta.subject, meta.template);
+          const res = sender.addData({
+            type: type,
+            request: payload.request,
+            proprio: payload.proprio,
+            landlords: proprios,
+            action: {
+              oldStatus: previousStatus,
+              request:  reqText
+            }
+          });
+          
+          if (res.batches) {
+             sendMailToApi(res.batches);
+             saveEmailNotification(res.batches, payload.request, payload.type);
+          }
+          console.log("APPROVED SENT TO ACCOUNTANT and MANAGER", type, res);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+  }
+
+  const sendMailNotificationToApi = async (payload: MailData, previousStatus?: string) => {
   
     const reqText = payload.action?.request || '';
 
@@ -236,34 +281,7 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
      } catch (error) {
       console.log(error);
     }
-
-    if (proprios.length > 0) {
-      try {
-        if (previousStatus) {
-          const type = 'approved' as TypeEmail;
-          const meta = STATUS_MAP[type];
-          const sender = new MailSender(meta.subject, meta.template);
-          const res = sender.addData({
-            type: type,
-            request: payload.request,
-            proprio: payload.proprio,
-            landlords: proprios,
-            action: {
-              oldStatus: previousStatus,
-              request:  reqText
-            }
-          });
-          if (res.batches) {
-            sendMailToApi(res.batches);
-            saveEmailNotification(res.batches, payload.request, payload.type);
-          }
-          console.log("APPROVED");
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
+    // on complete 
     if (request?.status == 'completed') {
       try {
         if (previousStatus) {

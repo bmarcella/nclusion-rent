@@ -12,7 +12,7 @@ export const ReqApprovedEmailTemplate = `
                 <p>
                   La requête de type <strong>{{type_request}}</strong>,
                   d’un montant de <strong>{{amount}} {{currency}}</strong>,
-                  a été <strong style="color:#16a34a;">approuvée</strong>.
+                  a été <strong style="color:#16a34a;">approuvée </strong> par {{madeBy}}.
                   Vous pouvez désormais procéder au paiement de la requête. Nous vous remercions par avance.
                 </p>
 
