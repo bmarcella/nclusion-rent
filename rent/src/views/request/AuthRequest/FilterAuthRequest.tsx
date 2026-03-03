@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DatePicker, Input, Select } from '@/components/ui';
+import { Input, Select } from '@/components/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 
 type Option = { label: string; value: string | number };

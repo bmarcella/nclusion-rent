@@ -16,6 +16,7 @@ export default function RecieveReq() {
  const [loadingRules , seLoadingRules]=  useState<boolean>(false);
 
  const [nquery , setQuery]=  useState<{ status : [], reqType: [] }>() as any [];
+
  const didRun = useRef(false);
    const fetchRule = async () => {
     if (!proprio?.type_person) return; // avoid undefined in query
@@ -42,13 +43,12 @@ export default function RecieveReq() {
       });
     setRules(objs);
     const val = {
-         status: [...new Set(objs.map(o => o.status))],
+          status: [...new Set(objs.map(o => o.status))],
           reqType: [...new Set(objs.flatMap(o => o.reqType))], // o.reqType is an array
     };
     setQuery(
      val
     );
-   console.log(val);
   };
 
   useEffect(()=>{

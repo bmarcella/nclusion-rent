@@ -36,8 +36,12 @@ export default function MoneyRequestNextStatusButton({
      await onNextStatus(data, false, currentStatus, comment);       
   }
 
+
+  
+  const nrules = rules.filter(r => r.status === currentStatus && r?.reqType?.includes(request.requestType) && r.max_amount >= request.amount && r.canApprove);
+
   return ( <>
-      {(rules.length > 0 && rules[0]?.max_amount >= request.amount || action ) && 
+      {(nrules.length > 0 && Number(nrules[0]?.max_amount) >= Number(request.amount) || action ) && 
         <Card className="grid grid-cols-1 gap-4"> 
             <div className="w-full">
               <div>

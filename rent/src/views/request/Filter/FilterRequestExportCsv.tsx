@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DatePicker } from "@/components/ui/DatePicker";
-import Input from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { manageAuth } from "@/constants/roles.constant";
 import { Landlord } from "@/services/Landlord";
@@ -13,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { requestStatusAll, requestType } from "../entities/AuthRequest";
 
 
-export interface RequestFilter {
+export interface RequestFilterCsv {
   reqType: string;
   status: string;
   date: {
@@ -22,19 +21,16 @@ export interface RequestFilter {
   };
   user: string;          // agent id or username
   regions: number | null ,   // region ids/codes
-  amount: {
-    min: number;
-    max: number;
-  },
-  proprios: []
+  proprios: [],
+  currency: string | null;
 }
 
 interface Props {
-  onChange: (data: RequestFilter) => void;
+  onChange: (data: RequestFilterCsv) => void;
   data: any
 };
 
-function FilterRequest({ onChange, data }: Props) {
+function FilterRequestCsv({ onChange, data }: Props) {
   const { proprio, authority } = useSessionUser((state) => state.user);
   const { t } = useTranslation();
   const [regions, setRegions] = useState<OptionType[]>([]);
@@ -43,10 +39,9 @@ function FilterRequest({ onChange, data }: Props) {
   const [selectedAgent, setSelectedAgent] = useState<string>() as any;
   const [selectedStatus, setSelectedStatus] = useState<string>() as any;
   const [selectedReqType, setSelectedReqType] = useState<string>() as any;
+  const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
   const [start, setStart] = useState<Date>() as any;
   const [end, setEnd] = useState<Date>() as any;
-  const [min, setMin] = useState<number>() as any;
-  const [max, setMax] = useState<number>() as any;
   // 
   const [proprios, setProprio] = useState<any[]>([]);
 
@@ -104,12 +99,9 @@ function FilterRequest({ onChange, data }: Props) {
       },
       user: selectedAgent,
       regions: selectedRegions!,
-      amount: {
-        min,
-        max
-      }
+      currency: selectedCurrency,
     });
-  }, [start, end, selectedAgent, selectedRegions, selectedStatus, selectedReqType, min, max, proprios]);
+  }, [start, end, selectedAgent, selectedRegions, selectedStatus, selectedReqType, proprios, selectedCurrency]);
 
   return (
     <>
@@ -157,7 +149,7 @@ function FilterRequest({ onChange, data }: Props) {
         )}
         {!data.sentByMe && (agents.length > 0) && (
           <Select
-            placeholder="Employé"
+            placeholder="Employee"
             options={agents}
             onChange={(options: OptionType) => {
               if (!options || options.value == undefined) {
@@ -168,6 +160,37 @@ function FilterRequest({ onChange, data }: Props) {
             }}
           />
         )}
+
+           <Select
+            placeholder="Monnaie"
+            options={[
+              {
+                label: 'All',
+                value: undefined as any
+              },
+              {
+                label: "Dollar US",
+                value: "USD"
+              },
+              {
+                label: "Gourdes",
+                value: "HTG"
+              },
+              {
+                label: "Pesos Dominicains",
+                value: ""
+              }
+      
+            ] as OptionType[]}
+            onChange={(options: OptionType) => {
+              setSelectedCurrency(undefined)
+              if (!options) {
+                setSelectedCurrency(null);
+                return;
+              }
+             setSelectedCurrency(options.value as string);
+            }}
+          />
 
         <DatePicker placeholder="Date debut" onChange={(date) => {
           setStart(undefined);
@@ -187,27 +210,10 @@ function FilterRequest({ onChange, data }: Props) {
           setEnd(new Date(date));
         }} />
 
-        <Input placeholder="Montant Min " onChange={(date) => {
-          setMin(undefined);
-          if (!date) {
-            setMin(undefined);
-            return;
-          }
-          setMin(Number(date.target.value));
-        }} />
-
-        <Input placeholder="Montant Max" onChange={(date) => {
-          setMax(undefined);
-          if (!date) {
-            setMax(undefined);
-            return;
-          }
-          setMax(Number(date.target.value));
-        }} />
       </div>
     </>
   )
 }
 
-export default FilterRequest
+export default FilterRequestCsv
 

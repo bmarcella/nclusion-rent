@@ -67,13 +67,12 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
   const [isSubmitting, setSubmitting] = useState(false);
 
   const init = (data: IRequest, type: TypeEmail, previousStatus?: string) => {
-
-    if (data && type) {
-      setRequest(data);
-      fetchRule(data, type, previousStatus);
-    } else {
-      console.log('No request provided to started fetching rules');
-    }
+      if (data && type) {
+        setRequest(data);
+        fetchRule(data, type, previousStatus);
+        } else {
+        console.log('No request provided to started fetching rules');
+      }
   };
 
   useImperativeHandle(ref, () => ({
@@ -82,129 +81,127 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
 
   const fetchRule = async (request: IRequest, type: TypeEmail, previousStatus?: string) => {
 
-    if (!proprio?.type_person) return;
-    if (!authority?.length) return;
-    if (!request) return;
+      if (!proprio?.type_person) return;
+      if (!authority?.length) return;
+      if (!request) return;
 
-    const role = authority[0];
-    setLoadingRules(true);
-    try {
-      const { regions } = await manageAuth(role, proprio, t);
-      const regIds = (regions ?? []).map((r) => r.id).filter(Boolean);
-      // Firestore: "in" cannot be empty
-      const q =
-        role === "admin"
-          ? query(
-            AuthRequestDoc,
-            where("status", "==", request.status),
-            where("roles", "array-contains", role)
-          )
-          : regIds.length
+      const role = authority[0];
+      setLoadingRules(true);
+      try {
+        const { regions } = await manageAuth(role, proprio, t);
+        const regIds = (regions ?? []).map((r) => r.id).filter(Boolean);
+        // Firestore: "in" cannot be empty
+        const q =
+          role === "admin"
             ? query(
               AuthRequestDoc,
               where("status", "==", request.status),
-              where("region_id", "in", regIds),
               where("roles", "array-contains", role)
             )
-            : null;
+            : regIds.length
+              ? query(
+                AuthRequestDoc,
+                where("status", "==", request.status),
+                where("region_id", "in", regIds),
+                where("roles", "array-contains", role)
+              )
+              : null;
 
-      if (!q) return;
+        if (!q) return;
 
-      const snapshot = await getDocs(q);
+        const snapshot = await getDocs(q);
 
-      const objs = snapshot.docs
-        .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as any) }))
-        .filter((rule) =>
-          Array.isArray(rule.reqType)
-            ? rule.reqType.includes(request.requestType as RequestTypeEnum)
-            : false
-        ) as AuthRequest[];
+        const objs = snapshot.docs
+          .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as any) }))
+          .filter((rule) =>
+            Array.isArray(rule.reqType)
+              ? rule.reqType.includes(request.requestType as RequestTypeEnum)
+              : false
+          ) as AuthRequest[];
 
-      const regionSet = new Set<number>();
-      const roleSet = new Set<string>();
+        const regionSet = new Set<number>();
+        const roleSet = new Set<string>();
 
-      for (const r of objs) {
-        if (typeof r.region_id === "number") regionSet.add(r.region_id);
-        (r.roles ?? []).forEach((ro) => roleSet.add(ro));
+        for (const r of objs) {
+          if (typeof r.region_id === "number") regionSet.add(r.region_id);
+          (r.roles ?? []).forEach((ro) => roleSet.add(ro));
+        }
+
+        const nsregions = [...regionSet];
+        const nroles = [...roleSet];
+
+        const landlords = await fetchProprio(nsregions, nroles);
+
+        let landlords_2: any[] = [];
+        let landlords_3: any[] = [];
+        let landlords2: any[] = [];
+        const reqText = buildRequestEmailDetailsSection(request, t);
+
+        
+
+        if (sendMail.current) return; // prevent duplicates
+        sendMail.current = true;
+
+          if (request?.status == 'approved') {
+            landlords_2 = await fetchProprio(nsregions, ['assist_accountant', 'accountant']);
+            landlords_3 = await fetchProprioByRole(['super_accountant', 'super_manager']);
+            landlords2 = landlords_3.concat(landlords_2 || []);
+            console.log("NOTIFY ACCOUNTANT : "+ landlords2.length);
+            sendforApproval({
+                type,
+                request,
+                landlords,
+                proprio,
+                action: {
+                  request: reqText
+                }
+              }, previousStatus, landlords2);
+        }
+        sendMailNotificationToApi({
+            type,
+            request,
+            landlords,
+            proprio,
+            action: {
+              request: reqText
+            }
+          }, previousStatus);
+
+      } finally {
+        setLoadingRules(false);
+        sendMail.current = false;
       }
-
-      const nsregions = [...regionSet];
-      const nroles = [...roleSet];
-
-      const landlords = await fetchProprio(nsregions, nroles);
-
-      let landlords_2: any[] = [];
-      let landlords_3: any[] = [];
-      let landlords2: any[] = [];
-      const reqText = buildRequestEmailDetailsSection(request, t);
-
-     
-
-      if (sendMail.current) return; // prevent duplicates
-      sendMail.current = true;
-
-       if (request?.status == 'approved') {
-
-          landlords_2 = await fetchProprio(nsregions, ['assist_accountant', 'accountant']);
-          landlords_3 = await fetchProprioByRole(['super_accountant', 'super_manager']);
-          landlords2 = landlords_3.concat(landlords_2 || []);
-          console.log("NOTIFY ACCOUNTANT : "+ landlords2.length);
-          sendforApproval({
-              type,
-              request,
-              landlords,
-              proprio,
-              action: {
-                request: reqText
-              }
-            }, previousStatus, landlords2);
-      }
-      sendMailNotificationToApi({
-          type,
-          request,
-          landlords,
-          proprio,
-          action: {
-            request: reqText
-          }
-        }, previousStatus);
-
-    } finally {
-      setLoadingRules(false);
-      sendMail.current = false;
-    }
   };
 
   const sendforApproval = async (payload: MailData, previousStatus?: string, proprios: any = []) => {
-     const reqText = payload.action?.request || '';
-     if (proprios.length > 0) {
-      try {
-        if (previousStatus) {
-          const type = 'approved' as TypeEmail;
-          const meta = STATUS_MAP[type];
-          const sender = new MailSender(meta.subject, meta.template);
-          const res = sender.addData({
-            type: type,
-            request: payload.request,
-            proprio: payload.proprio,
-            landlords: proprios,
-            action: {
-              oldStatus: previousStatus,
-              request:  reqText
+        const reqText = payload.action?.request || '';
+        if (proprios.length > 0) {
+        try {
+          if (previousStatus) {
+            const type = 'approved' as TypeEmail;
+            const meta = STATUS_MAP[type];
+            const sender = new MailSender(meta.subject, meta.template);
+            const res = sender.addData({
+              type: type,
+              request: payload.request,
+              proprio: payload.proprio,
+              landlords: proprios,
+              action: {
+                oldStatus: previousStatus,
+                request:  reqText
+              }
+            });
+            
+            if (res.batches) {
+                sendMailToApi(res.batches);
+                saveEmailNotification(res.batches, payload.request, payload.type);
             }
-          });
-          
-          if (res.batches) {
-             sendMailToApi(res.batches);
-             saveEmailNotification(res.batches, payload.request, payload.type);
+            console.log("APPROVED SENT TO ACCOUNTANT and MANAGER", type, res);
           }
-          console.log("APPROVED SENT TO ACCOUNTANT and MANAGER", type, res);
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
       }
-    }
-
   }
 
   const sendMailNotificationToApi = async (payload: MailData, previousStatus?: string) => {
@@ -251,9 +248,11 @@ const ProcessNewMail = forwardRef<HTMLDivElement, any>(({ }, ref) => {
             // console.log("AC", type, res);
           }
         }
-      } catch (error) {
+    } 
+    catch (error) {
       console.log(error);
     }
+    
     // send email to approver of the request 
     try {
       if (previousStatus) {

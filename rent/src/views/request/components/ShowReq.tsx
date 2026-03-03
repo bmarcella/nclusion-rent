@@ -28,8 +28,9 @@ import { getRegionsById } from "@/views/Entity/Regions";
 import { manageAuth } from "@/constants/roles.constant";
 import FilterRequest, { RequestFilter } from "../Filter/FilterRequest";
 import { useNavigate } from "react-router-dom";
-import { getCategorieName, getRequestCategorieById } from "../entities/AuthRequest";
+import { getCategorieName } from "../entities/AuthRequest";
 import ProcessNewMail from "@/views/mail/ProcessNewMail";
+import ExportCsv from "../Export";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const PAGE_SIZE_OPTIONS = [
@@ -350,7 +351,6 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
       {
         header: 'Action',
         cell: ({ row }) => {
-
           return (<div className="min-w-[200px]">
             {(hasAuthority(authority, 'agent_immobilier', true)) &&
               <Button variant="solid" shape="circle" size="xs" className='mr-1 ' onClick={() => openDialog(row?.original)}>
@@ -360,7 +360,6 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
             <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs" onClick={() => navigate("/request/" + row.original.id)}>
               <PiPaperPlane />
             </Button>
-
           </div>);
 
 
@@ -440,8 +439,9 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
   return (
     <>
       <ProcessNewMail ref={mailRef} />
+
       <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
-        <div className={classNames('rounded-2xl p-4 flex flex-col justify-center', 'bg-green-100')} >
+         <div className={classNames('rounded-2xl p-4 flex flex-col justify-center', 'bg-green-100')} >
           <div className="flex justify-between items-center relative">
             <div>
               <div className="mb-4 text-gray-900 font-bold">{'Total Requête'}</div>
@@ -455,9 +455,14 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
               <HiHome />
             </div>
           </div>
-        </div>
+         </div>
+         <div  className={classNames('flex flex-col justify-end')} >
+             <ExportCsv></ExportCsv>
+         </div>
+        
       </div>
       <FilterRequest onChange={onFilterChange} data={{ status, step, action, forMe, sentByMe, recieve, transition, rejected }} />
+
       <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
         {<>
           <Table>
