@@ -242,6 +242,8 @@ export interface IRequest {
   managerGlobalApproval: string,
   rejectedBy?: string,
   cancelledBy?: string,
+  completedBy?:string,
+  completedAt?: Date,
   comments?: {
     by_who: string,
     status: string,

@@ -10,7 +10,6 @@ export function ShowRequestBase() {
   const statuses = requestStatusAll(t)
   return (
     <>
-
       <Tabs defaultValue="tab1" className="w-full">
         <TabList>
           <TabNav value="tab1">Tout</TabNav>
@@ -27,7 +26,6 @@ export function ShowRequestBase() {
               {<ShowReq status={st.value} ></ShowReq>}
             </TabContent>)
           })}
-
         </div>
       </Tabs>
     </>

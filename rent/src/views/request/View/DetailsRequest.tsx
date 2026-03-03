@@ -685,7 +685,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
         );
     }
   };
-
+  console.log("Rules in MoneyRequestNextStatusButton:", rules);
   return (
     <div className="space-y-4">
 
