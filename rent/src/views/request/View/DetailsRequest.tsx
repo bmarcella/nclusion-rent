@@ -651,8 +651,6 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
       </Card>
     );
   };
-
-
   const renderMainSection = (t: any) => {
     switch (typeRequest) {
       case 'bill':
@@ -685,10 +683,8 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
         );
     }
   };
-  console.log("Rules in MoneyRequestNextStatusButton:", rules);
   return (
     <div className="space-y-4">
-
       <Card className="p-4 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="mb-4">

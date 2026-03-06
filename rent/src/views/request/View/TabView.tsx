@@ -16,6 +16,10 @@ import { AuthRequest, RequestTypeEnum } from '../entities/AuthRequest'
 import { manageAuth } from '@/constants/roles.constant'
 import { useTranslation } from 'react-i18next'
 import { Spinner } from '@/components/ui';
+import { ShowBankDetailsBase } from '@/views/bank/show/ShowBankDetails'
+import { Bank } from '@/views/Entity'
+import { getBankById } from '@/services/firebase/BankService'
+import BankReqView from './BankReqView'
 export type ParamsApprove = { request: IRequest, old_status: string }
 interface Props {
   data: IRequest
@@ -30,6 +34,18 @@ function TabView({ data, onDialogClose, action, approved }: Props) {
   const [rules, setRules] = useState<AuthRequest[] | undefined>([]) as any;
   const [loadingRules, seLoadingRules] = useState<boolean>(false);
   const { t } = useTranslation();
+  const [bank, setBank] = useState<Bank>();
+  const [loading, setLoading] = useState(true);
+   useEffect(() => {
+      const fetchBank = async () => {
+        setLoading(true);
+        const new_id = request.lease_payment?.id_bank
+        const result = await getBankById(new_id!);
+        setBank(result as any);
+        setLoading(false);
+      };
+      if (request.lease_payment?.id_bank) fetchBank();
+    }, [request.lease_payment?.id_bank]);
 
   useEffect(() => {
     let canceled = false;
@@ -91,6 +107,9 @@ function TabView({ data, onDialogClose, action, approved }: Props) {
           <TabNav value="tab1"> {request.requestType.toUpperCase()}</TabNav>
           {<><TabNav value="tab2"> Documents</TabNav>
             <TabNav value="tab3"> Historique</TabNav>
+             { request.requestType == 'lease_payment'  && request.lease_payment?.id_bank && (<>
+             <TabNav value="tab4"> Bank</TabNav>
+          </>)}
           </>
           }
         </TabList>
@@ -99,6 +118,13 @@ function TabView({ data, onDialogClose, action, approved }: Props) {
             <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} approved={approved} />
           </TabContent>
           <>
+          { request.requestType == 'lease_payment' && (<>
+            <TabContent value="tab4">
+              { bank && <BankReqView bank={bank} ></BankReqView> }
+            </TabContent>
+          </>)}
+         
+
             <TabContent value="tab3">
               <HistoticView data={request}></HistoticView>
             </TabContent>
