@@ -182,7 +182,7 @@ export const ShowBankDetailsBase = () => {
         createdAt: new Date(),
         taskName: step,
         bankId: bankId!,
-        id_region: bank?.id_region,
+        id_region: bank?.id_region || '',
         done: false,
         index,
         state: "pending",
@@ -229,7 +229,7 @@ export const ShowBankDetailsBase = () => {
         onRenovOk={onRenovOk}
         genTasks={SaveBankTasks}
         onChangeState={(comp, name) => { openDialog(comp, name) }}
-        bank={bank} userId={userId} />}
+        bank={bank} userId={userId || ''} />}
       <Dialog
         isOpen={dialogIsOpen}
         onClose={onDialogClose}
