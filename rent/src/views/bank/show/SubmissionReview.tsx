@@ -14,8 +14,6 @@ import ImageLordComp, { LordImage } from "./components/ImageLord";
 import BankInfo from "./components/BankInfo";
 import Rejected from "./reject/Rejected";
 import { Bank, ListBankStepsDetails } from "@/views/Entity";
-import generatePDF from 'react-to-pdf';
-import { PdfOps } from "./pdfOps";
 import { useReactToPrint } from "react-to-print";
 import Input from "@/components/ui/Input";
 import Checkbox from "@/components/ui/Checkbox";
@@ -72,13 +70,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
          
      }, [bankId]);
 
-     const pdfExport = async () => {
-       setPdf(true);
-       setTimeout(async () => {
-        await   generatePDF(contentRef,  PdfOps(bank?.bankName+'.pdf'));
-        setPdf(false);
-       }, 2000);
-     }
+  
 
      const print = async () => {
       setPdf(true);
