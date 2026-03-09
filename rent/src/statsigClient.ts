@@ -13,13 +13,7 @@ export const statsigClient = async (): Promise<null | StatsigClient> => {
     return initPromise
   }
 
-  const statsigKey: string =
-    (window as typeof window & { import: any })?.import?.meta?.env
-      ?.VITE_STATSIG_KEY || process.env.VITE_STATSIG_KEY
-
-  if (!statsigKey) {
-    return null
-  }
+  const statsigKey: string = `client-13HCyLarw0J97mI1s2pVey45pBDCaikeZRCLQE9mfuc`
 
   initPromise = (async () => {
     const client = new StatsigClient(
