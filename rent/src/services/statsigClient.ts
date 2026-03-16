@@ -25,7 +25,7 @@ export const statsigClient = async (): Promise<null | StatsigClient> => {
           new StatsigAutoCapturePlugin()
         ]
       }
-    )
+    );
     await client.initializeAsync()
     singleton = client
     return client
