@@ -32,7 +32,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.add',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["agent_immobilier", "admin",  'super_manager', 'coordonator'],
+                authority: ["agent_immobilier", "admin", 'super_manager', 'coordonator'],
                 subMenu: [],
             },
             {
@@ -42,17 +42,17 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.show',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["agent_immobilier", "admin",'coordonator', 'super_manager'],
+                authority: ["agent_immobilier", "admin", 'coordonator', 'super_manager'],
                 subMenu: [],
             },
-             {
+            {
                 key: 'bankMenu.ops',
                 path: '/bank/ops',
                 title: 'Operationelles',
                 translateKey: 'nav.bankMenu.ops',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager", 'super_manager'],
+                authority: ["admin", "coordonator", "assist_coordonator", "manager", "assist_manager", 'super_manager'],
                 subMenu: [],
             },
             {
@@ -62,7 +62,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.current',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager", 'super_manager'],
+                authority: ["admin", "coordonator", "assist_coordonator", "manager", "assist_manager", 'super_manager'],
                 subMenu: [],
             },
             {
@@ -72,7 +72,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.icurrent',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "coordonator", "assist_coordonator","manager", "assist_manager", 'super_manager'],
+                authority: ["admin", "coordonator", "assist_coordonator", "manager", "assist_manager", 'super_manager'],
                 subMenu: [],
             },
             {
@@ -82,7 +82,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.vendor',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "vendor_management",'coordonator', "assist_coordonator" , 'super_manager'],
+                authority: ["admin", "vendor_management", 'coordonator', "assist_coordonator", "manager", "assist_manager", 'super_manager'],
                 subMenu: [],
             },
             {
@@ -92,7 +92,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.report',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin",'super_manager', "coordonator", "assist_coordonator","manager", "assist_manager", 'super_manager'],
+                authority: ["admin", 'super_manager', "coordonator", "assist_coordonator", "manager", "assist_manager", 'super_manager'],
                 subMenu: [],
             }
         ],
@@ -113,7 +113,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.reqMenu.add',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ['assist_accountant', 'accountant', 'admin',"assist_manager", "assist_coordonator", "coordonator", "manager", "super_manager"],
+                authority: ['assist_accountant', 'accountant', 'admin', "assist_manager", "assist_coordonator", "coordonator", "manager", "super_manager"],
                 subMenu: [],
             },
             {
@@ -146,7 +146,7 @@ const navigationConfig: NavigationTree[] = [
                 authority: ['assist_accountant', 'accountant', 'admin', "super_accountant"],
                 subMenu: [],
             },
-           
+
         ],
     },
     {
