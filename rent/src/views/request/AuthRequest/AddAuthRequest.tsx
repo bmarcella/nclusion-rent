@@ -19,16 +19,17 @@ export const AddAuthRequest = ( { newRuleAdd } : any ) => {
     const [message, setMessage] = useTimeOutMessage()
     const [alert, setAlert] = useState("success") as any;
     const { userId } = useSessionUser((state) => state.user);
+
     const openDialog = () => {
         setIsOpen(true)
     }
+
     const onDialogClose = (e: MouseEvent) => {
         setIsOpen(false)
     }
 
 
     const onSubmitForm = async  (data: any) => {
-         console.log(data);
          setSubmitting(true);
             try {
               const request = {
@@ -38,7 +39,6 @@ export const AddAuthRequest = ( { newRuleAdd } : any ) => {
                 updated_by: userId,
                 updated_at: new Date()
               } as Partial<AuthRequest>;
-              console.log(request);
               const docRef = await addDoc(AuthRequestDoc, request);
               await updateDoc(docRef, { id: docRef.id });
               newRuleAdd();
@@ -46,7 +46,6 @@ export const AddAuthRequest = ( { newRuleAdd } : any ) => {
               setAlert("success")
               setTimeout(() => setSubmitting(false), 1000);
             } catch (error) {
-              console.error("Error adding document: ", error);
               setMessage("Erreur lors de l'enregistrement de la requete");
               setAlert("danger")
             }

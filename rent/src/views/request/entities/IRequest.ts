@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// ---- Primitive / enum-like types ----
 export type OnBehalfApprove = "pending" | "approve" | "reject";
 export type PaymentMethod = "bank_transfer" | "cash" | "check";
 export type Currency = "HTG" | "USD" | "PESOS";
@@ -242,14 +241,14 @@ export interface IRequest {
   managerGlobalApproval: string,
   rejectedBy?: string,
   cancelledBy?: string,
-  completedBy?:string,
+  completedBy?: string,
   completedAt?: Date,
   comments?: {
     by_who: string,
     status: string,
-    text : string , 
+    text: string,
     createdAt: Date,
-  } [];
+  }[];
   historicApproval: {
     status_to: string,
     status_from: string,

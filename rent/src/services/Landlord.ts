@@ -40,10 +40,11 @@ export const MailNotificationDoc = collection(db, mailNotification);
 
 
 export const getAuthRequestRef = (id: string) => {
-     return doc(db, otherBankPictures, id);
-}
-export const getOtherBankPicturesRef = (id: string) => {
      return doc(AuthRequestDoc, id);
+}
+
+export const getOtherBankPicturesRef = (id: string) => {
+     return doc(otherBankPicturesDoc, id);
 }
 
 export const getExpenseRequestDoc = (id: string) => {

@@ -17,9 +17,13 @@ import {
 } from "firebase/firestore";
 import { AuthRequestDoc } from "@/services/Landlord";
 import type { AuthRequest } from "../entities/AuthRequest";
-import { Button, Pagination, Tag } from "@/components/ui";
+import { Alert, Button, Pagination, Select, Tag } from "@/components/ui";
 import UserName from "@/views/bank/show/components/UserName";
 import { getRegionsById } from "@/views/Entity/Regions";
+import Currency from "@/views/shared/Currency";
+import { updateAuthReqById } from "@/services/firebase/AuthReqService";
+import useTimeOutMessage from "@/utils/hooks/useTimeOutMessage";
+import { CurrencyEnum } from "../entities/SchemaRequest";
 
 const { Tr, Th, Td, THead, TBody } = Table;
 
@@ -31,12 +35,11 @@ type Filter = {
 };
 
 const PAGE_SIZE_OPTIONS = [
-  { value: 100, label: "100 / page" },
   { value: 200, label: "200 / page" },
   { value: 500, label: "500 / page" },
+  { value: 1000, label: "1000 / page" },
 ];
 
-type SelectOpt = { value: number; label: string };
 
 export const ViewAuthRequest: React.FC = () => {
   // server-side paging state
@@ -46,10 +49,16 @@ export const ViewAuthRequest: React.FC = () => {
   const [pageSizeIdx, setPageSizeIdx] = useState(0);
   const pageSize = PAGE_SIZE_OPTIONS[pageSizeIdx].value;
 
+  const [isSubmitting, setSubmitting] = useState<boolean[]>([]);
+  const [message, setMessage] = useTimeOutMessage()
+  const [alert, setAlert] = useState("success") as any;
+
   // data
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<AuthRequest[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+
+  const [last, setLast] = useState<AuthRequest>();
 
   // filters & sort
   const [filter, setFilter] = useState<Filter>({
@@ -72,14 +81,12 @@ export const ViewAuthRequest: React.FC = () => {
     { key: "created_by", label: "Created By" },
     { key: "created_at", label: "Created At" },
     { key: "canApprove", label: "Can Approve" },
+    { key: "Actions", label: "Actions" },
   ] as const;
 
   // ---------- Constraints ----------
   const constraints = useMemo<QueryConstraint[]>(() => {
     const cs: QueryConstraint[] = [];
-
-    // Un-comment these when you're ready to use them (note: Firestore
-    // only allows ONE array-contains-any / in / not-in field per query).
 
     if (filter.isUser && filter.isUser.trim() !== "") {
       cs.push(where("created_by", "==", filter.isUser.trim()));
@@ -93,13 +100,6 @@ export const ViewAuthRequest: React.FC = () => {
       cs.push(where("region_id", "==", filter.region));
     }
 
-    // ⚠ If you also need reqType, you CANNOT keep array-contains-any
-    // on both roles and reqType at the same time.
-    if (filter.reqType?.length) {
-      // cs.push(where("reqType", "array-contains-any", filter.reqType.slice(0, 10)));
-    }
-
-    // Sorting (make sure you have composite indexes for combinations)
     if (sortKey === "created-desc") cs.push(orderBy("created_at", "desc"));
     if (sortKey === "created-asc") cs.push(orderBy("created_at", "asc"));
     if (sortKey === "status-asc") cs.push(orderBy("status", "asc"));
@@ -133,12 +133,56 @@ export const ViewAuthRequest: React.FC = () => {
     };
   }, [constraints]);
 
+
+  const currencyOps = CurrencyEnum.options.map((o) => {
+    return { value: o, label: o } as any;
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!last) return;
+    setRows(prev =>
+      prev.map(row =>
+        row.id == last.id ? { ...row, currency: last.currency } : row
+      )
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [last]);
+
+
+  const setCurrency = async (auth: AuthRequest, htg: AuthRequest["currency"], index: number) => {
+    if (!auth.id) return;
+    setSubmitting(prev => {
+      const next = [...prev];
+      next[index] = true;
+      return next;
+    });
+    try {
+      const new_auth = { ...auth, currency: htg } as Partial<AuthRequest>
+      await updateAuthReqById(auth?.id, new_auth);
+      setMessage("Devise du Réglément a été modifié avec success");
+      setAlert("success");
+      setLast(new_auth as any);
+      setTimeout(() => {
+        setSubmitting(prev => {
+          const next = [...prev];
+          next[index] = false;
+          return next;
+        });
+      }, 1000);
+    } catch (error) {
+      setMessage("Erreur lors de la modificationde la devise de la requete");
+      setAlert("danger")
+    }
+  }
+
   // fetch a specific page using cursor
   const fetchPage = async (pageNumber: number) => {
     setLoading(true);
     try {
       const base = AuthRequestDoc as CollectionReference<DocumentData>;
-
       let q: Query<DocumentData>;
       if (pageNumber === 1) {
         q = query(base, ...constraints, limit(pageSize));
@@ -186,26 +230,6 @@ export const ViewAuthRequest: React.FC = () => {
   const goPrev = () => page > 1 && !loading && fetchPage(page - 1);
   const goNext = () => hasNext && !loading && fetchPage(page + 1);
 
-  // ---------- Simple controls ----------
-  const setRolesCsv = (csv: string) =>
-    setFilter((f) => ({
-      ...f,
-      roles: csv
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-    }));
-
-  const setReqTypesCsv = (csv: string) =>
-    setFilter((f) => ({
-      ...f,
-      reqType: csv
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .map((n) => Number(n))
-        .filter((n) => !Number.isNaN(n)),
-    }));
 
   const fmt = (v: any) => {
     if (!v) return "-";
@@ -216,96 +240,11 @@ export const ViewAuthRequest: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Filters */}
-      {/* <div className="flex flex-wrap items-end gap-3">
-        <div>
-          <label className="block text-sm mb-1">Created by</label>
-          <input
-            className="border px-2 py-1 rounded w-64"
-            placeholder="user id or email"
-            value={filter.isUser ?? ""}
-            onChange={(e) =>
-              setFilter((f) => ({
-                ...f,
-                isUser: e.target.value || undefined,
-              }))
-            }
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1">Roles (CSV)</label>
-          <input
-            className="border px-2 py-1 rounded w-64"
-            placeholder="admin,user,manager"
-            value={filter.roles.join(",")}
-            onChange={(e) => setRolesCsv(e.target.value)}
-          />
-          <div className="text-xs text-gray-500 mt-1">
-            Max 10 values (Firestore limit).
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1">ReqTypes (CSV)</label>
-          <input
-            className="border px-2 py-1 rounded w-40"
-            placeholder="1,2,3"
-            value={filter.reqType.join(",")}
-            onChange={(e) => setReqTypesCsv(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1">Region ID</label>
-          <input
-            type="number"
-            className="border px-2 py-1 rounded w-28"
-            placeholder="e.g. 5"
-            value={filter.region ?? ""}
-            onChange={(e) =>
-              setFilter((f) => ({
-                ...f,
-                region:
-                  e.target.value === "" ? undefined : Number(e.target.value),
-              }))
-            }
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1">Sort</label>
-          <select
-            className="border px-2 py-1 rounded"
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as SortKey)}
-          >
-            <option value="created-desc">Created (newest)</option>
-            <option value="created-asc">Created (oldest)</option>
-            <option value="status-asc">Status (A → Z)</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1">Page size</label>
-          <Select<SelectOpt>
-            size="sm"
-            isSearchable={false}
-            value={PAGE_SIZE_OPTIONS.find((o) => o.value === pageSize) as any}
-            options={PAGE_SIZE_OPTIONS as any}
-            onChange={(opt) =>
-              setPageSizeIdx(
-                Math.max(
-                  0,
-                  PAGE_SIZE_OPTIONS.findIndex(
-                    (o) => o.value === (opt?.value ?? PAGE_SIZE_OPTIONS[0].value),
-                  ),
-                )
-              )
-            }
-          />
-        </div>
-      </div> */}
+      {message && (
+        <Alert showIcon className="mb-4 mt-4" type={alert}>
+          <span className="break-all">{message}</span>
+        </Alert>
+      )}
 
       <div className="w-full mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
         {/* Table */}
@@ -324,7 +263,7 @@ export const ViewAuthRequest: React.FC = () => {
               </Tr>
             )}
             {!loading &&
-              rows.map((r) => (
+              rows.map((r, i) => (
                 <Tr key={r.id}>
                   <Td>
                     <span className="inline-flex items-center gap-2">
@@ -333,7 +272,7 @@ export const ViewAuthRequest: React.FC = () => {
                       </Tag>
                     </span>
                   </Td>
-                  <Td>{r.max_amount}</Td>
+                  <Td>  <Currency amount={r.max_amount} tag={r?.currency || "N/A"} />  </Td>
                   <Td>{Array.isArray(r.roles) ? r.roles.join(", ") : "-"}</Td>
                   <Td>{Array.isArray(r.reqType) ? r.reqType.join(", ") : "-"}</Td>
                   <Td>{r.region_id ? getRegionsById(r.region_id).capital : "-"}</Td>
@@ -349,6 +288,20 @@ export const ViewAuthRequest: React.FC = () => {
                       <Tag className="bg-red-100 text-red-700 border-0">
                         Non
                       </Tag>}
+                  </Td>
+
+                  <Td>
+
+                    <Select
+                      isLoading={isSubmitting[i]}
+                      defaultValue={r.currency}
+                      options={currencyOps}
+                      onChange={(option: any) => {
+                        if (!option || !option.value) return;
+                        setCurrency(r, option.value, i);
+                      }}
+                    />
+
                   </Td>
                 </Tr>
               ))}

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { addDoc, CollectionReference, deleteDoc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
-import { BankDoc, BankLeaseDoc, bankPicturesDoc, getBankDoc, getExpenseRequestDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc, otherBankPicturesDoc, ReqPicturesDoc, TaskDoc } from "../Landlord";
+import { BankLeaseDoc, bankPicturesDoc, getBankDoc, getExpenseRequestDoc, getLandlordDoc, hdDoc, hStepsDoc, LandlordPicturesDoc, otherBankPicturesDoc, ReqPicturesDoc, TaskDoc } from "../Landlord";
 import { BankImage } from "@/views/bank/show/components/ImageGallery";
 import { ref, deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
 import { storage } from "./FirebaseStorage";
-import { BankStep, StepDecision } from "@/views/Entity";
 import { ReqImage } from "@/views/request/components/ImageReqComp";
 import { ContractSignedImage } from "@/views/bank/show/components/ImageContratSigned";
+import { StepDecision } from "@/views/Entity";
 
 export const getBankById = async (bankId: string) => {
   const bankRef = getBankDoc(bankId);
@@ -41,6 +41,9 @@ export const updateBankById = async (bankId: string, data: any) => {
     return false;
   }
 };
+
+
+
 
 export const addStepsHistory = async (data: any) => {
   try {

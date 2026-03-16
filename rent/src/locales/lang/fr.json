@@ -5,7 +5,8 @@
     "region": "Région",
     "roles": "Rôles",
     "maxAmount": "Montant maximal",
-    "canApprove": "Peut approuver"
+    "canApprove": "Peut approuver",
+    "currency" : "Devise"
   },
   "report": {
     "weekAIReport": {

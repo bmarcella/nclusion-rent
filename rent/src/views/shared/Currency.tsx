@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 
 interface CurrencyProps {
   amount: number | string;
   format?: string;
-  tag?: string;
+  tag?: string | any;
 }
 
 function Currency({ amount, format = 'fr-FR', tag = "HTG" }: CurrencyProps) {
