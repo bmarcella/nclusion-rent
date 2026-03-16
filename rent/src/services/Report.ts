@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BankDoc } from "./Landlord";
-import { DocumentData, getDocs, or, orderBy, Query, query, QueryConstraint, Timestamp, where } from "firebase/firestore";
+import { DocumentData, getDocs, orderBy, Query, query, QueryConstraint, Timestamp, where } from "firebase/firestore";
 import { getRegionIds } from "@/views/Entity/Regions";
 
 export interface ReportItem {
@@ -56,7 +55,7 @@ export interface ReportItem {
             return filters.length > 0 ? query(q, ...filters) : q;
     }
 
-    export const getQueryFiltersDate = (q: Query<DocumentData, DocumentData>, {  start, end }: any)  => {
+export const getQueryFiltersDate = (q: Query<DocumentData, DocumentData>, {  start, end }: any)  => {
          
       const filters: QueryConstraint[] = [];
       if (start && end) {
@@ -199,20 +198,13 @@ export const fetchReportPerCreatorPerWeek  = async ( q: Query<DocumentData>, Rep
 
 
 
-export const getQueryFiltersWeek = (q: Query<DocumentData, DocumentData>, { regions, agents, proprio, authority }: any)  => {
+export const getQueryFiltersWeek = (q: Query<DocumentData, DocumentData>, { regions, agents }: any)  => {
          
   const filters: QueryConstraint[] = [];
 
   if (regions && regions != 0) {
       filters.push(where('id_region', '==', regions));
-  } else {
-      // let ids = (proprio?.regions?.length==0 && authority && authority[0] == "admin") ? getRegionIds() : (proprio) ? proprio.regions : [];
-      // ids = ids.pop();
-      // // console.log("ids", ids);
-      // // const regionFilters = ids.map((id: number) => where("id_region", "==", id));
-      // // filters.push(or(...regionFilters)); // Firestore max disjunction = 30
-      // filters.push(where("id_region", "in", ids))
-  }
+  } 
 
   if (agents) {
       filters.push(where('createdBy', '==', agents));

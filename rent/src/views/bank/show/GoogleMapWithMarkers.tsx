@@ -7,7 +7,7 @@ export interface Location {
   lat: number;
   lng: number;
   name: string;
-  state ?: string;
+  state?: string;
   price?: string;
   imageUrls?: BankImage[]; // Changed to list of images
 }
@@ -39,7 +39,6 @@ const GoogleMapWithMarkers: React.FC<GoogleMapWithMarkersProps> = ({
 
   const defaultCenter = center || (locations.length > 0 ? { lat: locations[0].lat, lng: locations[0].lng } : { lat: 0, lng: 0 });
   const getMarkerColor = (state?: string) => {
-    console.log("state", state)
     switch (state) {
       case 'bankSteps.readyToUse':
         return 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
@@ -58,7 +57,7 @@ const GoogleMapWithMarkers: React.FC<GoogleMapWithMarkersProps> = ({
         return 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'; // default color
     }
   };
-  
+
   if (loadError) return <div>Error loading maps</div>;
   if (!isLoaded) return <div>Loading Maps...</div>;
 
@@ -69,15 +68,15 @@ const GoogleMapWithMarkers: React.FC<GoogleMapWithMarkersProps> = ({
       zoom={zoom}
     >
       {locations.map((loc, idx) => (
-         <Marker 
-         key={idx}
-         position={{ lat: loc.lat, lng: loc.lng }}
-         onClick={() => setSelectedLocation(loc)}
-         icon={{
-           url: getMarkerColor(loc.state),
-           scaledSize: new window.google.maps.Size(32, 32),
-         }}
-       />
+        <Marker
+          key={idx}
+          position={{ lat: loc.lat, lng: loc.lng }}
+          onClick={() => setSelectedLocation(loc)}
+          icon={{
+            url: getMarkerColor(loc.state),
+            scaledSize: new window.google.maps.Size(32, 32),
+          }}
+        />
       ))}
 
       {selectedLocation && (
@@ -100,13 +99,14 @@ const GoogleMapWithMarkers: React.FC<GoogleMapWithMarkersProps> = ({
             )}
             <h3 style={{ margin: '0 0 4px 0' }}>{selectedLocation.name}</h3>
             {selectedLocation.price && <p style={{ margin: 0, fontWeight: 'bold' }}>
-                <Currency amount= {selectedLocation.price} />
-                </p> }
+              <Currency amount={selectedLocation.price} />
+            </p>}
           </div>
         </InfoWindow>
       )}
     </GoogleMap>
   );
+
 };
 
 export default GoogleMapWithMarkers;

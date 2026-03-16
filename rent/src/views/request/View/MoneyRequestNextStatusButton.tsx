@@ -10,8 +10,8 @@ import { useState } from "react";
 interface Props {
   request: IRequest;
   onNextStatus: (nextStatus: string, step: boolean, prevStatus: string, comment?: string) => void | Promise<void>;
-  rules:  AuthRequest [],
-  action : boolean
+  rules: AuthRequest[],
+  action: boolean
 }
 
 export default function MoneyRequestNextStatusButton({
@@ -30,42 +30,42 @@ export default function MoneyRequestNextStatusButton({
     setCanClick(false);
     await onNextStatus(nextStep.value, true, currentStatus, comment);
   };
-  
-  const yes  = async  (data: string) => {
-     setCanClick(false);
-     await onNextStatus(data, false, currentStatus, comment);       
+
+  const yes = async (data: string) => {
+    setCanClick(false);
+    await onNextStatus(data, false, currentStatus, comment);
   }
 
 
-  
-  const nrules = rules.filter(r => r.status === currentStatus && r?.reqType?.includes(request.requestType) && r.max_amount >= request.amount && r.canApprove);
 
-  return ( <>
-      {(nrules.length > 0 && Number(nrules[0]?.max_amount) >= Number(request.amount) || action ) && 
-        <Card className="grid grid-cols-1 gap-4"> 
-            <div className="w-full">
-              <div>
-                <Input textArea placeholder="Entrer le commentaire ici" onChange={(e)=>{
-                    const v = String(e.target.value);
-                    setComment(v);
-                }}></Input>
-              </div>
+  const nrules = rules.filter(r => r.status === currentStatus && r?.reqType?.includes(request.requestType) && r.max_amount >= request.amount && r.canApprove && r?.currency == request.general?.currency);
+
+  return (<>
+    {(nrules.length > 0 && Number(nrules[0]?.max_amount) >= Number(request.amount) || action) &&
+      <Card className="grid grid-cols-1 gap-4">
+        <div className="w-full">
+          <div>
+            <Input textArea placeholder="Entrer le commentaire ici" onChange={(e) => {
+              const v = String(e.target.value);
+              setComment(v);
+            }}></Input>
           </div>
-          { nextStep && canClick ? (<>
-            {  (request.status != "approved") &&  <StatusPopup Ok={yes} id={"rejected"} title={"Voulez-vous vraiment rejetter ceci ?"} btnText = {"Rejetté"} ></StatusPopup> }
-            {  (request.status == "approved") &&  <StatusPopup Ok={yes} id={"cancelled"} title={"Voulez-vous vraiment annuller ceci ?"} btnText = {"Annullé"} ></StatusPopup> }
-            {  <Button variant="solid" className="ml-2 mr-2 col-end-1 col-span-2"  onClick={handleClick}>
-                  { (request.status != "approved") ?  "Approuvé" : "Livré" }
-              </Button> }
+        </div>
+        {nextStep && canClick ? (<>
+          {(request.status != "approved") && <StatusPopup Ok={yes} id={"rejected"} title={"Voulez-vous vraiment rejetter ceci ?"} btnText={"Rejetté"} ></StatusPopup>}
+          {(request.status == "approved") && <StatusPopup Ok={yes} id={"cancelled"} title={"Voulez-vous vraiment annuller ceci ?"} btnText={"Annullé"} ></StatusPopup>}
+          {<Button variant="solid" className="ml-2 mr-2 col-end-1 col-span-2" onClick={handleClick}>
+            {(request.status != "approved") ? "Approuvé" : "Livré"}
+          </Button>}
         </>
         ) : (
-             (<div className="text-xs text-muted-foreground">
-               { (canClick )? "This request is already at the final step." : "Processing, please wait..." }
-             </div>)
+          (<div className="text-xs text-muted-foreground">
+            {(canClick) ? "This request is already at the final step." : "Processing, please wait..."}
+          </div>)
         )}
-        </Card> 
-      }
+      </Card>
+    }
   </>
- 
+
   );
 }

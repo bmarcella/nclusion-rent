@@ -8,12 +8,14 @@ import { useTranslation } from '@/utils/hooks/useTranslation';
 import { useSessionUser } from '@/store/authStore';
 import { manageAuth } from '@/constants/roles.constant';
 import { AuthRequest, requestStatus, requestType } from '../entities/AuthRequest';
+import { CurrencyEnum } from '../entities/SchemaRequest';
 
 const schema = z.object({
     region_id: z.coerce.number().min(1, 'Required'),
     roles: z.array(z.string()).nonempty('Required'),
     status: z.string(),
     reqType: z.array(z.string()),
+    currency: z.string().optional(),
     max_amount: z.preprocess(
         (v) => (v === '' || v === null ? undefined : Number(v)),
         z.number({ required_error: 'Required' }).min(1, 'Must be greater than 0')
@@ -61,6 +63,7 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
     const {
         control,
         handleSubmit,
+        watch,
         formState: { errors },
     } = useForm<AuthRequest>({
         resolver: zodResolver(schema),
@@ -71,6 +74,7 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
             max_amount: defaultValues?.max_amount as any ?? 0,
             canApprove: defaultValues?.canApprove ?? false,
             reqType: defaultValues?.reqType ?? [],
+            currency: defaultValues?.currency,
             created_at: defaultValues?.created_at ?? new Date(),
         },
     });
@@ -82,6 +86,12 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
         () => loading || optLoading,
         [loading, optLoading]
     );
+
+    const currencyOps = CurrencyEnum.options.map((o) => {
+    return { value: o, label: o } as any;
+    });
+
+    const currency = watch('currency');
 
     return (
         <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded shadow w-full max-h-150 overflow-y-auto">
@@ -131,7 +141,6 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                         />
                     </FormItem>
 
-
                      {/* RequestType */}
                     <FormItem
                         label={t('authReq.reqType')}
@@ -155,8 +164,6 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
 
                         />
                     </FormItem>
-
-                  
 
                     {/* Roles */}
                     <FormItem
@@ -192,13 +199,32 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                             render={({ field }) => (
                                 <Input
                                     type="number"
-                                    prefix="HTG"
+                                    prefix={currency ?? 'HTG'}
                                     {...field}
                                     value={field.value ?? ''}                      // allow empty input
                                     onChange={(e) => field.onChange(e.target.value)} // keep as string
                                     inputMode="decimal"
                                 />
                             )}
+                        />
+                    </FormItem>
+
+                    {/* Currency */}
+                    <FormItem
+                        label={t('authReq.currency')}
+                        invalid={!!errors.currency}
+                        errorMessage={errors.currency?.message}
+                    >
+                        <Controller
+                                     control={control}
+                                     name="currency"
+                                     render={({ field }) => (
+                                       <Select
+                                         options={currencyOps}
+                                         value={currencyOps.find(opt => String(opt.value) === String(field.value)) || null}
+                                         onChange={(option) => field.onChange(String(option.value))}
+                                       />
+                                     )}
                         />
                     </FormItem>
 

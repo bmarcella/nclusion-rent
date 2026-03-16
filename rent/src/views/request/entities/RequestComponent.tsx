@@ -23,6 +23,7 @@ import ImageLordComp, { LordImage } from '@/views/bank/show/components/ImageLord
 import BankInfo from '@/views/bank/show/components/BankInfo';
 import CommentsBank from '@/views/bank/add/components/CommentsBank';
 import ContractDeService from '@/views/vendor/components/ContractDeService';
+
 // ----------------------
 // UI helpers
 // ----------------------
@@ -159,13 +160,9 @@ export function CollapsSection({
     </Card>
   );
 }
-
-
 // ----------------------
 // Dynamic subsections
 // ----------------------
-
-
 export function GeneralFields({ t, newRegionSet }: any) {
 
   const { control, register, watch, setValue, clearErrors, trigger, formState: { errors } } = useFormContextTyped();
@@ -185,7 +182,8 @@ export function GeneralFields({ t, newRegionSet }: any) {
 
   const currencyOps = CurrencyEnum.options.map((o) => {
     return { value: o, label: o } as any;
-  })
+  });
+
   useEffect(() => {
     if (!authority || authority.length === 0) return;
     const auth = authority[0];
@@ -259,7 +257,7 @@ export function GeneralFields({ t, newRegionSet }: any) {
     newRegionSet(sregion)
     manage();
   }, [sregion, other]);
-  console.log(errors)
+
   return (
     <>
       <Section title="Géneral">
@@ -345,7 +343,7 @@ export function GeneralFields({ t, newRegionSet }: any) {
                 <Select
                   defaultValue={field.value}
                   options={currencyOps}
-                  onChange={(option) => field.onChange(option?.value)}
+                  onChange={(option: any) => field.onChange(option?.value)}
                 />
               )}
             />
@@ -395,7 +393,7 @@ export function GeneralFields({ t, newRegionSet }: any) {
                   <Select
                     isLoading={loading}
                     options={managers}
-                    onChange={(option) => field.onChange(option?.value)}
+                    onChange={(option: any) => field.onChange(option?.value)}
                   />
                 )}
               />
@@ -485,8 +483,6 @@ export function BillFields({ t, categories }: any) {
     </Section>
   );
 }
-
-
 export function DiversFields({ t, categories }: any) {
   const { register, control } = useFormContextTyped();
   const [type, setType] = useState([]);
@@ -529,15 +525,13 @@ export function DiversFields({ t, categories }: any) {
     </Section>
   );
 }
-
 export function CapexFields({ t, categories }: any) {
   const { control, register, setValue } = useFormContextTyped();
   const [type, setType] = useState([]);
   const unit_price = useWatch({ control, name: "capex.unit_price" });
   const qt = useWatch({ control, name: "capex.quantity" });
   useEffect(() => {
-    const total = unit_price * qt;
-
+    const total = (unit_price && qt) ? unit_price * qt : 0;
     setValue("capex.price", total, {
       shouldDirty: true,
       shouldValidate: false,
@@ -588,7 +582,6 @@ export function CapexFields({ t, categories }: any) {
     </Section >
   );
 }
-
 export function LocomotifFields({ t, categories }: any) {
   const { control, register } = useFormContextTyped();
   return (
@@ -622,7 +615,6 @@ export function LocomotifFields({ t, categories }: any) {
     </Section>
   );
 }
-
 export function BankInfoFields({ t }: any) {
   const { register } = useFormContextTyped();
   return (
@@ -634,7 +626,6 @@ export function BankInfoFields({ t }: any) {
     </Section>
   );
 }
-
 export function DocumentsFields({ t }: any) {
   const { control } = useFormContextTyped();
   const { fields, append, remove } = useFieldArray({ name: "documents", control });
@@ -665,7 +656,6 @@ export function DocumentsFields({ t }: any) {
     </Section>
   );
 }
-
 export function TelecomFields({ t, categories }: any) {
   const { control, register, setValue, formState: { errors } } = useFormContextTyped();
   const { fields, append, remove } = useFieldArray({ name: "telecom.plans", control });
@@ -769,7 +759,6 @@ export function TelecomFields({ t, categories }: any) {
     </Section>
   );
 }
-
 export function OpexFields({ t, categories }: any) {
 
   const { control, register, watch, setValue } = useFormContextTyped();
@@ -912,7 +901,6 @@ export function OpexFields({ t, categories }: any) {
     </Section>
   );
 }
-
 export function TransportFields({ t, region, categories }: any) {
   const { control, register, watch, setValue, clearErrors, trigger, formState: { errors } } = useFormContextTyped();
   const { fields, append, remove } = useFieldArray({ name: "transport_logistique.items", control });
@@ -1181,7 +1169,6 @@ export function TransportFields({ t, region, categories }: any) {
 
   );
 }
-
 export function LeasePaymentFields({ t, categories }: any) {
   const { register, watch, control, setValue, formState: { errors } } = useFormContextTyped();
   const [cbank, setCBank] = useState() as any;
@@ -1485,7 +1472,6 @@ export function LeasePaymentFields({ t, categories }: any) {
 
   );
 }
-
 export function BankRenovationFields({ t, categories }: any) {
   const { control, register, watch, setValue } = useFormContextTyped();
   const { fields, append, remove } = useFieldArray({ name: "bank_renovation.Bank", control });
@@ -1700,7 +1686,6 @@ export function BankRenovationFields({ t, categories }: any) {
 
   );
 }
-
 export function useFormContextTyped() {
   return useFormContext<MoneyRequest>();
 }

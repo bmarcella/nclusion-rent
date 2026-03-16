@@ -16,7 +16,7 @@ import { Proprio } from '@/views/Entity'
 import { getApp } from 'firebase/app'
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { USER_ROLE } from '@/views/shared/schema'
-import { statsigClient } from '@/statsigClient'
+import { statsigClient } from '@/services/statsigClient'
 
 
 export async function apiSignOut() {
@@ -75,7 +75,7 @@ export async function apiSignIn(data: SignInCredential) {
         const resp = await signInWithEmailAndPassword(FirebaseAuth, data.email, data.password);
         const user = resp.user;
         const statsig = await statsigClient();
-        statsig ? await statsig?.updateUserAsync({ userID: user.email || 'n/a'}) : null
+        statsig ? await statsig?.updateUserAsync({ userID: user.email || 'n/a' }) : null
         const token = await resp.user.getIdToken();
         const proprio = await getProprioById(user.uid);
         if (!proprio) throw new Error('Votre compte n\'est pas actif, veuillez contacter l\'administrateur');

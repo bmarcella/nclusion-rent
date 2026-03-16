@@ -1,13 +1,8 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { IRequest } from "./IRequest";
+import { Currency, IRequest } from "./IRequest";
 import { billType, capexType } from "./TypeRequestData";
 
-
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 export interface RequestApprovalStatus {
   value: string,
@@ -65,7 +60,7 @@ const makeStatusOptions = (t: TFunction, keys: RequestStatusValue[]): StatusOpti
     label: t(`request.status.${value}`),
   }));
 
-// ---- Public option helpers --------------------------------------------------
+// ---- Public option helpers ---------------------
 export const requestStatus = (t: TFunction): StatusOption[] =>
   makeStatusOptions(t, [
     'regionalApproval',
@@ -204,7 +199,8 @@ export interface AuthRequest {
   status: string,
   reqType?: string[],
   canApprove: boolean,
-  // 
+  currency?: Currency;
+  // Meta data 
   created_at?: Date,
   created_by?: string,
   updated_at?: Date,

@@ -6,7 +6,7 @@ import { useThemeStore } from '@/store/themeStore'
 import PostLoginLayout from './PostLoginLayout'
 import PreLoginLayout from './PreLoginLayout'
 import { useLocation } from 'react-router-dom'
-import { statsigClient } from '../../statsigClient'
+import { statsigClient } from '../../services/statsigClient'
 
 const Layout = ({ children }: CommonProps) => {
     const layoutType = useThemeStore((state) => state.layout.type)

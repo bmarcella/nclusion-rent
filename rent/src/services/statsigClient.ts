@@ -13,7 +13,7 @@ export const statsigClient = async (): Promise<null | StatsigClient> => {
     return initPromise
   }
 
-  const statsigKey: string = `client-13HCyLarw0J97mI1s2pVey45pBDCaikeZRCLQE9mfuc`
+  const statsigKey: string = import.meta.env.VITE_STATSIG_KEY;
 
   initPromise = (async () => {
     const client = new StatsigClient(

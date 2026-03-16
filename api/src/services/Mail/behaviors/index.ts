@@ -2,34 +2,37 @@
 
 import { createService, DEvent } from "../../../damba.import";
 
-
 const api = createService('/mail');
+
 api.DPost(
   '/',
   async (e: DEvent) => {
-    const data = e.in.body;
+     const { from, subject, contents } = e.in.body;
 
-    const batches = [];
+  if (!Array.isArray(contents) || contents.length === 0) {
+    return e.out.json({
+      error: true,
+      message: "No email contents provided",
+    });
+  }
 
-    for (let i = 0; i < data.contents.length; i++) {
-      const batch = {
-        from: data.from,
-        subject: data.subject,
-        to: data.contents[i].to,
-        html: data.contents[i].html
-      };
-      batches.push(batch);
-    }
+  const batches = contents.map(({ to, html }) => ({
+    from,
+    subject,
+    to,
+    html,
+  }));
 
-    const results = await e.in.resend.batch.send(batches)
-    return e.out.json({ message: "Sending email is in process!", error: false, batches, data, results });
+  const results = await e.in.resend.batch.send(batches);
+  return e.out.json({
+    error: false,
+    message: "Email delivery is in progress.",
+    count: batches.length,
+    results,
+  });
   },
   {
-    async sendEmail(e: DEvent, data) {
-
-
-    }
-
+    
   },
 );
 
