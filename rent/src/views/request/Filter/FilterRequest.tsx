@@ -11,6 +11,7 @@ import { convertToSelectOptionsProprio, convertToSelectOptionsRegion, OptionType
 import { Query, DocumentData, CollectionReference, query, where, getDocs, orderBy } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
 import { requestStatusAll, requestType } from "../entities/AuthRequest";
+import { CurrencyEnum } from "../entities/SchemaRequest";
 
 
 export interface RequestFilter {
@@ -21,10 +22,11 @@ export interface RequestFilter {
     end: Date;
   };
   user: string;          // agent id or username
-  regions: number | null ,   // region ids/codes
+  regions: number | null,   // region ids/codes
   amount: {
     min: number;
     max: number;
+    currency?: string
   },
   proprios: []
 }
@@ -47,7 +49,12 @@ function FilterRequest({ onChange, data }: Props) {
   const [end, setEnd] = useState<Date>() as any;
   const [min, setMin] = useState<number>() as any;
   const [max, setMax] = useState<number>() as any;
-  // 
+  const [currency, setCurrency] = useState<string>() as any;
+
+  const currencyOps = CurrencyEnum.options.map((o) => {
+    return { value: o, label: o } as any;
+  });
+
   const [proprios, setProprio] = useState<any[]>([]);
 
   const statusesOptions = useMemo(() => {
@@ -106,10 +113,11 @@ function FilterRequest({ onChange, data }: Props) {
       regions: selectedRegions!,
       amount: {
         min,
-        max
+        max,
+        currency
       }
     });
-  }, [start, end, selectedAgent, selectedRegions, selectedStatus, selectedReqType, min, max, proprios]);
+  }, [start, end, selectedAgent, selectedRegions, selectedStatus, selectedReqType, min, max, proprios, currency]);
 
   return (
     <>
@@ -204,6 +212,17 @@ function FilterRequest({ onChange, data }: Props) {
           }
           setMax(Number(date.target.value));
         }} />
+
+        <Select
+          options={currencyOps}
+          onChange={(option: any) => {
+            if (!option || !option.value) {
+              setCurrency(undefined)
+              return;
+            }
+            setCurrency(option.value);
+          }}
+        />
       </div>
     </>
   )

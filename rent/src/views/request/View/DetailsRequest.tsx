@@ -17,6 +17,8 @@ import UserName from '@/views/bank/show/components/UserName';
 import classNames from 'classnames';
 import CommentReq from './CommentReq';
 import { ParamsApprove } from './TabView';
+import { useNavigate } from 'react-router-dom';
+import { add7DaysToExpirationDate } from '@/views/Entity';
 
 interface Props {
   data: IRequest;
@@ -37,6 +39,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
   const { userId, authority, proprio } = useSessionUser((state) => state.user);
   const metaId = (data as any).id ?? (data as any)._id ?? '';
   const metaStatus = (data as any).status ?? (data as any).state ?? '';
+  const navigate = useNavigate()
 
   const formatDate = (value: any) => {
     if (!value) return '-';
@@ -88,7 +91,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
       throw new Error("updateMoneyRequestStatus: requestId is required");
     }
 
-    const ref = getExpenseRequestDoc(data.id)
+    const ref = getExpenseRequestDoc(data.id);
     // Clone the array to avoid mutating original state directly (React rule)
     const hist = [...data.historicApproval];
     const coms = data?.comments || [];
@@ -110,10 +113,11 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
     });
 
     let payload: Record<string, any> = {}
-
+    const expiration_date = add7DaysToExpirationDate(data.expiration_date);
     if (validated) {
       const prev = getPrev(prevStatus);
       payload = {
+        expiration_date,
         status: nextStatus,
         historicApproval: hist,
         comments,
@@ -122,6 +126,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
     } else {
       const prev = getPrev(nextStatus);
       payload = {
+        expiration_date,
         status: nextStatus,
         historicApproval: hist,
         comments,
@@ -130,6 +135,7 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
     }
 
     await updateDoc(ref, payload);
+
     // Fetch the updated document
     const snapshot = await getDoc(ref);
     const new_req = { id: snapshot.id, ...snapshot.data() } as IRequest;
@@ -515,15 +521,15 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
             <div className="font-bold">Fournisseur de service</div>
             <div>{b.vendor_name}</div>
           </div>
-          <div>
-            <div className="font-bold">Id du Contrat </div>
-            <div>{b.contract_id}</div>
+          <div onClick={() => navigate("/contrat/" + b.contract_id)}>
+            <div className="font-bold ">Id du Contrat </div>
+            <div className='underline text-blue-500 hover:text-blue-200'>{b.contract_id}</div>
           </div>
         </div>
 
         {b.description && <div className='mt-4'>
           <div className="font-bold mb-1">Description</div>
-          <p className="text-sm whitespace-pre-wrap">{b.description}</p>
+          <p className="text-sm whitespace-pre-wrap ">{b.description}</p>
         </div>}
       </Card>
     );
@@ -727,6 +733,18 @@ function DetailsRequest({ data, rules, getNewreq, action, auth = true, approved 
           <div>
             <b className="font-bold ">Created at</b>
             <div>{formatRelative(data.createdAt.toDate?.() || data.createdAt, new Date(), { locale: fr })}</div>
+          </div>
+
+          <div>
+            <b className="font-bold ">Date Expiration</b>
+            <div>
+              {
+                data?.expiration_date ?
+                  formatRelative(data?.expiration_date.toDate?.() || data?.expiration_date, new Date(), { locale: fr })
+                  :
+                  formatRelative(add7DaysToExpirationDate(data?.expiration_date).toDate?.() || add7DaysToExpirationDate(data?.expiration_date), new Date(), { locale: fr })
+              }
+            </div>
           </div>
         </div>
         {general.is_for_other && (

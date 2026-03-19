@@ -31,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 import { getCategorieName } from "../entities/AuthRequest";
 import ProcessNewMail from "@/views/mail/ProcessNewMail";
 import ExportCsv from "../Export";
+import { add7DaysToExpirationDate } from "@/views/Entity";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const PAGE_SIZE_OPTIONS = [
@@ -188,6 +189,7 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
     // AMOUNT
     if (filter?.amount?.min != null) filters.push(where("amount", ">=", filter.amount.min));
     if (filter?.amount?.max != null) filters.push(where("amount", "<=", filter.amount.max));
+    if (filter?.amount?.currency != null) filters.push(where("general.currency", "==", filter.amount.currency));
 
     // DATE
     if (filter?.date?.start) filters.push(where("createdAt", ">=", filter.date.start));
@@ -344,7 +346,14 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
               (row.original?.createdBy) ? <UserName userId={row.original.createdBy} /> : "" : "Moi"}
             </div>
             <div className="font-medium"> pour  <b>{row.original?.general?.beneficiaryName}</b >
+
             </div>
+            {<div className="font-medium"> Expiration:  <b>{
+              row.original?.expiration_date ?
+                formatRelative(row.original?.expiration_date.toDate?.() || row.original?.expiration_date, new Date(), { locale: fr })
+                :
+                formatRelative(add7DaysToExpirationDate(row.original?.expiration_date).toDate?.() || add7DaysToExpirationDate(row.original?.expiration_date), new Date(), { locale: fr })
+            }</b ></div>}
           </div>
         ),
       },
@@ -441,7 +450,7 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
       <ProcessNewMail ref={mailRef} />
 
       <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
-         <div className={classNames('rounded-2xl p-4 flex flex-col justify-center', 'bg-green-100')} >
+        <div className={classNames('rounded-2xl p-4 flex flex-col justify-center', 'bg-green-100')} >
           <div className="flex justify-between items-center relative">
             <div>
               <div className="mb-4 text-gray-900 font-bold">{'Total Requête'}</div>
@@ -455,11 +464,11 @@ function ShowReq({ status = undefined, step = false, action = false, forMe = fal
               <HiHome />
             </div>
           </div>
-         </div>
-         <div  className={classNames('flex flex-col justify-end')} >
-             <ExportCsv></ExportCsv>
-         </div>
-        
+        </div>
+        <div className={classNames('flex flex-col justify-end')} >
+          <ExportCsv></ExportCsv>
+        </div>
+
       </div>
       <FilterRequest onChange={onFilterChange} data={{ status, step, action, forMe, sentByMe, recieve, transition, rejected }} />
 
