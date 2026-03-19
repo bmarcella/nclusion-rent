@@ -79,7 +79,7 @@ export interface ICapex {
   price: number;
   provider: string;
   target_date: Date;
-  decripstion: string; // spelling kept from schema
+  decripstion: string;
 }
 
 export interface ILocomotif {
@@ -255,6 +255,7 @@ export interface IRequest {
     by_who: string,
     createdAt: Date,
   }[],
+  expiration_date?: Date,
   createdBy: string,
   createdAt: Date,
   updatedBy: string,

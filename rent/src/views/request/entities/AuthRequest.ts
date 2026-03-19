@@ -188,9 +188,6 @@ export const StatusTrainV2 = (t: TFunction, flow?: number): StatusNode => {
   return head;
 };
 
-
-
-
 export interface AuthRequest {
   id?: string,
   region_id?: number,

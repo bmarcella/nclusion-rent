@@ -1,56 +1,58 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { da } from "date-fns/locale";
 import { USER_ROLE } from "../shared/schema";
+import { Timestamp } from "firebase/firestore";
 
 export interface Document {
-    id: string;
-    name: string;
-    type: string;
-    url: string;
-    createdAt: Date;
-    updatedAt: Date;
+  id: string;
+  name: string;
+  type: string;
+  url: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 export interface Person {
-    id: string;
-    fullName: string;
-    nickName?: string;
-    companyName?: string;
-    id_user?: string; 
-    nif?: string;
-    cin?: string;
-    address: string;
-    phone: string;
-    phone_b?: string;
-    email?: string;
-    website?: string;
-    createdAt?: any;
-    updatedAt?: Date;
-    type_person: USER_ROLE; 
-    regions?: number[];
-    documents?: Document[];
-    city?: string;
-    active?: boolean ;
-    createBy?: string;
-    updateBy?: string;
+  id: string;
+  fullName: string;
+  nickName?: string;
+  companyName?: string;
+  id_user?: string;
+  nif?: string;
+  cin?: string;
+  address: string;
+  phone: string;
+  phone_b?: string;
+  email?: string;
+  website?: string;
+  createdAt?: any;
+  updatedAt?: Date;
+  type_person: USER_ROLE;
+  regions?: number[];
+  documents?: Document[];
+  city?: string;
+  active?: boolean;
+  createBy?: string;
+  updateBy?: string;
 }
 export interface Proprio extends Person {
-  tasks?: Tasks[]; 
-  banks?: Bank[]; 
+  tasks?: Tasks[];
+  banks?: Bank[];
 }
 export type TaskState = 'pending' | 'in-progress' | 'completed';
 interface Tasks {
-    id: string;
-    taskName: string;
-    assignee: string;
-    startDate: string;
-    endDate: string;
-    state: TaskState;
-    montant_total: number;
-    description: string;
-    montant_initial: number;
-    create_by: string;
-    createdAt: Date;
+  id: string;
+  taskName: string;
+  assignee: string;
+  startDate: string;
+  endDate: string;
+  state: TaskState;
+  montant_total: number;
+  description: string;
+  montant_initial: number;
+  create_by: string;
+  createdAt: Date;
 }
 export const internetProviders = ["internetProviders.natcom", "internetProviders.digicel", "internetProviders.none"] as const;
 export const roofTypes = [
@@ -253,7 +255,7 @@ export type MajorRenovation = typeof majorRenovations[number];
 export type CurrentSecurity = typeof currentSecurities[number];
 export type NeededSecurity = typeof currentSecurities[number];
 export type CloseHour = typeof closeHours[number];
-export type  PreviousUse = typeof previousUses[number];
+export type PreviousUse = typeof previousUses[number];
 export type OpenHour = typeof openHours[number];
 export type ExpectedRevenue = typeof expectedRevenue[number];
 export type PopulationInArea = typeof populationInAreas[number];
@@ -280,7 +282,7 @@ export type StepDecision = {
   createdAt?: Date;
   step?: BankStep;
 };
-export type BankLease  = {
+export type BankLease = {
   id?: string;
   bankId?: string;
   date_debut?: Date;
@@ -306,93 +308,135 @@ export const FrenchNumber = ({ number }: { number: number }) => {
   return formatted;
 };
 
+
+
 export interface Bank {
-    id?: string;
-    bankName: string;
-    city: string;
-    id_region: number | string ;
-    yearCount: number | string;
-    date:  string;
-    rentCost?: number | string;
-    final_rentCost: number | string;
-    superficie?: number | string;
-    nombre_chambre?: number | string;
-    addresse : string;
-    comptoireContratId?: string;
-    peintureContratId?: string;
-    landlord: string | any;
-    reference?:  string;
-    renovStep? : RenovStep; // new add 
-    isrefSameAsLandlord: boolean;
-    urgency: boolean;
-    createdBy: string;
+  id?: string;
+  bankName: string;
+  city: string;
+  id_region: number | string;
+  yearCount: number | string;
+  date: string;
+  rentCost?: number | string;
+  final_rentCost: number | string;
+  superficie?: number | string;
+  nombre_chambre?: number | string;
+  addresse: string;
+  comptoireContratId?: string;
+  peintureContratId?: string;
+  landlord: string | any;
+  reference?: string;
+  renovStep?: RenovStep; // new add 
+  isrefSameAsLandlord: boolean;
+  urgency: boolean;
+  createdBy: string;
+  createdAt?: Date;
+  step: BankStep;
+  reject: boolean;
+  pending: boolean;
+  approve: boolean;
+  paintedAt?: Date;
+  comptoireBuildedAt?: Date;
+  images: any[];
+  location: {
+    lat: any,
+    lng: any,
+  },
+  finalDecision?: {
+    date?: Date;
+    createdBy?: string;
     createdAt?: Date;
-    step : BankStep;
-    reject: boolean;
-    pending: boolean;
-    approve: boolean;
-    paintedAt?: Date;
-    comptoireBuildedAt?: Date;
-    images: any[];
-    location: {
-      lat: any,
-      lng: any,
-    },
-    finalDecision? : {
-        date?: Date;
-        createdBy?: string;
-        createdAt?: Date;
-        status?: FinalDecisionStatus;
-        reason_why?: string
-    };
+    status?: FinalDecisionStatus;
+    reason_why?: string
+  };
 
-    rentDetails? : {
-        paymentMethod?: PaymentMethod [];
-        paymentStructure?: PaymentStructureType;
-        locationType?: LocationType;
-        verifyOwner?: VerifyOwner[];
-        whoReferred?: WhoReferred[];
-        locationArea?: LocationArea;
-    }
-    demoDetails? : {
-        internetService?: InternetProvider []; //done
-        previousUse?: PreviousUse [];
-        nonRenewalReason?: NonRenewalReason;
-        lotteryCompetition?: LotteryCompetition; // done
-        bankEntrance?: BankEntrance[]; // done
-        clientVisibility?: ClientVisibility[]; 
-        populationInArea?: PopulationInArea; // d
-        expectedRevenue?: ExpectedRevenue; // d
-        buildingStability?: BuildingStability; 
-        toilet?: boolean ;
-        water?: boolean;
-        electricity?: boolean;
-        airConditioning?: boolean;// d
-    }
-   
-    securityDetails? : {
-        areaStability?: AreaStability;
-        openHour?: OpenHour;
-        closeHour?: CloseHour;
-        currentSecurity?: CurrentSecurity[];
-        roof?:RoofType;
-    }
+  rentDetails?: {
+    paymentMethod?: PaymentMethod[];
+    paymentStructure?: PaymentStructureType;
+    locationType?: LocationType;
+    verifyOwner?: VerifyOwner[];
+    whoReferred?: WhoReferred[];
+    locationArea?: LocationArea;
+  }
+  demoDetails?: {
+    internetService?: InternetProvider[]; //done
+    previousUse?: PreviousUse[];
+    nonRenewalReason?: NonRenewalReason;
+    lotteryCompetition?: LotteryCompetition; // done
+    bankEntrance?: BankEntrance[]; // done
+    clientVisibility?: ClientVisibility[];
+    populationInArea?: PopulationInArea; // d
+    expectedRevenue?: ExpectedRevenue; // d
+    buildingStability?: BuildingStability;
+    toilet?: boolean;
+    water?: boolean;
+    electricity?: boolean;
+    airConditioning?: boolean;// d
+  }
 
-    renovationDetails? : {
-        neededSecurity?: NeededSecurity[];
-        majorRenovation?: MajorRenovation[];
-        minorRenovation?: MinorRenovations[];
-    }
+  securityDetails?: {
+    areaStability?: AreaStability;
+    openHour?: OpenHour;
+    closeHour?: CloseHour;
+    currentSecurity?: CurrentSecurity[];
+    roof?: RoofType;
+  }
+
+  renovationDetails?: {
+    neededSecurity?: NeededSecurity[];
+    majorRenovation?: MajorRenovation[];
+    minorRenovation?: MinorRenovations[];
+  }
 }
 
+export const add7DaysToExpirationDate = (expDate?: Date | Timestamp): Date => {
+  const baseDate =
+    !expDate
+      ? new Date()
+      : expDate instanceof Date
+        ? new Date(expDate)
+        : expDate.toDate();
 
-export const getEmptyPartialBank = () : any => {
+  if (Number.isNaN(baseDate.getTime())) {
+    throw new Error('Invalid expiration date');
+  }
+
+  baseDate.setDate(baseDate.getDate() + 7);
+  return baseDate;
+};
+
+export const toDateSafe = (
+  value?: Date | Timestamp | null
+): Date | null => {
+  if (!value) return null;
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : new Date(value);
+  }
+
+  const date = value.toDate();
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+export const isBeforeToday = (value?: Date | Timestamp | null): boolean => {
+  const input = toDateSafe(value);
+  if (!input) return true;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  input.setHours(0, 0, 0, 0);
+  return today < input;
+};
+
+
+export const getEmptyPartialBank = (): any => {
   return {
     bankName: '',
     id_region: '',
     comptoireContratId: '',
     peintureContratId: '',
-    renovStep : '' as RenovStep,
+    renovStep: '' as RenovStep,
     city: '',
     addresse: ' ',
     superficie: '',
@@ -409,66 +453,65 @@ export const getEmptyPartialBank = () : any => {
   };
 }
 
-export const getBlankBank  = (data: any, uuid: string, location: any): Bank => {
-    return {
-        id: '',
-        step: 'bankSteps.needApproval' as BankStep,
-        reject: false,
-        pending: false,
-        approve: false,
-        ...data, 
-        location: {
-          lat: location.lat,
-          lng: location.lng,
-        },
-        finalDecision: { 
-          date: new Date(),
-          createdBy: '',
-          createdAt: new Date(),
-          status: '',
-          reason_why: ''
-        },
-        rentDetails: {
-          paymentMethod: [],
-          paymentStructure: '',
-          locationType: '',
-          verifyOwner: [],
-          whoReferred: [],
-          locationArea: ''
-        },
-        demoDetails: {
-          internetService: [],
-          previousUse: [],
-          nonRenewalReason: '',
-          lotteryCompetition: '',
-          clientVisibility: [],
-          populationInArea: '',
-          expectedRevenue: '',
-          buildingStability: '',
-          bankEntrance: [],
-          toilet: false,
-          water: false,
-          electricity: false,
-          airConditioning: false,
-        },
-        securityDetails: {
-          AreaStability: '',
-          openHour: '',
-          closeHour: '',
-          currentSecurity: [],
-          roof:''
-        },
-        renovationDetails: {
-          neededSecurity: [],
-          majorRenovation: [],
-          minorRenovation: []
-        },
-        createdBy: uuid ,
-        createdAt: new Date(),
-      };
-      
-}
+export const getBlankBank = (data: any, uuid: string, location: any): Bank => {
+  return {
+    id: '',
+    step: 'bankSteps.needApproval' as BankStep,
+    reject: false,
+    pending: false,
+    approve: false,
+    ...data,
+    location: {
+      lat: location.lat,
+      lng: location.lng,
+    },
+    finalDecision: {
+      date: new Date(),
+      createdBy: '',
+      createdAt: new Date(),
+      status: '',
+      reason_why: ''
+    },
+    rentDetails: {
+      paymentMethod: [],
+      paymentStructure: '',
+      locationType: '',
+      verifyOwner: [],
+      whoReferred: [],
+      locationArea: ''
+    },
+    demoDetails: {
+      internetService: [],
+      previousUse: [],
+      nonRenewalReason: '',
+      lotteryCompetition: '',
+      clientVisibility: [],
+      populationInArea: '',
+      expectedRevenue: '',
+      buildingStability: '',
+      bankEntrance: [],
+      toilet: false,
+      water: false,
+      electricity: false,
+      airConditioning: false,
+    },
+    securityDetails: {
+      AreaStability: '',
+      openHour: '',
+      closeHour: '',
+      currentSecurity: [],
+      roof: ''
+    },
+    renovationDetails: {
+      neededSecurity: [],
+      majorRenovation: [],
+      minorRenovation: []
+    },
+    createdBy: uuid,
+    createdAt: new Date(),
+  };
 
+}
 
 
 
@@ -478,21 +521,21 @@ export const ListIBankSteps = [
     label: "Considération",
     title: "Banque en attente",
     description: "La banque est en attente d'approbation.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.rejected",
     label: "Rejeté",
     title: "Banque rejetée",
     description: "La banque a été rejetée et nécessite une approbation.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.notProceeded",
     label: "Non traité",
     title: "Banque non traitée",
     description: "La banque n'a pas encore été traitée dans le système.",
-    authority : []
+    authority: []
   }
 ];
 
@@ -503,28 +546,28 @@ export const ListABankSteps = [
     label: "Validation",
     title: "Validation requise",
     description: "La banque nécessite une validation avant de passer à l'étape suivante.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.needApprobation",
     label: "Approbation",
     title: "Approbation requise",
     description: "La banque attend une approbation officielle.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.needContract",
     label: "Contrat",
     title: "Contrat requis",
     description: "La banque a besoin de signer un contrat pour continuer le processus.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.needRenovation",
     label: "Rénovation",
     title: "Rénovation requise",
     description: "La banque nécessite des rénovations avant d’être opérationnelle.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.readyToUse",
@@ -544,7 +587,7 @@ export const ReportStepsSimple = [
     label: "Rejeté",
   },
   {
-    key: [ "bankSteps.needApprobation", "bankSteps.needContract", "bankSteps.pending","bankSteps.notProceeded", "bankSteps.needRenovation"],
+    key: ["bankSteps.needApprobation", "bankSteps.needContract", "bankSteps.pending", "bankSteps.notProceeded", "bankSteps.needRenovation"],
     label: "Approuvée",
   },
   {
@@ -563,11 +606,11 @@ export const ReportSteps = [
     label: "Non-Vues",
   },
   {
-    key: [ "bankSteps.needApprobation", "bankSteps.needContract", "bankSteps.pending","bankSteps.notProceeded"],
+    key: ["bankSteps.needApprobation", "bankSteps.needContract", "bankSteps.pending", "bankSteps.notProceeded"],
     label: "Approbation",
   },
   {
-    key: [ "bankSteps.needRenovation"],
+    key: ["bankSteps.needRenovation"],
     label: "Rénovation",
   },
   {
@@ -586,7 +629,7 @@ export const ReportStepsWeek = [
     label: "Non-Vues",
   },
   {
-    key: [ "bankSteps.needApprobation", "bankSteps.needContract", "bankSteps.pending","bankSteps.notProceeded", "bankSteps.needRenovation", "bankSteps.readyToUse"],
+    key: ["bankSteps.needApprobation", "bankSteps.needContract", "bankSteps.pending", "bankSteps.notProceeded", "bankSteps.needRenovation", "bankSteps.readyToUse"],
     label: "Approbation",
   }
 ];
@@ -650,7 +693,7 @@ export const ReportStepsFullX = [
     sub: true,
     subKey: ["renovSteps.comptoire"]
   },
-   {
+  {
     key: ["bankSteps.needRenovation"],
     label: "Peinture",
     sub: true,
@@ -669,34 +712,34 @@ export const ReportStepsFullX = [
 ];
 
 
-export const ListBankStepsDetails= [
+export const ListBankStepsDetails = [
   {
     key: "bankSteps.needApproval",
     label: "Validation",
     title: "Validation requise",
     description: "La banque nécessite une validation avant de passer à l'étape suivante.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.needApprobation",
     label: "Approbation",
     title: "Approbation requise",
     description: "La banque attend une approbation officielle.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.needContract",
     label: "Contrat",
     title: "Contrat requis",
     description: "La banque a besoin de signer un contrat pour continuer le processus.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.needRenovation",
     label: "Rénovation",
     title: "Rénovation requise",
     description: "La banque nécessite des rénovations avant d’être opérationnelle.",
-    authority : []
+    authority: []
   },
   {
     key: "bankSteps.readyToUse",
@@ -707,7 +750,7 @@ export const ListBankStepsDetails= [
   }
 ];
 
-export const getEndDateYear = (date: string, y : any ) => {
+export const getEndDateYear = (date: string, y: any) => {
   const newDate = new Date(date);
   newDate.setFullYear(newDate.getFullYear() + y);
   return newDate as Date;
@@ -717,12 +760,12 @@ export const getEndDateYear = (date: string, y : any ) => {
 export interface BankTask {
   id: string;
   taskName: RenovStep;
-  bankId : string ;
+  bankId: string;
   state: string;
-  id_region: number | string ;
+  id_region: number | string;
   description: string;
   index?: any,
-  done :  boolean;
+  done: boolean;
   createdBy: string;
   createdAt: Date;
   contratId?: string;
@@ -731,7 +774,7 @@ export interface BankTask {
 export interface RenovContract {
   id: string;
   transport: number;
-  renovStep : RenovStep;
+  renovStep: RenovStep;
   assignee: string;
   createdBy: string;
   regionsId: number[];
@@ -743,9 +786,9 @@ export interface RenovContract {
   startDate: Date;
   completed: boolean;
   completedAt?: Date;
-  validated : boolean;
+  validated: boolean;
   validatedAt?: Date;
-  banksId: string [];
+  banksId: string[];
   updatedAt: Date,
   updatedBy: string,
   completedBy: string,

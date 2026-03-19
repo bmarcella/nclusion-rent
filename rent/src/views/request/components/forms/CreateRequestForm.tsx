@@ -3,14 +3,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-import { Alert, Button, Steps } from '@/components/ui';
+import { Alert, Steps } from '@/components/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/utils/hooks/useTranslation';
 import { useSessionUser } from '@/store/authStore';
 import { manageAuth } from '@/constants/roles.constant';
 import { BankDoc, ExpenseRequestDoc, getLandlordDoc, Landlord } from '@/services/Landlord';
-import { Proprio } from '@/views/Entity';
+import { add7DaysToExpirationDate, Proprio } from '@/views/Entity';
 import { convertToSelectOptionsProprio } from '@/views/report/components/ReportTypeFilter';
 import { Query, DocumentData, CollectionReference, query, where, getDocs, orderBy, getDoc, addDoc, updateDoc } from 'firebase/firestore';
 import { OptionType } from '@/views/report/components/FilterBankWeek';
@@ -18,12 +17,11 @@ import { getBankImages } from '@/services/firebase/BankService';
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage';
 import ImageReq from '../ImageReq';
 import EndBank from '@/views/bank/add/components/EndBank';
-import { getNextNodeV2, requestStatusAll, RequestType, RequestTypeEnum } from '../../entities/AuthRequest';
+import { requestStatusAll, RequestType, RequestTypeEnum } from '../../entities/AuthRequest';
 import { MoneyRequest, MoneyRequestSchema } from '../../entities/SchemaRequest';
 import { ViewReqForm } from './ViewReqForm';
 import { IRequest } from '../../entities/IRequest';
 import ProcessNewMail from '@/views/mail/ProcessNewMail';
-import { ApiSendMail } from '@/services/MailService';
 
 interface Props {
   typeRequest: RequestType
@@ -66,6 +64,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
     },
     mode: "onChange",
   });
+
   const {
     setValue,
     watch,
@@ -204,7 +203,6 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
     typeReq.forEach((key: any) => {
       clearIfNot(key, type == key);
     });
-
   }
 
   // Keep the payload clean: when type changes, clear other sections
@@ -274,6 +272,7 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
       }
       setSubmitting(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
+      const expiration_date = add7DaysToExpirationDate(new Date());
       const request = {
         ...data,
         preApproval_by: null,
@@ -296,7 +295,8 @@ const CreateRequestForm = ({ typeRequest, goBack }: Props) => {
         updatedAt: new Date(),
         status: new_status,
         requestType: typeRequest.key,
-        amount: getAmount(data, typeRequest.key)
+        amount: getAmount(data, typeRequest.key),
+        expiration_date
       } as unknown as Partial<IRequest>;
       // console.log(request);
       const docRef = await addDoc(ExpenseRequestDoc, request);
