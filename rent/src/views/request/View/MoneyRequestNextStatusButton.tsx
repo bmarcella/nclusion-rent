@@ -44,6 +44,7 @@ export default function MoneyRequestNextStatusButton({
 
 
 
+
   const nrules = rules.filter(r => r.status === currentStatus && r?.reqType?.includes(request.requestType) && r.max_amount >= request.amount && r.canApprove && r?.currency == request.general?.currency);
 
   return (<>
@@ -60,11 +61,11 @@ export default function MoneyRequestNextStatusButton({
         {nextStep && canClick ? (<>
           {(request.status != "approved") && <StatusPopup Ok={yes} id={"rejected"} title={"Voulez-vous vraiment rejetter ceci ?"} btnText={"Rejetté"} ></StatusPopup>}
           {(request.status == "approved") && <StatusPopup Ok={yes} id={"cancelled"} title={"Voulez-vous vraiment annuller ceci ?"} btnText={"Annullé"} ></StatusPopup>}
-          {!isNotExpired && <Button variant="solid" className="ml-2 mr-2 col-end-1 col-span-2" onClick={handleClick}>
+          {isNotExpired && <Button variant="solid" className="ml-2 mr-2 col-end-1 col-span-2" onClick={handleClick}>
             {(request.status != "approved") ? "Approuvé" : "Livré"}
           </Button>}
 
-          {isNotExpired && <div className="text-xs text-muted-foreground">
+          {!isNotExpired && <div className="text-xs text-muted-foreground">
             {"This request is expired."}
           </div>}
         </>

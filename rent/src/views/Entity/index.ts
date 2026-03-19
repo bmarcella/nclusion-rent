@@ -1,7 +1,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { da } from "date-fns/locale";
 import { USER_ROLE } from "../shared/schema";
+import { Timestamp } from "firebase/firestore";
 
 export interface Document {
   id: string;
@@ -306,11 +308,7 @@ export const FrenchNumber = ({ number }: { number: number }) => {
   return formatted;
 };
 
-export const add7DaysToExpirationDate = (expDate?: Date): Date => {
-  const baseDate = expDate ? new Date(expDate) : new Date();
-  baseDate.setDate(baseDate.getDate() + 7);
-  return baseDate;
-};
+
 
 export interface Bank {
   id?: string;
@@ -391,14 +389,44 @@ export interface Bank {
   }
 }
 
-export const isBeforeToday = (date?: Date): boolean => {
-  if (!date) return true;
+export const add7DaysToExpirationDate = (expDate?: Date | Timestamp): Date => {
+  const baseDate =
+    !expDate
+      ? new Date()
+      : expDate instanceof Date
+        ? new Date(expDate)
+        : expDate.toDate();
+
+  if (Number.isNaN(baseDate.getTime())) {
+    throw new Error('Invalid expiration date');
+  }
+
+  baseDate.setDate(baseDate.getDate() + 7);
+  return baseDate;
+};
+
+export const toDateSafe = (
+  value?: Date | Timestamp | null
+): Date | null => {
+  if (!value) return null;
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : new Date(value);
+  }
+
+  const date = value.toDate();
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+export const isBeforeToday = (value?: Date | Timestamp | null): boolean => {
+  const input = toDateSafe(value);
+  if (!input) return true;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const input = new Date(date);
+
   input.setHours(0, 0, 0, 0);
-  return input < today;
+  return today < input;
 };
 
 
