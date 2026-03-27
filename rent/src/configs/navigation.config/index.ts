@@ -32,7 +32,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.add',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["agent_immobilier", "admin", 'super_manager', 'coordonator'],
+                authority: ["agent_immobilier", "admin", 'super_manager', 'coordonator', "coordonator_agent_immobilier"],
                 subMenu: [],
             },
             {
@@ -42,7 +42,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.show',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["agent_immobilier", "admin", 'coordonator', 'super_manager'],
+                authority: ["agent_immobilier", "admin", 'coordonator', 'super_manager', "coordonator_agent_immobilier"],
                 subMenu: [],
             },
             {
@@ -62,7 +62,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.current',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "coordonator", "assist_coordonator", "manager", "assist_manager", 'super_manager'],
+                authority: ["admin", "coordonator", "assist_coordonator", "manager", "assist_manager", 'super_manager', "coordonator_agent_immobilier"],
                 subMenu: [],
             },
             {
@@ -72,7 +72,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.bankMenu.icurrent',
                 icon: '',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: ["admin", "coordonator", "assist_coordonator", "manager", "assist_manager", 'super_manager'],
+                authority: ["admin", "coordonator", "assist_coordonator", "manager", "assist_manager", 'super_manager', "coordonator_agent_immobilier"],
                 subMenu: [],
             },
             {
@@ -104,7 +104,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.reqMenu.name',
         icon: 'reqMenu',
         type: NAV_ITEM_TYPE_COLLAPSE,
-        authority: [],
+        authority: ['assist_accountant', 'accountant', 'admin', "assist_manager", "assist_coordonator", "coordonator", "manager", "super_manager"],
         subMenu: [
             {
                 key: 'reqMenu.add',

@@ -1,7 +1,5 @@
 /* eslint-disable react/jsx-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import {  getBankImages, getLordImages } from "@/services/firebase/BankService";
@@ -59,20 +57,15 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     }, [bankId]);
 
     useEffect(() => {
-    
         if (bank)  getLordImages(bank.landlord).then((imgs: any[]) => {
             console.log("Bank Images: ", imgs);
             setLImages(imgs);
         });
       }, [bank]);
-
       useEffect(() => {
-         
      }, [bankId]);
 
-  
-
-     const print = async () => {
+    const print = async () => {
       setPdf(true);
       setTimeout(async () => {
        await  reactToPrintFn();
@@ -83,7 +76,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     const  canApprove = () => {
       try {
         const role = authority?.[0] || null;
-        if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="coordonator"  || role =="admin" || role =="super_manager" || role =="manager" || role =="asssit_manager") ) {
+        if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="assist_coordonator"  || role =="coordonator"  || role =="admin" || role =="super_manager" || role =="manager" || role =="asssit_manager") ) {
             return true;
         }
         return false;
@@ -93,13 +86,56 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
      }
     }
 
+    const  canValidate = () => {
+      try {
+        const role = authority?.[0] || null;
+        if (!bank?.approve && bank?.step === "bankSteps.needApproval" && (role =="assist_coordonator"  || role =="coordonator_agent_immobilier"  || role =="admin" ) ) {
+            return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Error checking approval:", error);
+        return false;
+     }
+    }
+
+    const  canReject = () => {
+      try {
+        const role = authority?.[0] || null;
+        if ( role =="coordonator_agent_immobilier" && bank?.step != "bankSteps.needApproval") {
+            return false;
+        }
+        if ( (!bank?.reject && (bank?.step != "bankSteps.needContract"  && bank?.step != "bankSteps.needRenovation" && bank?.step != "bankSteps.readyToUse")) || role =="admin"  ) {
+            return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Error checking approval:", error);
+        return false;
+      }
+    }
+    const  canPending = () => {
+      try {
+        const role = authority?.[0] || null;
+        if ( role =="coordonator_agent_immobilier" && bank?.step != "bankSteps.needApproval") {
+            return false;
+        }
+
+        if ( (!bank?.pending  && (bank?.step != "bankSteps.needContract"  && bank?.step != "bankSteps.needRenovation" && bank?.step != "bankSteps.readyToUse")) || role =="admin"  ) {
+            return true;
+        }
+        
+        return false;
+      } catch (error) {
+        console.error("Error checking approval:", error);
+        return false;
+      }
+  }
+
   return (
     <>
     <div className="flex gap-2 pt-6  space-y-6 rounded bg-white pl-1 mb-4 pr-1"  >
     <div className="w-full"  >
-    {/* <Button loading={pdf} variant="solid" onClick={() => {
-        pdfExport()
-     }}>Download PDF</Button> */}
       <Button loading={pdf} variant="solid"  className=" ml-4" icon={<BiPrinter/>} onClick={() => {
         print()
      }}> </Button>
@@ -144,15 +180,12 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
               <Steps.Item key={index} title={t('bank.' + step.key)} />
             ))}
           </Steps>
-        </div> } 
+    </div> 
+    } 
  
      <div className="p-6 space-y-6"  ref={contentRef}>
 
-      {/* { bank && bank.step=='bankSteps.needRenovation' && <TaskManager bank={bank} /> } */}
-
       { bank && (contrat || bank.step=='bankSteps.needContract') && <LeaseContractForm bank={bank} ></LeaseContractForm> }
-
-
 
       { bank && bank.id && (bank.step=='bankSteps.needRenovation') &&  !pdf && <div>
         <h2 className="text-2xl font-bold mb-2 text-pink-600">Rénovation</h2>
@@ -182,7 +215,6 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
         </div>
       </div>
 
-      
        {  (pdf || pConfig) && <div className={ (pConfig && !pdf ) ? "w-full border" : "w-full" } style={{ height: h+'px' }}></div> }
       
 
@@ -221,26 +253,33 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
         >
           <PiCheckFatFill /> Contrat Signé
         </Button> }
-        {  !bank?.approve  && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
+        {  canValidate() && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ (data) => { onApproveOk(data) }} />, "Approbation")}
         >
           <PiCheckFatFill /> Validé
         </Button> }
+
         {  canApprove() && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onPermitOk() }} />, "Approbation")}
         >
           <PiCheckFatFill /> Approuvé
         </Button> }
-       {  !bank?.reject  &&<Button className="bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1" 
+
+        <>
+        {  canReject()  && <Button className="bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1" 
           onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={onRejectOk} />)}
           >
           <PiThumbsDownFill/> Rejeté
         </Button> }
-        {  !bank?.pending &&  <Button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full" 
+
+        {  canPending() &&  <Button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full" 
           onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ (data) => { onPendingOk(data) }} />, "Consideration")}
           >
           Attente
         </Button> }
+        </>
+    
+
       </div> }
     </div>
     </>

@@ -27,7 +27,6 @@ export const ShowBankDetailsBase = () => {
   }, [bankId]);
 
   const openDialog = (component: React.ReactNode, name: string = "Rejection") => {
-    console.log("openDialog")
     setIsOpen(true)
     setDialogName(name);
     setModalContent(component);
@@ -95,6 +94,7 @@ export const ShowBankDetailsBase = () => {
       reject: false,
       approve: true,
       pending: false,
+      first_approval: userId,
       step: "bankSteps.needApprobation" as BankStep,
       finalDecision: dec
     };
@@ -103,6 +103,7 @@ export const ShowBankDetailsBase = () => {
       createdAt: new Date(),
       step: "bankSteps.needApprobation" as BankStep,
     } as StepDecision;
+
     SaveHistory(reject, dec);
     SaveSteps(step);
   }
@@ -119,6 +120,8 @@ export const ShowBankDetailsBase = () => {
     SaveHistory(reject);
     SaveSteps(step);
   }
+
+
   const onContratOk = async () => {
     const step = {
       createdBy: userId,
@@ -230,6 +233,7 @@ export const ShowBankDetailsBase = () => {
         genTasks={SaveBankTasks}
         onChangeState={(comp, name) => { openDialog(comp, name) }}
         bank={bank} userId={userId || ''} />}
+
       <Dialog
         isOpen={dialogIsOpen}
         onClose={onDialogClose}

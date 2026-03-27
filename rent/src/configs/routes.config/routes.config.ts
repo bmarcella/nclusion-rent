@@ -28,7 +28,7 @@ export const protectedRoutes: Routes = [
         key: 'bankMenu.needApproval',
         path: '/bank/approval',
         component: lazy(() => import('@/views/bank/show/NeedApproval')),
-        authority: ["coordonator", "assist_coordonator", "admin", "manager", "assist_manager", 'super_manager'],
+        authority: ["coordonator", "assist_coordonator", 'coordonator_agent_immobilier',  "admin", "manager", "assist_manager", 'super_manager'],
     },
     {
         key: 'bankMenu.ops',
@@ -40,7 +40,7 @@ export const protectedRoutes: Routes = [
         key: 'bankMenu.icurrent',
         path: '/bank/inactive',
         component: lazy(() => import('@/views/bank/show/InactiveBank')),
-        authority: ["coordonator", "assist_coordonator", "admin", "manager", "assist_manager", 'super_manager'],
+        authority: ["coordonator", "assist_coordonator", "coordonator_agent_immobilier", "admin", "manager", "assist_manager", 'super_manager'],
     },
     {
         key: 'bankMenu.approved',
@@ -58,7 +58,7 @@ export const protectedRoutes: Routes = [
         key: 'bankMenu.vendor',
         path: '/bank/vendor',
         component: lazy(() => import('@/views/vendor')),
-        authority: [],
+        authority: ["coordonator", "assist_coordonator", "admin", "manager", "assist_manager", 'super_manager'],
     },
     {
         key: 'proprioMenu.add',
