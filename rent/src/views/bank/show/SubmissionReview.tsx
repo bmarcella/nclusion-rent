@@ -49,6 +49,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     const [pConfig, setPConfig] = useState(false);
     const { authority } = useSessionUser((state) => state.user);
     const { t } = useTranslation();
+    const role = authority?.[0] || null;
     useEffect(() => {
              getBankImages(bankId).then((imgs: BankImage[]) => {
                  console.log("Bank Images: ", imgs);
@@ -74,33 +75,19 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     }
 
     const  canApprove = () => {
-      try {
-        const role = authority?.[0] || null;
         if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="assist_coordonator"  || role =="coordonator"  || role =="admin" || role =="super_manager" || role =="manager" || role =="asssit_manager") ) {
             return true;
         }
         return false;
-      } catch (error) {
-        console.error("Error checking approval:", error);
-        return false;
-     }
     }
 
     const  canValidate = () => {
-      try {
-        const role = authority?.[0] || null;
         if (!bank?.approve && bank?.step === "bankSteps.needApproval" && (role =="assist_coordonator"  || role =="coordonator_agent_immobilier"  || role =="admin" ) ) {
             return true;
         }
         return false;
-      } catch (error) {
-        console.error("Error checking approval:", error);
-        return false;
-     }
     }
-
     const  canReject = () => {
-      try {
         const role = authority?.[0] || null;
         if ( role =="coordonator_agent_immobilier" && bank?.step != "bankSteps.needApproval") {
             return false;
@@ -109,14 +96,8 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
             return true;
         }
         return false;
-      } catch (error) {
-        console.error("Error checking approval:", error);
-        return false;
-      }
     }
     const  canPending = () => {
-      try {
-        const role = authority?.[0] || null;
         if ( role =="coordonator_agent_immobilier" && bank?.step != "bankSteps.needApproval") {
             return false;
         }
@@ -124,13 +105,15 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
         if ( (!bank?.pending  && (bank?.step != "bankSteps.needContract"  && bank?.step != "bankSteps.needRenovation" && bank?.step != "bankSteps.readyToUse")) || role =="admin"  ) {
             return true;
         }
-        
-        return false;
-      } catch (error) {
-        console.error("Error checking approval:", error);
         return false;
       }
-  }
+    const  canSignedContract = () => {
+        if ((bank &&  bank?.approve && bank.step=='bankSteps.needContract') && ( role =="coordonator"  || role =="assist_coordonator"   || role =="admin" ) ) {
+            return true;
+        }
+        return false;
+    }
+
 
   return (
     <>
@@ -248,11 +231,12 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
           <PiCheckFatFill /> Rénovation terminée
         </Button> }
 
-        { (bank &&  bank.step=='bankSteps.needContract')  && bank?.approve && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
+        { canSignedContract()  && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onContratOk() }} />, "Approbation")}
         >
           <PiCheckFatFill /> Contrat Signé
         </Button> }
+
         {  canValidate() && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ (data) => { onApproveOk(data) }} />, "Approbation")}
         >
