@@ -72,6 +72,7 @@ interface Props {
     isAgent?: boolean;
     all?: boolean;
 }
+
 export function TableBank({ step, isAgent = false, all = false }: Props) {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(pageSizeOption[0].value);
@@ -361,7 +362,7 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
     useEffect(() => {
         setCurrentPage(1); // reset first
         fetchBanks(1);
-    }, [start, end, regions, agents, steps, name]);
+    }, [start, end, regions, agents, steps, name, pageSize]);
 
 
     const onPaginationChange = async (page: number) => {
@@ -444,6 +445,7 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
             }
         );
     }, []);
+    
     return (
         <div>
             <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
@@ -552,13 +554,9 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                 }
                 <div className="flex items-center justify-between mt-4">
                     <Pagination
-                        // pageSize={table.getState().pagination.pageSize}
-                        // currentPage={table.getState().pagination.pageIndex + 1}
-                        // currentPage={currentPage}
                         pageSize={pageSize}
                         currentPage={currentPage}
                         total={totalData}
-                        // total={banks.length}
                         onChange={onPaginationChange}
                     />
                     <div style={{ minWidth: 130 }}>

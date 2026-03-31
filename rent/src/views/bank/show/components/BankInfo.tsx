@@ -14,7 +14,6 @@ import {
   FaExclamationCircle,
   FaInfoCircle,
 } from "react-icons/fa";
-import StepHistory from "./StepHistory";
 
 interface BankInfoProps {
   bank: Bank;
@@ -192,14 +191,6 @@ const BankInfo: React.FC<BankInfoProps> = ({ bank }) => {
           </div>
         )}
       </div>
-      <div className="space-y-2">
-
-      <div className="max-w-[700px]">
-           <StepHistory bankId={bank.id} />
-      </div>
-
-      </div>
-      
     </div>
     </div>
   );

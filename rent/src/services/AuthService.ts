@@ -107,6 +107,7 @@ export async function apiSignUp(data: SignUpCredential) {
         const landlord: any = {
             id: '',
             fullName: data.fullName,
+            fullName_lower: data.fullName.toLowerCase(), 
             regions: [],
             id_user: user.uid,
             nickName: data.fullName,

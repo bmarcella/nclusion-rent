@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Select } from '@/components/ui/Select';
+import DebouceInput from '@/components/shared/DebouceInput';
 import { manageAuth } from '@/constants/roles.constant';
 import {  getRegionsLabelvalue, RegionType } from '@/views/Entity/Regions';
 import { useEffect, useState } from 'react';
@@ -15,6 +16,7 @@ interface Props {
   t: (key: string) => string;
   onChangeRegion: (payload:  number[]) => void;
   onChangeRole: (role: string) => void;
+  onChangeFullName: (name: string) => void;
 }
 
 export const convertToSelectOptionsRegion = (items: RegionType[]) => {
@@ -25,7 +27,7 @@ export const convertToSelectOptionsRegion = (items: RegionType[]) => {
 }
 
 
-function FilterProprio({ authority, proprio, t, onChangeRegion, onChangeRole }: Props) {
+function FilterProprio({ authority, proprio, t, onChangeRegion, onChangeRole, onChangeFullName }: Props) {
   const [regions, setRegions] = useState<OptionType[]>([]);
   const [roles, setRoles] = useState<OptionType[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<OptionType[]>([]);
@@ -46,6 +48,11 @@ function FilterProprio({ authority, proprio, t, onChangeRegion, onChangeRole }: 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded">
+      <DebouceInput
+        placeholder="Rechercher par nom"
+        wait={500}
+        onChange={(e) => onChangeFullName(e.target.value)}
+      />
       {roles.length > 0 && (
         <Select
           placeholder="Role"

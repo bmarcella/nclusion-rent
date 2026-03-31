@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Proprio } from '@/views/Entity';
 import  { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -24,6 +26,7 @@ interface Props {
 
 export const personSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
+  fullName_lower: z.string().optional(),
   nickName: z.string().optional(),
   companyName: z.string().optional(),
   nif: z.string().min(1, 'NIF is required'),
@@ -42,7 +45,6 @@ function EntEntForm( { lord , onChange} : Props) {
   const [message, setMessage] = useTimeOutMessage()
   const { userId } = useSessionUser((state) => state.user);
   const { t } = useTranslation();
-   
   const [alert, setAlert] = useState("success") as any;
   const {
     handleSubmit,
@@ -67,6 +69,7 @@ function EntEntForm( { lord , onChange} : Props) {
     setSubmitting(true)
     try {
         data.updatedBy = userId;
+        data.fullName_lower = data.fullName.toLowerCase();
         const landlordRef = getLandlordDoc(lord.id);
         await updateDoc(landlordRef, data);
         onChange(data);

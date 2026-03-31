@@ -51,6 +51,7 @@ function AddProprioForm( { done } : Props) {
     defaultValues: {
       id: '',
       fullName: '',
+      fullName_lower: '',
       nickName: '',
       city: '',
       companyName: '',
@@ -84,6 +85,7 @@ function AddProprioForm( { done } : Props) {
   const onSubmit = async (data: any) => {
     setSubmitting(true)
     try {
+        data.fullName_lower = data.fullName.toLowerCase(), 
         data.createBy = userId;
         data.uploadedAt = new Date();
         data.active = true;

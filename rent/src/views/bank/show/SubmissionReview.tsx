@@ -21,6 +21,8 @@ import { Steps } from "@/components/ui/Steps";
 import { useTranslation } from "@/utils/hooks/useTranslation";
 import { BiPrinter } from "react-icons/bi";
 import AllTask from "./components/AllTask";
+import Tabs from "@/components/ui/Tabs";
+import StepHistory from "./components/StepHistory";
 
 interface Props {
     bankId: string;
@@ -47,6 +49,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     const [h2, setH2] = useState(null);
     const [h3, setH3] = useState(null);
     const [pConfig, setPConfig] = useState(false);
+    const [activeTab, setActiveTab] = useState('comments');
     const { authority } = useSessionUser((state) => state.user);
     const { t } = useTranslation();
     const role = authority?.[0] || null;
@@ -221,25 +224,57 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
        {  (pdf || pConfig) && <div className={ (pConfig && !pdf ) ? "w-full border" : "w-full" } style={{ height: h+'px' }}></div> }
       
 
-      {/* Details */}
-      <div>
-        <h2 className="text-2xl font-bold mb-2 text-pink-600">Details</h2>
-        <Card  className="p-2 rounded-lg">
-         { bank && <BankInfo bank={bank} /> }
-        </Card>
+      {/* Details & Comments side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Details - 2/3 width */}
+        <div className="lg:col-span-2">
+          <div className="rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-gray-800/60">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-bold text-pink-600">Details</h2>
+                {bank?.step && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-700">
+                    {t('bank.' + bank.step)}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="p-4">
+              {bank && <BankInfo bank={bank} />}
+            </div>
+          </div>
+        </div>
+
+        {/* Comments & Timeline - 1/3 width */}
+        <div className="lg:col-span-1">
+          <div className="rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 border border-indigo-100 dark:border-gray-700 overflow-hidden h-full flex flex-col">
+            <Tabs defaultValue="comments" onChange={(val) => setActiveTab(val as string)}>
+              <Tabs.TabList className="px-4 pt-3 border-b border-indigo-100 dark:border-gray-700 bg-white/60 dark:bg-gray-800/60">
+                <Tabs.TabNav value="comments">Commentaires</Tabs.TabNav>
+                <Tabs.TabNav value="timeline">Timeline</Tabs.TabNav>
+              </Tabs.TabList>
+            </Tabs>
+            <div className="p-4 flex-1 overflow-y-auto max-h-[700px]">
+              {activeTab === 'comments' && bank && bank.id && (
+                <CommentsBank
+                  bankId={bank.id}
+                  userId={userId || ''}
+                  isEdit={true}
+                  nextStep={function (step: number, data: any): void {
+                    throw new Error("Function not implemented.");
+                  }}
+                  only={pdf}
+                />
+              )}
+              {activeTab === 'timeline' && bank && bank.id && (
+                <StepHistory bankId={bank.id} />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
-      { (pdf || pConfig) && <div  className={ (pConfig && !pdf) ? "w-full border" : "w-full" }  style={{ height: h2+'px' }}></div> }
-
-      {/* Comments */}
-      <div>
-        <h2 className="text-2xl font-bold mb-2 text-pink-600">Commentaires</h2>
-        <Card>
-        { bank && bank.id && <CommentsBank  bankId={bank.id} userId={userId || ''} isEdit={true} nextStep={function (step: number, data: any): void {
-                      throw new Error("Function not implemented.");
-                  } }  only={pdf} /> }
-        </Card>
-      </div> 
+      {(pdf || pConfig) && <div className={(pConfig && !pdf) ? "w-full border" : "w-full"} style={{ height: h2 + 'px' }}></div>}
 
       {/* Action buttons */}
       { !pdf &&  
