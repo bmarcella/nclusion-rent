@@ -186,15 +186,35 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
 
       {/* Photos */}
       <div>
-        <h2 className="text-2xl font-bold mb-2 text-pink-600">Photo</h2>
-        <div className="grid grid-flow-row-dense grid-cols-3 grid-rows-2 gap-4">
-            <div className="col-span-2 row-span-2 shadow-lg p-4 rounded-lg">
-               <ImageGallery images={images} userId={userId || ''} canDelete={false} showPic={true} ></ImageGallery>
+        <div className="flex items-center gap-3 mb-4">
+          <h2 className="text-2xl font-bold text-pink-600">Photo</h2>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-700">
+            {images.length + lImages.length} fichiers
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Bank Images */}
+          <div className="lg:col-span-2">
+            <div className="rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 p-5  border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Images des banks</h3>
+                <span className="text-sm text-gray-500">{images.length} photo{images.length !== 1 ? 's' : ''}</span>
+              </div>
+              <ImageGallery images={images} userId={userId || ''} canDelete={false} showPic={true} />
             </div>
-      
-            <div className="shadow-lg p-4 rounded-lg">
-              <ImageLordComp images={lImages} userId={userId || ''} canDelete={false} showPic={true} ></ImageLordComp>
+          </div>
+
+          {/* Landlord Documents */}
+          <div className="lg:col-span-1">
+            <div className="rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 p-5 border border-indigo-100 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Documents propriétaire</h3>
+                <span className="text-sm text-gray-500">{lImages.length} doc{lImages.length !== 1 ? 's' : ''}</span>
+              </div>
+              <ImageLordComp images={lImages} userId={userId || ''} canDelete={false} showPic={true} />
             </div>
+          </div>
         </div>
       </div>
 

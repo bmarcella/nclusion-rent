@@ -70,7 +70,7 @@ const ImageLordComp : React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)
         }}
         src={image.imageUrl}
         alt={image.fileName}
-        className={ !showPic ? "w-full h-64 object-cover hover:scale-105 transition-transform duration-300": "card-image"}
+        className={ !showPic ? "w-full h-64 object-cover hover:scale-105 transition-transform duration-300": "w-full max-h-48 object-cover rounded"}
       />
     )}
 
@@ -109,26 +109,22 @@ const ImageLordComp : React.FC<ImageGalleryProps> = ({ images, onDelete=(i: any)
 
       </div>
           <Dialog
-                width={ width * 0.8 }
-                height={height * 0.8}
+                width={ width * 0.9 }
+                height={height * 0.9}
                 isOpen={dialogIsOpen}
                 onClose={onDialogClose}
                 onRequestClose={onDialogClose}
             >
-                <h5 className="mb-4">{ image?.fileName }</h5>
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-auto p-4">
-                <div className="bg-white p-4 rounded-lg shadow-lg">
+                <h5 className="mb-4 font-semibold text-gray-800">{ image?.fileName }</h5>
+                <div className="flex items-center justify-center w-full h-full overflow-auto p-2">
                   {image && (
                     <img
                       src={image.imageUrl}
                       alt={image.fileName}
-                      className="card-image rounded"
+                      className="max-w-full max-h-[75vh] object-contain rounded"
                     />
                   )}
                 </div>
-               </div>
-                
-                
             </Dialog>
     </div>
   );
