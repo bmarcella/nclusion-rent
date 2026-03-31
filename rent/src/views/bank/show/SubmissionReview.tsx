@@ -1,7 +1,5 @@
 /* eslint-disable react/jsx-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import {  getBankImages, getLordImages } from "@/services/firebase/BankService";
@@ -51,6 +49,7 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     const [pConfig, setPConfig] = useState(false);
     const { authority } = useSessionUser((state) => state.user);
     const { t } = useTranslation();
+    const role = authority?.[0] || null;
     useEffect(() => {
              getBankImages(bankId).then((imgs: BankImage[]) => {
                  console.log("Bank Images: ", imgs);
@@ -59,20 +58,15 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     }, [bankId]);
 
     useEffect(() => {
-    
         if (bank)  getLordImages(bank.landlord).then((imgs: any[]) => {
             console.log("Bank Images: ", imgs);
             setLImages(imgs);
         });
       }, [bank]);
-
       useEffect(() => {
-         
      }, [bankId]);
 
-  
-
-     const print = async () => {
+    const print = async () => {
       setPdf(true);
       setTimeout(async () => {
        await  reactToPrintFn();
@@ -81,25 +75,50 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
     }
 
     const  canApprove = () => {
-      try {
-        const role = authority?.[0] || null;
-        if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="coordonator"  || role =="admin" || role =="super_manager" || role =="manager" || role =="asssit_manager") ) {
+        if (bank?.approve && bank?.step === "bankSteps.needApprobation" && (role =="assist_coordonator"  || role =="coordonator"  || role =="admin" || role =="super_manager" || role =="manager" || role =="asssit_manager") ) {
             return true;
         }
         return false;
-      } catch (error) {
-        console.error("Error checking approval:", error);
-        return false;
-     }
     }
+
+    const  canValidate = () => {
+        if (!bank?.approve && bank?.step === "bankSteps.needApproval" && (role =="assist_coordonator"  || role =="coordonator_agent_immobilier"  || role =="admin" ) ) {
+            return true;
+        }
+        return false;
+    }
+    const  canReject = () => {
+        const role = authority?.[0] || null;
+        if ( role =="coordonator_agent_immobilier" && bank?.step != "bankSteps.needApproval") {
+            return false;
+        }
+        if ( (!bank?.reject && (bank?.step != "bankSteps.needContract"  && bank?.step != "bankSteps.needRenovation" && bank?.step != "bankSteps.readyToUse")) || role =="admin"  ) {
+            return true;
+        }
+        return false;
+    }
+    const  canPending = () => {
+        if ( role =="coordonator_agent_immobilier" && bank?.step != "bankSteps.needApproval") {
+            return false;
+        }
+
+        if ( (!bank?.pending  && (bank?.step != "bankSteps.needContract"  && bank?.step != "bankSteps.needRenovation" && bank?.step != "bankSteps.readyToUse")) || role =="admin"  ) {
+            return true;
+        }
+        return false;
+      }
+    const  canSignedContract = () => {
+        if ((bank &&  bank?.approve && bank.step=='bankSteps.needContract') && ( role =="coordonator"  || role =="assist_coordonator"   || role =="admin" ) ) {
+            return true;
+        }
+        return false;
+    }
+
 
   return (
     <>
     <div className="flex gap-2 pt-6  space-y-6 rounded bg-white pl-1 mb-4 pr-1"  >
     <div className="w-full"  >
-    {/* <Button loading={pdf} variant="solid" onClick={() => {
-        pdfExport()
-     }}>Download PDF</Button> */}
       <Button loading={pdf} variant="solid"  className=" ml-4" icon={<BiPrinter/>} onClick={() => {
         print()
      }}> </Button>
@@ -144,15 +163,12 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
               <Steps.Item key={index} title={t('bank.' + step.key)} />
             ))}
           </Steps>
-        </div> } 
+    </div> 
+    } 
  
      <div className="p-6 space-y-6"  ref={contentRef}>
 
-      {/* { bank && bank.step=='bankSteps.needRenovation' && <TaskManager bank={bank} /> } */}
-
       { bank && (contrat || bank.step=='bankSteps.needContract') && <LeaseContractForm bank={bank} ></LeaseContractForm> }
-
-
 
       { bank && bank.id && (bank.step=='bankSteps.needRenovation') &&  !pdf && <div>
         <h2 className="text-2xl font-bold mb-2 text-pink-600">Rénovation</h2>
@@ -170,19 +186,38 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
 
       {/* Photos */}
       <div>
-        <h2 className="text-2xl font-bold mb-2 text-pink-600">Photo</h2>
-        <div className="grid grid-flow-row-dense grid-cols-3 grid-rows-2 gap-4">
-            <div className="col-span-2 row-span-2 shadow-lg p-4 rounded-lg">
-               <ImageGallery images={images} userId={userId || ''} canDelete={false} showPic={true} ></ImageGallery>
+        <div className="flex items-center gap-3 mb-4">
+          <h2 className="text-2xl font-bold text-pink-600">Photo</h2>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-700">
+            {images.length + lImages.length} fichiers
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Bank Images */}
+          <div className="lg:col-span-2">
+            <div className="rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 p-5  border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Images des banks</h3>
+                <span className="text-sm text-gray-500">{images.length} photo{images.length !== 1 ? 's' : ''}</span>
+              </div>
+              <ImageGallery images={images} userId={userId || ''} canDelete={false} showPic={true} />
             </div>
-      
-            <div className="shadow-lg p-4 rounded-lg">
-              <ImageLordComp images={lImages} userId={userId || ''} canDelete={false} showPic={true} ></ImageLordComp>
+          </div>
+
+          {/* Landlord Documents */}
+          <div className="lg:col-span-1">
+            <div className="rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 p-5 border border-indigo-100 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Documents propriétaire</h3>
+                <span className="text-sm text-gray-500">{lImages.length} doc{lImages.length !== 1 ? 's' : ''}</span>
+              </div>
+              <ImageLordComp images={lImages} userId={userId || ''} canDelete={false} showPic={true} />
             </div>
+          </div>
         </div>
       </div>
 
-      
        {  (pdf || pConfig) && <div className={ (pConfig && !pdf ) ? "w-full border" : "w-full" } style={{ height: h+'px' }}></div> }
       
 
@@ -216,31 +251,39 @@ const SubmissionReview = ( { bankId, genTasks, onChangeState, onRenovOk, onRejec
           <PiCheckFatFill /> Rénovation terminée
         </Button> }
 
-        { (bank &&  bank.step=='bankSteps.needContract')  && bank?.approve && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
+        { canSignedContract()  && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onContratOk() }} />, "Approbation")}
         >
           <PiCheckFatFill /> Contrat Signé
         </Button> }
-        {  !bank?.approve  && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
+
+        {  canValidate() && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ (data) => { onApproveOk(data) }} />, "Approbation")}
         >
           <PiCheckFatFill /> Validé
         </Button> }
+
         {  canApprove() && <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
          onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ () => { onPermitOk() }} />, "Approbation")}
         >
           <PiCheckFatFill /> Approuvé
         </Button> }
-       {  !bank?.reject  &&<Button className="bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1" 
+
+        <>
+        {  canReject()  && <Button className="bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1" 
           onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={onRejectOk} />)}
           >
           <PiThumbsDownFill/> Rejeté
         </Button> }
-        {  !bank?.pending &&  <Button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full" 
+
+        {  canPending() &&  <Button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full" 
           onClick={() => onChangeState(<Rejected bankId={bankId}  userId={userId || ''} onSubmit={ (data) => { onPendingOk(data) }} />, "Consideration")}
           >
           Attente
         </Button> }
+        </>
+    
+
       </div> }
     </div>
     </>

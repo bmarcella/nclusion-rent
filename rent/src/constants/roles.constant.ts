@@ -4,12 +4,35 @@ import { convertStringToSelectOptions } from "@/views/bank/add/components/InfoBa
 import { getRegionsByValues, Regions } from "@/views/Entity/Regions"
 import { USER_ROLES } from "@/views/shared/schema"
 
+export enum UserRole {
+  ADMIN = "admin",
+  ASSIST_ACCOUNTANT = "assist_accountant",
+  ACCOUNTANT = "accountant",
+  SUPER_ACCOUNTANT = "super_accountant",
+  SUPER_MANAGER = "super_manager",
+  AGENT_IMMOBILIER = "agent_immobilier",
+  COORDONATOR_AGENT_IMMOBILIER = "coordonator_agent_immobilier",
+  COORDONATOR = "coordonator",
+  ASSIST_COORDONATOR = "assist_coordonator",
+  MANAGER = "manager",
+  ASSIST_MANAGER = "assist_manager",
+  PROPRIETOR = "proprietor",
+  OPERATION = "operation",
+  SUPER_OPERATION = "super_operation",
+  VENDOR_MANAGEMENT = "vendor_management",
+  FIELDS_OPS = "fields_ops",
+  VENDOR = "vendeur",
+  PROPRIETARY = "proprietaire",
+  REFERENCE = "reference",
+}
+
 export const ADMIN = 'admin'
 export const ASSIST_ACCOUNTANT = 'assist_accountant'
 export const ACCOUNTANT = 'accountant'
 export const SUPER_ACCOUNTANT = 'super_accountant'
 export const SUPER_MANAGER = 'super_manager'
 export const AGENT_IMMOBILLIER= 'agent_immobilier'
+export const COORDONATOR_AGENT_IMMOBILLIER= 'coordonator_agent_immobilier'
 export const COORDONATOR = 'coordonator'
 export const ASSIST_COORDONATOR = 'assist_coordonator'
 export const MANAGER = 'manager'
@@ -45,9 +68,13 @@ export const getRolesByAhth = (auth: string ) => {
           case "coordonator":
             roles = roles.concat(["agent_immobilier","assist_coordonator", "vendeur"])
             break;
-          case "assist_coordonator":
+            case "assist_coordonator":
             roles.push("agent_immobilier");
+            roles.push("coordonator_agent_immobilier");
             roles.push("vendeur");
+            break;   
+          case "coordonator_agent_immobilier":
+            roles.push("agent_immobilier");
             break;
       
           case "manager":

@@ -53,6 +53,7 @@ import GoogleMapWithMarkers from '../GoogleMapWithMarkers';
 import ChangeLocation from '../../add/components/ChangeLocation';
 import Currency from '@/views/shared/Currency';
 import ImageSignedContract from '../../add/components/ImageSignedContract';
+import { COORDONATOR_AGENT_IMMOBILLIER } from '@/constants/roles.constant';
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -68,11 +69,12 @@ type Option = {
 }
 
 interface Props {
-    step?: BankStep ;
+    step?: BankStep [] ;
     isAgent?: boolean;
     all?: boolean;
+    id: string;
 }
-export function TableBank({ step, isAgent = false, all = false }: Props) {
+export function TableBanks({ step, isAgent = false, all = false, id }: Props) {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(pageSizeOption[0].value);
     const [hasNext, setHasNext] = useState(true);
@@ -198,7 +200,8 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                             <Button variant="solid" shape="circle" size="xs" onClick={() => openDialog(row.original)}>
                                 <PiEyeLight />      
                             </Button>
-                      { ['bankSteps.needApproval', "bankSteps.needApprobation" ].includes(row.original.step as any) 
+                      { ['bankSteps.needApproval', "bankSteps.needApprobation" ].includes(row.original.step as any)  
+                          && !hasAuthority(authority, COORDONATOR_AGENT_IMMOBILLIER) 
                           && <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>
                        }
                         </div>);
@@ -211,8 +214,9 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                             <Button className="ml-1 bg-green-300 hover:bg-green-400 border-0 hover:ring-0" variant="solid" shape="circle" size="xs" onClick={() => navigate("/bank/" + row.original.id)}>
                                 <PiCheck />
                             </Button>
-                          { ['bankSteps.needApproval', "bankSteps.needApprobation" ].includes(row.original.step as any) 
-                            && <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup> 
+                          { ['bankSteps.needApproval', "bankSteps.needApprobation" ].includes(row.original.step as any)
+                             && !hasAuthority(authority, COORDONATOR_AGENT_IMMOBILLIER) 
+                             && <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup> 
                            }
                         </div>);
                 }
@@ -289,10 +293,10 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                 q = query(BankDoc, orderBy("createdAt", "desc"));
             }
         } else {
-            q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step));
+            q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "in", step), where("first_approval", "==", id));
         }
         q = getQueryDate(q);
-        const snapshot = await getCountFromServer(q);  // 🚀 NOT getDocs!
+        const snapshot = await getCountFromServer(q); 
         setTotalData(snapshot.data().count);
     };
 
@@ -305,9 +309,11 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                 q = query(BankDoc, orderBy("createdAt", "desc"), limit(pageSize));
             }
         } else {
-            q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "==", step), limit(pageSize));
+            q = query(BankDoc, orderBy("createdAt", "desc"), where("step", "in", step), where("first_approval", "==", id), limit(pageSize));
         }
+
         q = getQueryDate(q);
+
         // Only if not first page
         if (pageNum > 1 && pageDocs[pageNum - 2]) {
             q = query(q, startAfter(pageDocs[pageNum - 2]));
@@ -357,18 +363,15 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
         pageCount: Math.ceil(totalData / pageSize), // ✅ Optional
     })
 
-
     useEffect(() => {
-        setCurrentPage(1); // reset first
+        setCurrentPage(1);
         fetchBanks(1);
     }, [start, end, regions, agents, steps, name]);
-
 
     const onPaginationChange = async (page: number) => {
         if (page !== currentPage) {
             await fetchBanks(page);
         }
-        //  table.setPageIndex(page - 1);
     };
     const onSelectChange = (value = 0) => {
         table.setPageSize(Number(value))
@@ -715,6 +718,6 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
 }
 
 
-export default TableBank;
+export default TableBanks;
 
 

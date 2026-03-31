@@ -1,7 +1,5 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { da } from "date-fns/locale";
 import { USER_ROLE } from "../shared/schema";
 import { Timestamp } from "firebase/firestore";
 
@@ -36,10 +34,13 @@ export interface Person {
   createBy?: string;
   updateBy?: string;
 }
+
 export interface Proprio extends Person {
   tasks?: Tasks[];
   banks?: Bank[];
 }
+
+
 export type TaskState = 'pending' | 'in-progress' | 'completed';
 interface Tasks {
   id: string;
@@ -55,6 +56,7 @@ interface Tasks {
   createdAt: Date;
 }
 export const internetProviders = ["internetProviders.natcom", "internetProviders.digicel", "internetProviders.none"] as const;
+
 export const roofTypes = [
   "roof.sheetMetal",       // Tôle
   "roof.concrete",         // Béton
@@ -71,6 +73,7 @@ export const roofTypes = [
   "roof.elastomer",        // Membrane élastomère
   "roof.slate"             // Ardoise
 ] as const;
+
 export const verifyOwners = [
   "verifyOwners.siblings",
   "verifyOwners.neighbors",
@@ -240,6 +243,8 @@ export const bankSteps = [
   "bankSteps.readyToUse",
   "bankSteps.notProceeded"
 ] as const;
+
+
 export type WhoReferred = typeof whoReferreds[number];
 export type InternetProvider = typeof internetProviders[number];
 export type FinalDecisionStatus = typeof finalDecisionStatuses[number];
@@ -265,7 +270,6 @@ export type ClientVisibility = typeof clientVisibilities[number];
 export type LotteryCompetition = typeof lotteryCompetitions[number];
 export type NonRenewalReason = typeof nonRenewalReasons[number];
 export type RoofType = typeof roofTypes[number];
-
 export const renovSteps = [
   "renovSteps.construction",
   "renovSteps.comptoire",
@@ -274,6 +278,13 @@ export const renovSteps = [
   "renovSteps.completed",
 ] as const;
 export type RenovStep = typeof renovSteps[number];
+
+export const ContratTypes = [
+  "contract.simple",
+  "contract.full"
+] as const;
+
+export type ContratType = typeof ContratTypes[number];
 
 export type StepDecision = {
   id?: string;
@@ -338,6 +349,7 @@ export interface Bank {
   paintedAt?: Date;
   comptoireBuildedAt?: Date;
   images: any[];
+  first_approval?: string;
   location: {
     lat: any,
     lng: any,
@@ -349,7 +361,6 @@ export interface Bank {
     status?: FinalDecisionStatus;
     reason_why?: string
   };
-
   rentDetails?: {
     paymentMethod?: PaymentMethod[];
     paymentStructure?: PaymentStructureType;
@@ -373,7 +384,6 @@ export interface Bank {
     electricity?: boolean;
     airConditioning?: boolean;// d
   }
-
   securityDetails?: {
     areaStability?: AreaStability;
     openHour?: OpenHour;
@@ -381,14 +391,12 @@ export interface Bank {
     currentSecurity?: CurrentSecurity[];
     roof?: RoofType;
   }
-
   renovationDetails?: {
     neededSecurity?: NeededSecurity[];
     majorRenovation?: MajorRenovation[];
     minorRenovation?: MinorRenovations[];
   }
 }
-
 export const add7DaysToExpirationDate = (expDate?: Date | Timestamp): Date => {
   const baseDate =
     !expDate
