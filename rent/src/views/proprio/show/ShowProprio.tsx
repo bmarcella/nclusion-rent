@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     getDocs,
+    getCountFromServer,
     query,
     orderBy,
     limit,
@@ -14,7 +15,7 @@ import {
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Proprio } from '@/views/Entity';
 import { Landlord } from '@/services/Landlord';
-import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
+import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from '@tanstack/react-table';
 import Table from '@/components/ui/Table';
 import { Button, Dialog, Pagination, Select, Tag } from '@/components/ui';
 import { PiEyeLight } from 'react-icons/pi';
@@ -32,11 +33,10 @@ import { deleteLord } from '@/services/firebase/BankService';
 import FilterProprio from './components/FilterProprio';
 
 const { Tr, Th, Td, THead, TBody } = Table
-const PAGE_SIZE = 0;
 const pageSizeOption = [
-    { value: 50, label: '50 / page' },
-    { value: 100, label: '100 / page' },
+    { value: 10, label: '10 / page' },
     { value: 200, label: '200 / page' },
+    { value: 300, label: '300 / page' },
     { value: 500, label: '500 / page' },
 ]
 
@@ -54,11 +54,12 @@ interface Props {
 function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
     const [hasNext, setHasNext] = useState(true);
     const [data, setData] = useState<Proprio[]>([]);
-    const [totalData, setTotalData] = useState(1);
+    const [totalData, setTotalData] = useState(0);
     const [page, setPage] = useState(1);
     const [pageCursors, setPageCursors] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
     const [loading, setLoading] = useState(false);
-
+    const [pageSize, setPageSize] = useState(pageSizeOption[0].value);
+    const [currentPage, setCurrentPage] = useState(1);
     const fetchedRef = useRef(false);
     const [cEnt, setEnt] = useState<Proprio>();
     const [dialogIsOpen, setIsOpen] = useState(false);
@@ -212,45 +213,61 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
 
 
     useEffect(() => {
-        if (fetchedRef.current) return;
+        fetchCount();
+        setCurrentPage(1)
+        setPageCursors([])
         fetchPage(1); // load first page
-    }, [roles, regions]);
+    }, [roles, regions, pageSize]);
 
+    const buildBaseQuery = () => {
+        let baseQuery: Query<DocumentData> = Landlord as CollectionReference<DocumentData>;
+
+        if (isUser !== undefined) {
+            baseQuery = query(baseQuery, where('createBy', '==', isUser));
+        }
+
+        if (roles && regions.length === 0) {
+            baseQuery = query(baseQuery, where('type_person', '==', roles));
+        } else if (regions.length > 0 && !roles) {
+            baseQuery = query(baseQuery, where('regions', 'array-contains-any', regions));
+        } else if (roles && regions.length > 0) {
+            baseQuery = query(baseQuery, where('type_person', '==', roles), where('regions', 'array-contains-any', regions));
+        }
+        return baseQuery;
+    }
+
+    const fetchCount = async () => {
+        try {
+            const baseQuery = buildBaseQuery();
+            const snapshot = await getCountFromServer(baseQuery);
+            console.log(snapshot.data().count)
+            setTotalData(snapshot.data().count);
+        } catch (error) {
+            console.error('Error fetching count:', error);
+        }
+    }
 
     const fetchPage = async (pageNumber: number) => {
         setLoading(true);
         try {
             let q: Query<DocumentData>;
-            let baseQuery: Query<DocumentData> = Landlord as CollectionReference<DocumentData>;
-
-            // Build conditional filters
-            if (isUser !== undefined) {
-                baseQuery = query(baseQuery, where('createBy', '==', isUser));
-            }
-
-            if (roles && regions.length === 0) {
-                baseQuery = query(baseQuery, where('type_person', '==', roles));
-            } else if (regions.length > 0 && !roles) {
-                baseQuery = query(baseQuery, where('regions', 'array-contains-any', regions));
-            } else if (roles && regions.length > 0) {
-                baseQuery = query(baseQuery, where('type_person', '==', roles), where('regions', 'array-contains-any', regions));
-            }
-
-            const pageSize = pageSizeOption[PAGE_SIZE].value;
+            const baseQuery = buildBaseQuery();
 
             // First page
             if (pageNumber === 1) {
                 q = query(baseQuery, orderBy('fullName'), limit(pageSize));
             } else {
                 const prevCursor = pageCursors[pageNumber - 2]; // e.g. page 2 → index 0
+
                 if (!prevCursor) {
                     console.warn(`Missing cursor for page ${pageNumber - 1}`);
                     setLoading(false);
                     return;
                 }
-
                 q = query(baseQuery, orderBy('fullName'), startAfter(prevCursor), limit(pageSize));
             }
+
+            setCurrentPage(pageNumber);
 
             const snapshot = await getDocs(q);
 
@@ -258,8 +275,6 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
                 id: doc.id,
                 ...doc.data(),
             })) as Proprio[];
-
-            setTotalData(snapshot.size);
 
             // Store cursor if not already stored
             if (snapshot.docs.length > 0 && !pageCursors[pageNumber - 1]) {
@@ -273,30 +288,18 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
             setData(landlords);
             setPage(pageNumber);
             setHasNext(snapshot.docs.length === pageSize);
+
+            // Fallback: if count query hasn't resolved yet, estimate a minimum total
+            if (snapshot.docs.length === pageSize) {
+                setTotalData((prev) => Math.max(prev, pageNumber * pageSize + 1));
+            } else {
+                setTotalData((prev) => Math.max(prev, (pageNumber - 1) * pageSize + snapshot.docs.length));
+            }
         } catch (error) {
             console.error('Error fetching page:', error);
         }
 
         setLoading(false);
-    };
-
-
-
-    useEffect(() => {
-        if (fetchedRef.current) return;
-        fetchPage(1); // load first page
-    }, []);
-
-    const handlePrev = () => {
-        if (page > 1) {
-            fetchPage(page - 1);
-        }
-    };
-
-    const handleNext = () => {
-        if (hasNext) {
-            fetchPage(page + 1);
-        }
     };
 
     const onChange = (payload: any) => {
@@ -322,15 +325,18 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
         // Pipeline
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        // getPaginationRowModel: getPaginationRowModel(),
+        manualPagination: true,
+        pageCount : Math.ceil(totalData / pageSize)
     })
 
     const onPaginationChange = (page: number) => {
-        table.setPageIndex(page - 1)
+        fetchPage(page)
     }
 
     const onSelectChange = (value = 0) => {
-        table.setPageSize(Number(value))
+        table.setPageSize(Number(value));
+        setPageSize(Number(value));
     }
 
     const onChangeRegion = async (ids: any[]) => {
@@ -346,7 +352,7 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
     return (
 
         <div>
-            <h4>{name} - {data.length}</h4>
+            <h4>{name} - { totalData } </h4>
             <FilterProprio authority={authority || []} proprio={proprio} t={t} onChangeRegion={onChangeRegion} onChangeRole={onChangeRole} ></FilterProprio>
 
 
@@ -393,8 +399,8 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
                 </Table>
                 <div className="flex items-center justify-between mt-4">
                     <Pagination
-                        pageSize={table.getState().pagination.pageSize}
-                        currentPage={table.getState().pagination.pageIndex + 1}
+                        pageSize={pageSize}
+                        currentPage={currentPage}
                         total={totalData}
                         onChange={onPaginationChange}
                     />
@@ -404,8 +410,7 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
                             isSearchable={false}
                             value={pageSizeOption.filter(
                                 (option) =>
-                                    option.value ===
-                                    table.getState().pagination.pageSize,
+                                    option.value === pageSize,
                             )}
                             options={pageSizeOption}
                             onChange={(option) => onSelectChange(option?.value)}
