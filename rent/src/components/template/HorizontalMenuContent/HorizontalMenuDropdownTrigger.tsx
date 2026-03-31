@@ -9,14 +9,16 @@ interface HorizontalMenuDropdownTriggerCommonProps extends CommonProps {
 }
 
 interface ButtonProps
-    extends HorizontalMenuDropdownTriggerCommonProps,
+    extends
+        HorizontalMenuDropdownTriggerCommonProps,
         ButtonHTMLAttributes<HTMLButtonElement> {
     asElement?: 'button'
     ref?: Ref<HTMLButtonElement>
 }
 
 interface AnchorProps
-    extends HorizontalMenuNavLinkProps,
+    extends
+        HorizontalMenuNavLinkProps,
         HorizontalMenuDropdownTriggerCommonProps {
     asElement?: 'a'
     path: string

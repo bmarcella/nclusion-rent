@@ -18,8 +18,7 @@ export interface AvatarGroupProps extends CommonProps {
 }
 
 interface GroupContainerProps
-    extends CommonProps,
-        Pick<AvatarGroupProps, 'chained'> {}
+    extends CommonProps, Pick<AvatarGroupProps, 'chained'> {}
 
 const GroupContainer = ({
     children,

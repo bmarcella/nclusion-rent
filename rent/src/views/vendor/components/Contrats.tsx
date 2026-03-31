@@ -6,28 +6,24 @@ import TaskManagerPopup from '@/views/vendor/components/TaskManagerPopup'
 import ShowContrat from './ShowContrat'
 
 function Contrats() {
-  return (
-    <> 
-   
-        <Tabs defaultValue="tab2" className="w-full">
+    return (
+        <>
+            <Tabs defaultValue="tab2" className="w-full">
                 <TabList>
-                <TabNav value="tab2">Voir</TabNav>
+                    <TabNav value="tab2">Voir</TabNav>
                     <TabNav value="tab1">Ajouter</TabNav>
-                   
                 </TabList>
                 <div className="p-4">
                     <TabContent value="tab1">
-                       <TaskManagerPopup></TaskManagerPopup>
+                        <TaskManagerPopup></TaskManagerPopup>
                     </TabContent>
                     <TabContent value="tab2">
-                       <ShowContrat/>
+                        <ShowContrat />
                     </TabContent>
-        
                 </div>
             </Tabs>
-        
-    </>
-  )
+        </>
+    )
 }
 
 export default Contrats

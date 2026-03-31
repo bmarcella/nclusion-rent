@@ -1,5 +1,5 @@
-import ShowAccountantAction from "./ShowAccountantAction";
+import ShowAccountantAction from './ShowAccountantAction'
 
-export { ShowAccountantActionBase } from "./ShowAccountantAction";
+export { ShowAccountantActionBase } from './ShowAccountantAction'
 
-export default ShowAccountantAction ;
+export default ShowAccountantAction

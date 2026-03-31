@@ -1,16 +1,15 @@
+import BankForm from './components/BankForm'
 
-import BankForm from "./components/BankForm";
-
-export const  AddBankBase = () => {
+export const AddBankBase = () => {
     return (
-      <>
-       <BankForm />
-      </>
+        <>
+            <BankForm />
+        </>
     )
-  }
-  
-  const AddBank = () => {
-      return <AddBankBase />
-  }
-  
-  export default AddBank;
+}
+
+const AddBank = () => {
+    return <AddBankBase />
+}
+
+export default AddBank

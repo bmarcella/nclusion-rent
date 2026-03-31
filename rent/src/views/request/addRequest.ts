@@ -1,5 +1,5 @@
-import ViewAddRequest from "./ViewAddRequest";
+import ViewAddRequest from './ViewAddRequest'
 
-export { ViewAddRequestBase } from "./ViewAddRequest";
+export { ViewAddRequestBase } from './ViewAddRequest'
 
-export default ViewAddRequest;
+export default ViewAddRequest

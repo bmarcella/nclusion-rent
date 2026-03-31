@@ -41,8 +41,8 @@ const SignUpForm = (props: SignUpFormProps) => {
 
     const [isSubmitting, setSubmitting] = useState<boolean>(false)
     const { signUp } = useAuth()
-    const random = (min: number, max: number) => { 
-        return Math.floor(Math.random() * (max - min + 1) + min);
+    const random = (min: number, max: number) => {
+        return Math.floor(Math.random() * (max - min + 1) + min)
     }
     // const num = random(1, 1000);
     const {
@@ -56,15 +56,15 @@ const SignUpForm = (props: SignUpFormProps) => {
             email: '',
             password: '',
             confirmPassword: '',
-        }
+        },
     })
 
     const onSignUp = async (values: SignUpFormSchema) => {
         const { fullName, password, email } = values
         if (!disableSubmit) {
             setSubmitting(true)
-            const lc_email = email.toLowerCase();
-            const result = await signUp({ fullName,  password, email: lc_email })
+            const lc_email = email.toLowerCase()
+            const result = await signUp({ fullName, password, email: lc_email })
             if (result?.status === 'failed') {
                 setMessage?.(result.message)
             }
@@ -75,7 +75,6 @@ const SignUpForm = (props: SignUpFormProps) => {
     return (
         <div className={className}>
             <Form onSubmit={handleSubmit(onSignUp)}>
-            
                 <FormItem
                     label="Nom complet"
                     invalid={Boolean(errors.fullName)}

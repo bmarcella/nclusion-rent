@@ -41,9 +41,7 @@ import type { Placement } from '@floating-ui/react'
 import type { HTMLProps, FocusEvent, MouseEvent, ReactNode, Ref } from 'react'
 
 export interface DropdownMenuProps
-    extends CommonProps,
-        DropdownToggleSharedProps,
-        DropdownSubItemSharedProps {
+    extends CommonProps, DropdownToggleSharedProps, DropdownSubItemSharedProps {
     activeKey?: string
     title?: string | ReactNode
     menuClass?: string

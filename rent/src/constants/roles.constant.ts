@@ -1,29 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { convertStringToSelectOptions } from "@/views/bank/add/components/InfoBank"
-import { getRegionsByValues, Regions } from "@/views/Entity/Regions"
-import { USER_ROLES } from "@/views/shared/schema"
+import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBank'
+import { getRegionsByValues, Regions } from '@/views/Entity/Regions'
+import { USER_ROLES } from '@/views/shared/schema'
 
 export enum UserRole {
-  ADMIN = "admin",
-  ASSIST_ACCOUNTANT = "assist_accountant",
-  ACCOUNTANT = "accountant",
-  SUPER_ACCOUNTANT = "super_accountant",
-  SUPER_MANAGER = "super_manager",
-  AGENT_IMMOBILIER = "agent_immobilier",
-  COORDONATOR_AGENT_IMMOBILIER = "coordonator_agent_immobilier",
-  COORDONATOR = "coordonator",
-  ASSIST_COORDONATOR = "assist_coordonator",
-  MANAGER = "manager",
-  ASSIST_MANAGER = "assist_manager",
-  PROPRIETOR = "proprietor",
-  OPERATION = "operation",
-  SUPER_OPERATION = "super_operation",
-  VENDOR_MANAGEMENT = "vendor_management",
-  FIELDS_OPS = "fields_ops",
-  VENDOR = "vendeur",
-  PROPRIETARY = "proprietaire",
-  REFERENCE = "reference",
+    ADMIN = 'admin',
+    ASSIST_ACCOUNTANT = 'assist_accountant',
+    ACCOUNTANT = 'accountant',
+    SUPER_ACCOUNTANT = 'super_accountant',
+    SUPER_MANAGER = 'super_manager',
+    AGENT_IMMOBILIER = 'agent_immobilier',
+    COORDONATOR_AGENT_IMMOBILIER = 'coordonator_agent_immobilier',
+    COORDONATOR = 'coordonator',
+    ASSIST_COORDONATOR = 'assist_coordonator',
+    MANAGER = 'manager',
+    ASSIST_MANAGER = 'assist_manager',
+    PROPRIETOR = 'proprietor',
+    OPERATION = 'operation',
+    SUPER_OPERATION = 'super_operation',
+    VENDOR_MANAGEMENT = 'vendor_management',
+    FIELDS_OPS = 'fields_ops',
+    VENDOR = 'vendeur',
+    PROPRIETARY = 'proprietaire',
+    REFERENCE = 'reference',
 }
 
 export const ADMIN = 'admin'
@@ -31,8 +31,8 @@ export const ASSIST_ACCOUNTANT = 'assist_accountant'
 export const ACCOUNTANT = 'accountant'
 export const SUPER_ACCOUNTANT = 'super_accountant'
 export const SUPER_MANAGER = 'super_manager'
-export const AGENT_IMMOBILLIER= 'agent_immobilier'
-export const COORDONATOR_AGENT_IMMOBILLIER= 'coordonator_agent_immobilier'
+export const AGENT_IMMOBILLIER = 'agent_immobilier'
+export const COORDONATOR_AGENT_IMMOBILLIER = 'coordonator_agent_immobilier'
 export const COORDONATOR = 'coordonator'
 export const ASSIST_COORDONATOR = 'assist_coordonator'
 export const MANAGER = 'manager'
@@ -46,63 +46,80 @@ export const VENDOR = 'vendeur'
 export const PROPRIETARY = 'proprietaire'
 export const REFERENCE = 'reference'
 
-
-
- export const manageAuth = async (auth : string, proprio: any, t : any )=> {
-    let regions : any[] = Regions;
-    if (auth !== "admin") {
-        regions  = getRegionsByValues(proprio?.regions || []);
+export const manageAuth = async (auth: string, proprio: any, t: any) => {
+    let regions: any[] = Regions
+    if (auth !== 'admin') {
+        regions = getRegionsByValues(proprio?.regions || [])
     }
-    const xroles = getRolesByAhth(auth);
-    const roles = await convertStringToSelectOptions([...xroles], t, "roles");
-    return { regions , roles }
-  }
+    const xroles = getRolesByAhth(auth)
+    const roles = await convertStringToSelectOptions([...xroles], t, 'roles')
+    return { regions, roles }
+}
 
-export const getRolesByAhth = (auth: string ) => {
-     let roles: any [] = [ "proprietaire", "reference"];
-       auth = auth.toLowerCase().trim();
-        switch (auth) {
-           case "admin":
-               roles  = [...USER_ROLES];
-              break;
-          case "coordonator":
-            roles = roles.concat(["agent_immobilier","assist_coordonator", "vendeur"])
-            break;
-            case "assist_coordonator":
-            roles.push("agent_immobilier");
-            roles.push("coordonator_agent_immobilier");
-            roles.push("vendeur");
-            break;   
-          case "coordonator_agent_immobilier":
-            roles.push("agent_immobilier");
-            break;
-      
-          case "manager":
-            roles = roles.concat(["agent_immobilier","assist_manager", "assist_coordonator", "coordonator"]);
-            break;
-      
-          case "assist_manager":
-            roles = roles.concat(["agent_immobilier", "assist_coordonator", "coordonator"]);
-            break;
-      
-          case "operation":
-            roles = roles.concat(["agent_immobilier","vendeur"]);
-            break;
-          case "vendor_management":
-            roles = roles.concat(["vendeur"]);
-          break;
-          case "super_manager":
-            roles = roles.concat(["vendeur","agent_immobilier","assist_manager", "assist_coordonator", "coordonator"]);  
-         break;
-         case "accountant":
-            roles = roles.concat(["vendeur", "assist_accountant"]);  
-         break;
-         case "super_accountant":
-            roles = roles.concat(["vendeur", "assist_accountant", "accountant"]);  
-         break;
-          default:
-            roles  = ["proprietaire", "reference"];
-          break;
-        }
-        return roles;
+export const getRolesByAhth = (auth: string) => {
+    let roles: any[] = ['proprietaire', 'reference']
+    auth = auth.toLowerCase().trim()
+    switch (auth) {
+        case 'admin':
+            roles = [...USER_ROLES]
+            break
+        case 'coordonator':
+            roles = roles.concat([
+                'agent_immobilier',
+                'assist_coordonator',
+                'vendeur',
+            ])
+            break
+        case 'assist_coordonator':
+            roles.push('agent_immobilier')
+            roles.push('coordonator_agent_immobilier')
+            roles.push('vendeur')
+            break
+        case 'coordonator_agent_immobilier':
+            roles.push('agent_immobilier')
+            break
+
+        case 'manager':
+            roles = roles.concat([
+                'agent_immobilier',
+                'assist_manager',
+                'assist_coordonator',
+                'coordonator',
+            ])
+            break
+
+        case 'assist_manager':
+            roles = roles.concat([
+                'agent_immobilier',
+                'assist_coordonator',
+                'coordonator',
+            ])
+            break
+
+        case 'operation':
+            roles = roles.concat(['agent_immobilier', 'vendeur'])
+            break
+        case 'vendor_management':
+            roles = roles.concat(['vendeur'])
+            break
+        case 'super_manager':
+            roles = roles.concat([
+                'vendeur',
+                'agent_immobilier',
+                'assist_manager',
+                'assist_coordonator',
+                'coordonator',
+            ])
+            break
+        case 'accountant':
+            roles = roles.concat(['vendeur', 'assist_accountant'])
+            break
+        case 'super_accountant':
+            roles = roles.concat(['vendeur', 'assist_accountant', 'accountant'])
+            break
+        default:
+            roles = ['proprietaire', 'reference']
+            break
+    }
+    return roles
 }

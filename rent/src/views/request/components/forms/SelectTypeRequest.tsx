@@ -16,7 +16,10 @@ import {
     HiOutlineScale,
 } from 'react-icons/hi2'
 
-const TYPE_CONFIG: Record<string, { icon: any; gradient: string; iconBg: string }> = {
+const TYPE_CONFIG: Record<
+    string,
+    { icon: any; gradient: string; iconBg: string }
+> = {
     [RequestTypeEnum.transport_logistique]: {
         icon: HiOutlineTruck,
         gradient: 'from-blue-500 to-blue-600',
@@ -87,7 +90,11 @@ function SelectTypeRequest({ GetSelected }: Props) {
     return (
         <div className="space-y-6">
             <Steps current={0}>
-                <Steps.Item title={t('request.step1') || 'Selectionner le type de requête'} />
+                <Steps.Item
+                    title={
+                        t('request.step1') || 'Selectionner le type de requête'
+                    }
+                />
                 <Steps.Item title={t('request.step2') || 'Ajouter requête'} />
             </Steps>
 
@@ -111,9 +118,10 @@ function SelectTypeRequest({ GetSelected }: Props) {
                             className={`
                                 group relative rounded-2xl border-2 cursor-pointer
                                 transition-all duration-200 ease-in-out overflow-hidden
-                                ${isHovered
-                                    ? 'border-transparent shadow-lg scale-[1.02]'
-                                    : 'border-gray-200 dark:border-gray-700 hover:border-transparent hover:shadow-lg hover:scale-[1.02]'
+                                ${
+                                    isHovered
+                                        ? 'border-transparent shadow-lg scale-[1.02]'
+                                        : 'border-gray-200 dark:border-gray-700 hover:border-transparent hover:shadow-lg hover:scale-[1.02]'
                                 }
                             `}
                             onMouseEnter={() => setHovered(tq.key)}
@@ -121,19 +129,24 @@ function SelectTypeRequest({ GetSelected }: Props) {
                             onClick={() => GetSelected(tq)}
                         >
                             {/* Gradient top bar */}
-                            <div className={`h-1.5 bg-gradient-to-r ${config.gradient} transition-all duration-200 ${isHovered ? 'h-2' : ''}`} />
+                            <div
+                                className={`h-1.5 bg-gradient-to-r ${config.gradient} transition-all duration-200 ${isHovered ? 'h-2' : ''}`}
+                            />
 
                             <div className="p-5">
                                 {/* Icon + Categories count */}
                                 <div className="flex items-start justify-between mb-4">
-                                    <div className={`w-12 h-12 rounded-xl ${config.iconBg} flex items-center justify-center transition-transform duration-200 group-hover:scale-110`}>
+                                    <div
+                                        className={`w-12 h-12 rounded-xl ${config.iconBg} flex items-center justify-center transition-transform duration-200 group-hover:scale-110`}
+                                    >
                                         <Icon className="text-2xl" />
                                     </div>
-                                    {tq.categories && tq.categories.length > 0 && (
-                                        <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
-                                            {tq.categories.length} cat.
-                                        </span>
-                                    )}
+                                    {tq.categories &&
+                                        tq.categories.length > 0 && (
+                                            <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+                                                {tq.categories.length} cat.
+                                            </span>
+                                        )}
                                 </div>
 
                                 {/* Label */}
@@ -147,12 +160,27 @@ function SelectTypeRequest({ GetSelected }: Props) {
                                 </p>
 
                                 {/* Action hint */}
-                                <div className={`mt-4 flex items-center gap-1 text-sm font-medium transition-all duration-200 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`}>
-                                    <span className={`bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}>
+                                <div
+                                    className={`mt-4 flex items-center gap-1 text-sm font-medium transition-all duration-200 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`}
+                                >
+                                    <span
+                                        className={`bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}
+                                    >
                                         Démarrer
                                     </span>
-                                    <svg className="w-4 h-4" style={{ color: 'currentColor' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    <svg
+                                        className="w-4 h-4"
+                                        style={{ color: 'currentColor' }}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 5l7 7-7 7"
+                                        />
                                     </svg>
                                 </div>
                             </div>

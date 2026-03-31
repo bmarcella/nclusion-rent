@@ -35,4 +35,4 @@ export const ReqStatusMyChangeEmailTemplate = `
     </table>
   </body>
 </html>
-`;
+`

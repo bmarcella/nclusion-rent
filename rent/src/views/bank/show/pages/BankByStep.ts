@@ -1,4 +1,4 @@
-import ShowBankByStep from './ShowBankByStep';
+import ShowBankByStep from './ShowBankByStep'
 
-export { ShowBankByStepBase } from './ShowBankByStep';
-export default ShowBankByStep;
+export { ShowBankByStepBase } from './ShowBankByStep'
+export default ShowBankByStep

@@ -1,5 +1,5 @@
-import Report from "./Report";
+import Report from './Report'
 
-export { ReportBase }  from "./Report";
+export { ReportBase } from './Report'
 
-export default Report;
+export default Report

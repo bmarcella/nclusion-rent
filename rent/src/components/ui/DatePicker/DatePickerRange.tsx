@@ -15,7 +15,8 @@ import type { Ref } from 'react'
 export type DatePickerRangeValue = [Date | null, Date | null]
 
 export interface DatePickerRangeProps
-    extends CommonProps,
+    extends
+        CommonProps,
         Omit<
             CalendarSharedProps,
             | 'onMonthChange'
