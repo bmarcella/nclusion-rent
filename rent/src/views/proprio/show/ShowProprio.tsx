@@ -11,8 +11,11 @@ import {
     CollectionReference,
     where,
     Query,
+    writeBatch,
+    doc,
 } from 'firebase/firestore';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import db from '@/services/firebase/FirebaseDB';
+import { useEffect, useMemo, useState } from 'react';
 import { Proprio } from '@/views/Entity';
 import { Landlord } from '@/services/Landlord';
 import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from '@tanstack/react-table';
@@ -60,7 +63,6 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
     const [loading, setLoading] = useState(false);
     const [pageSize, setPageSize] = useState(pageSizeOption[0].value);
     const [currentPage, setCurrentPage] = useState(1);
-    const fetchedRef = useRef(false);
     const [cEnt, setEnt] = useState<Proprio>();
     const [dialogIsOpen, setIsOpen] = useState(false);
     const { userId, authority, proprio } = useSessionUser((state) => state.user);
@@ -68,6 +70,45 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
     const { width, height } = useWindowSize();
     const [regions, setRegions] = useState<number[]>([]);
     const [roles, setRoles] = useState<string>();
+    const [fullName, setFullName] = useState<string>('');
+    const [migrating, setMigrating] = useState(false);
+
+    const migrateFullNameLower = async () => {
+        setMigrating(true);
+        try {
+            const snapshot = await getDocs(Landlord as CollectionReference<DocumentData>);
+            let updated = 0;
+            const batchSize = 500;
+            let batch = writeBatch(db);
+            let count = 0;
+
+            for (const docSnap of snapshot.docs) {
+                const data = docSnap.data();
+                if (!data.fullName_lower && data.fullName) {
+                    batch.update(doc(db, 'landlord', docSnap.id), {
+                        fullName_lower: data.fullName.toLowerCase(),
+                    });
+                    updated++;
+                    count++;
+                    if (count >= batchSize) {
+                        await batch.commit();
+                        batch = writeBatch(db);
+                        count = 0;
+                    }
+                }
+            }
+
+            if (count > 0) {
+                await batch.commit();
+            }
+
+            alert(`Migration terminée: ${updated} entités mises à jour.`);
+        } catch (error) {
+            console.error('Migration error:', error);
+            alert('Erreur lors de la migration.');
+        }
+        setMigrating(false);
+    }
 
     const openDialog = (e: any) => {
         setEnt(e);
@@ -217,7 +258,7 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
         setCurrentPage(1)
         setPageCursors([])
         fetchPage(1); // load first page
-    }, [roles, regions, pageSize]);
+    }, [roles, regions, pageSize, fullName]);
 
     const buildBaseQuery = () => {
         let baseQuery: Query<DocumentData> = Landlord as CollectionReference<DocumentData>;
@@ -233,6 +274,12 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
         } else if (roles && regions.length > 0) {
             baseQuery = query(baseQuery, where('type_person', '==', roles), where('regions', 'array-contains-any', regions));
         }
+
+        if (fullName) {
+            const search = fullName.toLowerCase();
+            baseQuery = query(baseQuery, where('fullName_lower', '>=', search), where('fullName_lower', '<=', search + '\uf8ff'));
+        }
+
         return baseQuery;
     }
 
@@ -303,7 +350,6 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
     };
 
     const onChange = (payload: any) => {
-        console.log("onChange: ", payload);
         if (cEnt?.id) {
             setEnt(prev => {
                 const p = { ...prev, ...payload };
@@ -349,11 +395,27 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
         setRoles(role);
     }
 
+    const onChangeFullName = (name: string) => {
+        setFullName(name);
+    }
+
     return (
 
         <div>
-            <h4>{name} - { totalData } </h4>
-            <FilterProprio authority={authority || []} proprio={proprio} t={t} onChangeRegion={onChangeRegion} onChangeRole={onChangeRole} ></FilterProprio>
+            <div className="flex items-center justify-between mb-4">
+                <h4>{name} - { totalData } </h4>
+                {hasAuthority(authority, 'admin') && (
+                    <Button
+                        size="sm"
+                        variant="solid"
+                        loading={migrating}
+                        onClick={migrateFullNameLower}
+                    >
+                        Migrer fullName_lower
+                    </Button>
+                )}
+            </div>
+            <FilterProprio authority={authority || []} proprio={proprio} t={t} onChangeRegion={onChangeRegion} onChangeRole={onChangeRole} onChangeFullName={onChangeFullName} ></FilterProprio>
 
 
             <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">

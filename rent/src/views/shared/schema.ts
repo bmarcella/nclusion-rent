@@ -10,6 +10,7 @@ export type  USER_ROLE = typeof USER_ROLES[number];
 export const ProprioSchema = z.object({
     id: z.string().optional(),
     fullName: z.string().min(1, 'Full name is required'),
+    fullName_lower: z.string().optional(),
     nickName: z.string().optional(),
     city: z.string().optional(),
     companyName: z.string().optional(),

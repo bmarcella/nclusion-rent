@@ -154,15 +154,8 @@ function FilterBankWeek({ authority, proprio, t, onChangeRegion, onChangeAgent, 
                  setStart(undefined);
                  return;
               }
-             console.log('start:', date);
              setStart(new Date(date));
           }} />
-
-    
-
-        
-
-  
     </div>
   );
 }

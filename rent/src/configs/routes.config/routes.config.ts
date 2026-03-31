@@ -115,6 +115,12 @@ export const protectedRoutes: Routes = [
         authority: ['assist_accountant', 'accountant', 'admin', "super_accountant", "manager"],
     },
     {
+        key: 'reqMenu.report',
+        path: '/request/report',
+        component: lazy(() => import('@/views/request/ExpenseRequestReport')),
+        authority: ['admin', 'super_manager', 'super_accountant', 'manager'],
+    },
+    {
         key: 'reqMenu.print',
         path: '/request/:reqId',
         component: lazy(() => import('@/views/request/ShowPrintRequest')),

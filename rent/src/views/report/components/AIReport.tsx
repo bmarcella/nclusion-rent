@@ -22,7 +22,7 @@ function AIReport() {
   // -------------------
   const [ regions, setRegions] = useState<number>(0);
   const [agents, setAgents] = useState<string>();
-  const [start, setStart] = useState<Date>();
+  const [start, setStart] = useState<Date>(new Date());
   const [end, setEnd] = useState<Date>();
   const [type_rep, setTypeRep] = useState<boolean>();
 
@@ -42,7 +42,6 @@ function AIReport() {
       if (result.length > 0) {
         setSteps(result[0].steps);
       }
-
       setLoading(false);
     });
   }, [regions, agents, start, end, type_rep]);

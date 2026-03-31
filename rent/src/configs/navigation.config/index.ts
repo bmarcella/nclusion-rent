@@ -146,6 +146,16 @@ const navigationConfig: NavigationTree[] = [
                 authority: ['assist_accountant', 'accountant', 'admin', "super_accountant"],
                 subMenu: [],
             },
+            {
+                key: 'reqMenu.report',
+                path: '/request/report',
+                title: 'Rapport',
+                translateKey: 'nav.reqMenu.report',
+                icon: '',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['admin', 'super_manager', 'super_accountant', 'manager'],
+                subMenu: [],
+            },
 
         ],
     },
