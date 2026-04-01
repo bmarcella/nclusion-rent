@@ -36,6 +36,7 @@ export const billType = {
         'Facture mensuelle — Forfaits data des opérateurs terrain',
     ],
     5: [
+        'Banques : Réparation',
         'Banques : renouvellement des baux',
         'Banques : construction — comptoire ',
         'Banques : construction — peinture ',
