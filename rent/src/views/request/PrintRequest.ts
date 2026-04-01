@@ -1,6 +1,5 @@
-import ShowPrintRequest from "./ShowPrintRequest";
+import ShowPrintRequest from './ShowPrintRequest'
 
+export { ShowPrintRequestBase } from './ShowPrintRequest'
 
-export { ShowPrintRequestBase } from "./ShowPrintRequest";
-
-export default ShowPrintRequest;
+export default ShowPrintRequest

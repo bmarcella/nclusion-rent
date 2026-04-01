@@ -1,14 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Form, FormItem, Input, Select, Checkbox, Button } from '@/components/ui';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from '@/utils/hooks/useTranslation';
-import { useSessionUser } from '@/store/authStore';
-import { manageAuth } from '@/constants/roles.constant';
-import { AuthRequest, requestStatus, requestType } from '../entities/AuthRequest';
-import { CurrencyEnum } from '../entities/SchemaRequest';
+import {
+    Form,
+    FormItem,
+    Input,
+    Select,
+    Checkbox,
+    Button,
+} from '@/components/ui'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from '@/utils/hooks/useTranslation'
+import { useSessionUser } from '@/store/authStore'
+import { manageAuth } from '@/constants/roles.constant'
+import {
+    AuthRequest,
+    requestStatus,
+    requestType,
+} from '../entities/AuthRequest'
+import { CurrencyEnum } from '../entities/SchemaRequest'
 
 const schema = z.object({
     region_id: z.coerce.number().min(1, 'Required'),
@@ -18,47 +29,65 @@ const schema = z.object({
     currency: z.string().optional(),
     max_amount: z.preprocess(
         (v) => (v === '' || v === null ? undefined : Number(v)),
-        z.number({ required_error: 'Required' }).min(1, 'Must be greater than 0')
+        z
+            .number({ required_error: 'Required' })
+            .min(1, 'Must be greater than 0'),
     ),
     canApprove: z.boolean(),
-});
+})
 
 interface AuthFormProps {
-    onSubmitForm: (data: AuthRequest) => void;
-    defaultValues?: Partial<AuthRequest>;
-    loading?: boolean;
+    onSubmitForm: (data: AuthRequest) => void
+    defaultValues?: Partial<AuthRequest>
+    loading?: boolean
 }
 
-function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProps) {
-    const { t } = useTranslation();
-    const { authority, proprio } = useSessionUser((s) => s.user);
-    const statuses = requestStatus(t);
-    const reqTypes = requestType(t);
+function AuthForm({
+    onSubmitForm,
+    defaultValues,
+    loading = false,
+}: AuthFormProps) {
+    const { t } = useTranslation()
+    const { authority, proprio } = useSessionUser((s) => s.user)
+    const statuses = requestStatus(t)
+    const reqTypes = requestType(t)
     // Options state loaded asynchronously
-    const [roleOptions, setRoleOptions] = useState<Array<{ label: string; value: string }>>([]);
-    const [regionOptions, setRegionOptions] = useState<Array<{ label: string; value: number; cities?: string[] }>>([]);
-    const [optLoading, setOptLoading] = useState(false);
-    const [statusOptions, setStatusOptions] = useState<Array<{ label: string; value: string }>>([]);
-    const [reqOptions, setReqOptions] = useState<Array<{ label: string; value: string }>>([]);
+    const [roleOptions, setRoleOptions] = useState<
+        Array<{ label: string; value: string }>
+    >([])
+    const [regionOptions, setRegionOptions] = useState<
+        Array<{ label: string; value: number; cities?: string[] }>
+    >([])
+    const [optLoading, setOptLoading] = useState(false)
+    const [statusOptions, setStatusOptions] = useState<
+        Array<{ label: string; value: string }>
+    >([])
+    const [reqOptions, setReqOptions] = useState<
+        Array<{ label: string; value: string }>
+    >([])
 
     // Load roles/regions AFTER render via effect (no async work in render)
     useEffect(() => {
         const load = async () => {
             setStatusOptions(statuses)
-            setReqOptions(reqTypes as any);
-            if (!authority || authority.length === 0) return;
-            setOptLoading(true);
+            setReqOptions(reqTypes as any)
+            if (!authority || authority.length === 0) return
+            setOptLoading(true)
             try {
-                const { roles, regions } = await manageAuth(authority[0], proprio, t);
+                const { roles, regions } = await manageAuth(
+                    authority[0],
+                    proprio,
+                    t,
+                )
                 // Expecting manageAuth to already shape {label,value}. If not, map here.
-                setRoleOptions(roles);       // roles: [{label, value: string}]
-                setRegionOptions(regions);   // regions: [{label, value: number}]
+                setRoleOptions(roles) // roles: [{label, value: string}]
+                setRegionOptions(regions) // regions: [{label, value: number}]
             } finally {
-                setOptLoading(false);
+                setOptLoading(false)
             }
-        };
-        load();
-    }, [authority, proprio, t]);
+        }
+        load()
+    }, [authority, proprio, t])
 
     const {
         control,
@@ -71,33 +100,32 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
             region_id: defaultValues?.region_id ?? 0,
             roles: defaultValues?.roles ?? [],
             status: defaultValues?.status ?? '',
-            max_amount: defaultValues?.max_amount as any ?? 0,
+            max_amount: (defaultValues?.max_amount as any) ?? 0,
             canApprove: defaultValues?.canApprove ?? false,
             reqType: defaultValues?.reqType ?? [],
             currency: defaultValues?.currency,
             created_at: defaultValues?.created_at ?? new Date(),
         },
-    });
+    })
 
-    const onSubmit = (data: AuthRequest) =>  onSubmitForm(data);
-    
+    const onSubmit = (data: AuthRequest) => onSubmitForm(data)
+
     // Disable submit if options are still loading or region not chosen
     const submitDisabled = useMemo(
         () => loading || optLoading,
-        [loading, optLoading]
-    );
+        [loading, optLoading],
+    )
 
     const currencyOps = CurrencyEnum.options.map((o) => {
-    return { value: o, label: o } as any;
-    });
+        return { value: o, label: o } as any
+    })
 
-    const currency = watch('currency');
+    const currency = watch('currency')
 
     return (
         <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded shadow w-full max-h-150 overflow-y-auto">
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                     {/* Region */}
                     <FormItem
                         label={t('authReq.region')}
@@ -112,8 +140,16 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                                     isLoading={optLoading}
                                     placeholder={t('common.select')}
                                     options={regionOptions}
-                                    value={regionOptions.find(opt => Number(opt.value) === Number(field.value)) || null}
-                                    onChange={(opt) => field.onChange(Number(opt?.value))}
+                                    value={
+                                        regionOptions.find(
+                                            (opt) =>
+                                                Number(opt.value) ===
+                                                Number(field.value),
+                                        ) || null
+                                    }
+                                    onChange={(opt) =>
+                                        field.onChange(Number(opt?.value))
+                                    }
                                 />
                             )}
                         />
@@ -133,15 +169,22 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                                     isLoading={optLoading}
                                     placeholder={t('common.select')}
                                     options={statusOptions}
-                                    value={statusOptions.find(opt => String(opt.value) === String(field.value)) || null}
-                                    onChange={(opt) => field.onChange(String(opt?.value))}
+                                    value={
+                                        statusOptions.find(
+                                            (opt) =>
+                                                String(opt.value) ===
+                                                String(field.value),
+                                        ) || null
+                                    }
+                                    onChange={(opt) =>
+                                        field.onChange(String(opt?.value))
+                                    }
                                 />
                             )}
-
                         />
                     </FormItem>
 
-                     {/* RequestType */}
+                    {/* RequestType */}
                     <FormItem
                         label={t('authReq.reqType')}
                         invalid={!!errors.reqType}
@@ -150,18 +193,24 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                         <Controller
                             name="reqType"
                             control={control}
-                            
                             render={({ field }) => (
                                 <Select
-                                    isLoading={optLoading}
                                     isMulti
+                                    isLoading={optLoading}
                                     placeholder={t('common.select')}
                                     options={reqOptions}
-                                    value={ reqOptions.filter(opt => field.value?.includes(String(opt.value)))}
-                                    onChange={(opts: any[]) => field.onChange(opts.map(o => String(o.value)))}
+                                    value={reqOptions.filter((opt) =>
+                                        field.value?.includes(
+                                            String(opt.value),
+                                        ),
+                                    )}
+                                    onChange={(opts: any[]) =>
+                                        field.onChange(
+                                            opts.map((o) => String(o.value)),
+                                        )
+                                    }
                                 />
                             )}
-
                         />
                     </FormItem>
 
@@ -176,12 +225,18 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                             control={control}
                             render={({ field }) => (
                                 <Select
-                                    isLoading={optLoading}
                                     isMulti
+                                    isLoading={optLoading}
                                     placeholder={t('common.select')}
                                     options={roleOptions}
-                                    value={roleOptions.filter(opt => field.value.includes(String(opt.value)))}
-                                    onChange={(opts: any[]) => field.onChange(opts.map(o => String(o.value)))}
+                                    value={roleOptions.filter((opt) =>
+                                        field.value.includes(String(opt.value)),
+                                    )}
+                                    onChange={(opts: any[]) =>
+                                        field.onChange(
+                                            opts.map((o) => String(o.value)),
+                                        )
+                                    }
                                 />
                             )}
                         />
@@ -201,8 +256,10 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                                     type="number"
                                     prefix={currency ?? 'HTG'}
                                     {...field}
-                                    value={field.value ?? ''}                      // allow empty input
-                                    onChange={(e) => field.onChange(e.target.value)} // keep as string
+                                    value={field.value ?? ''} // allow empty input
+                                    onChange={(e) =>
+                                        field.onChange(e.target.value)
+                                    } // keep as string
                                     inputMode="decimal"
                                 />
                             )}
@@ -216,15 +273,23 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                         errorMessage={errors.currency?.message}
                     >
                         <Controller
-                                     control={control}
-                                     name="currency"
-                                     render={({ field }) => (
-                                       <Select
-                                         options={currencyOps}
-                                         value={currencyOps.find(opt => String(opt.value) === String(field.value)) || null}
-                                         onChange={(option) => field.onChange(String(option.value))}
-                                       />
-                                     )}
+                            control={control}
+                            name="currency"
+                            render={({ field }) => (
+                                <Select
+                                    options={currencyOps}
+                                    value={
+                                        currencyOps.find(
+                                            (opt) =>
+                                                String(opt.value) ===
+                                                String(field.value),
+                                        ) || null
+                                    }
+                                    onChange={(option) =>
+                                        field.onChange(String(option.value))
+                                    }
+                                />
+                            )}
                         />
                     </FormItem>
 
@@ -238,21 +303,28 @@ function AuthForm({ onSubmitForm, defaultValues, loading = false }: AuthFormProp
                             name="canApprove"
                             control={control}
                             render={({ field }) => (
-                                <Checkbox checked={field.value} onChange={field.onChange} />
+                                <Checkbox
+                                    checked={field.value}
+                                    onChange={field.onChange}
+                                />
                             )}
                         />
                     </FormItem>
-
                 </div>
 
                 <div className="mt-6">
-                    <Button type="submit" variant="solid" loading={submitDisabled} disabled={submitDisabled}>
+                    <Button
+                        type="submit"
+                        variant="solid"
+                        loading={submitDisabled}
+                        disabled={submitDisabled}
+                    >
                         {t('common.submit')}
                     </Button>
                 </div>
             </Form>
         </div>
-    );
+    )
 }
 
-export default AuthForm;
+export default AuthForm

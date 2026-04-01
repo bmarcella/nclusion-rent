@@ -63,7 +63,7 @@
 //         step?: string;
 //         all?: boolean;
 //    }
-//   export function TableReq ( { mode, step }: Props) { 
+//   export function TableReq ( { mode, step }: Props) {
 //     const [page, setPage] = useState(1);
 //     const [hasNext, setHasNext] = useState(true);
 //     const [objs, setObjs] = useState<RequestType[]>([]);
@@ -71,21 +71,21 @@
 //     const [pageDocs, setPageDocs] = useState<DocumentSnapshot[]>([]);
 //     const fetchedRef = useRef(false);
 //     const [totalData, setTotalData] = useState(1);
-   
+
 //     const [cObj, setCObj] = useState<RequestType>();
 //     const { width, height } = useWindowSize();
 //     const [message, setMessage] = useTimeOutMessage();
 //     const [alert, setAlert] = useState("success") as any;
 //     const { t } = useTranslation();
 //     const navigate = useNavigate()
-//     // 
+//     //
 //     const { userId, proprio , authority } = useSessionUser((state) => state.user);
 //     const [ regions, setRegions] = useState<number>(0);
 //     const [start, setStart] = useState<Date>();
 //     const [end, setEnd] = useState<Date>();
 //     const [steps, setSteps] = useState<string>();
 
-//     // 
+//     //
 //      const [dialogIsOpen, setIsOpen] = useState(false)
 //     const openDialog = (obj: RequestType) => {
 //         setCObj(obj);
@@ -115,14 +115,14 @@
 //                                     Id: {' '}
 //                                     { row.original.id && <strong className="text-green-400"> { row.original.id } </strong> }
 //                                 </div>
-                                
+
 //                             }
 //                         >
 //                             <span className="cursor-pointer">{ row.original.bankName}</span>
 //                         </Tooltip>
 //                     </div>
 //                     ),
-                
+
 //             },
 //             {
 //                 header: 'Proprietaire',
@@ -146,7 +146,7 @@
 //                 cell: ({ row }) => (
 //                     <div className="min-w-[160px]">
 //                        <div className="font-medium"> Initial : <Currency amount={row.original.rentCost}></Currency></div>
-//                         { (row.original?.final_rentCost && row.original?.final_rentCost>0) && 
+//                         { (row.original?.final_rentCost && row.original?.final_rentCost>0) &&
 //                        <div className="font-medium"> Final : <Currency amount={row.original.final_rentCost}></Currency>
 //                        </div> }
 //                      </div>
@@ -197,14 +197,14 @@
 //                          </Button>
 //                          {  <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
 //                     </div>);
-//                 } 
+//                 }
 //             },
 //         ],
 //         [],
 //     )
 
 //     const getQueryDate = (q: Query<DocumentData, DocumentData>)  => {
-         
+
 //             const filters: QueryConstraint[] = [];
 
 //             if (regions && regions != 0) {
@@ -214,12 +214,10 @@
 //                 filters.push(where("id_region", "in", ids))
 //             }
 
-        
-
 //             if (steps) {
 //                 filters.push(where('step', '==', steps));
 //             }
-           
+
 //             if (start && end) {
 //                 const isSameDay =
 //                 start.toDateString() === end.toDateString();
@@ -254,7 +252,7 @@
 //         if (!step) {
 //             if (mode === 'sent') {
 //                 q = query(q, where("createdBy", "==", userId));
-//             } 
+//             }
 //         } else {
 //             q = query(q, where("step", "==", step));
 //         }
@@ -269,21 +267,21 @@
 //         if (!step) {
 //             if (mode === 'sent') {
 //                 q = query(q, where("createdBy", "==", userId));
-//             } 
+//             }
 //         } else {
 //             q = query(q, where("step", "==", step));
 //         }
 //         q = getQueryDate(q);
-    
+
 //         // Only if not first page
 //         if (pageNum > 1 && pageDocs[pageNum - 2]) {
 //             q = query(q, startAfter(pageDocs[pageNum - 2]));
 //         }
 
 //         fetchTotalCount();
-    
+
 //         const snapshot = await getDocs(q);
-        
+
 //         const newObjs = await Promise.all(
 //             snapshot.docs.map(async (docSnap) => {
 //                 const data = docSnap.data();
@@ -292,11 +290,11 @@
 //         );
 
 //         console.log("Banks: ", newObjs);
-    
+
 //         // Instead of replacing, accumulate
 //         setObjs((prevBanks: any) => (pageNum === 1 ? newObjs : [...prevBanks, ...newObjs]));
 //         setCurrentPage(pageNum);
-    
+
 //         // Important: set the last doc for next page
 //         if (snapshot.docs.length > 0) {
 //             setPageDocs((prev) => {
@@ -305,10 +303,10 @@
 //                 return updated;
 //             });
 //         }
-    
+
 //         // (optional) update totalData properly if you fetched total separately
 //     };
-    
+
 //     useEffect(() => {
 //         if (fetchedRef.current) return;
 //         fetchObjs(1); // load first page
@@ -317,7 +315,6 @@
 //     useEffect(() => {
 //         fetchObjs(1);
 //      }, [start, end, regions, steps]);
-
 
 //     const table = useReactTable({
 //         data: objs,
@@ -360,7 +357,6 @@
 
 //     }
 
-
 //     const onChangeRegion = async (id: number) => {
 //         console.log("onChangeRegion: ", id);
 //         setRegions(id);
@@ -393,16 +389,16 @@
 //                 </div>
 //             </div>
 //           </div>
-//           { 
+//           {
 //           <FilterBank  authority={authority || []} proprio={proprio} t={t}
-//            onChangeRegion={onChangeRegion} 
+//            onChangeRegion={onChangeRegion}
 //            onChangeDate = {onChangeDate}
 //            isMap = {false}
 //           >
 //           </FilterBank> }
 
-//         { step && <FilterMyBank  onChangeStep={onChangeStep}  t={t}  ></FilterMyBank> } 
-      
+//         { step && <FilterMyBank  onChangeStep={onChangeStep}  t={t}  ></FilterMyBank> }
+
 //         <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
 //           {   <>
 //             <Table>
@@ -518,7 +514,7 @@
 
 //                             <Tabs defaultValue="2tab1">
 //                                 <TabList>
-                        
+
 //                                     <TabNav value="2tab1" icon={<BiImage />}>
 //                                         Banks
 //                                     </TabNav>
@@ -527,7 +523,7 @@
 //                                     </TabNav>
 //                                 </TabList>
 //                                 <div className="p-4">
-                                
+
 //                                     <TabContent value="2tab1">
 //                                         {message && (
 //                                         <Alert showIcon className="mt-6 mb-6" type={alert}>
@@ -543,10 +539,10 @@
 //                                             <span className="break-all ">{message}</span>
 //                                         </Alert>
 //                                         )}
-//                                         { cbank?.id && cbank?.landlord?.id && 
+//                                         { cbank?.id && cbank?.landlord?.id &&
 //                                         <ImageLandlord nextStep={nextStep}
-//                                           lordId={cbank.landlord.id} 
-//                                           userId={userId || ''} 
+//                                           lordId={cbank.landlord.id}
+//                                           userId={userId || ''}
 //                                           isEdit={true}></ImageLandlord> }
 //                                     </TabContent>
 //                                 </div>
@@ -559,8 +555,8 @@
 //                         </Alert>
 //                         )}
 //                     { cbank?.id && <CommentsBank nextStep={nextStep}
-//                       bankId={cbank.id} 
-//                       userId={userId || ''} 
+//                       bankId={cbank.id}
+//                       userId={userId || ''}
 //                       isEdit={true}/> }
 //                     </TabContent>
 
@@ -570,7 +566,7 @@
 //                     </TabContent>
 //                 </div>
 //             </Tabs>
-          
+
 //                     </div>
 
 //                     <div className="text-right mt-6">
@@ -587,9 +583,5 @@
 //       </div>
 //     );
 //   }
-  
 
 //   export default TableReq;
-
-
-  

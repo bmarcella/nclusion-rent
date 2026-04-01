@@ -49,4 +49,4 @@ export const ReqPaidEmailTemplate = `
     </table>
   </body>
 </html>
-`;
+`

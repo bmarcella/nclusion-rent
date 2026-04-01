@@ -3,8 +3,10 @@ import classNames from 'classnames'
 import useDebounce from '@/utils/hooks/useDebounce'
 import type { HTMLAttributes } from 'react'
 
-interface StickyFooterProps
-    extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+interface StickyFooterProps extends Omit<
+    HTMLAttributes<HTMLDivElement>,
+    'children'
+> {
     stickyClass?: string
     defaultClass?: string
     children?: ReactNode | ((isSticky: boolean) => ReactNode)

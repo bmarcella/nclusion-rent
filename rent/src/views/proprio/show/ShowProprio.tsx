@@ -13,27 +13,33 @@ import {
     Query,
     writeBatch,
     doc,
-} from 'firebase/firestore';
-import db from '@/services/firebase/FirebaseDB';
-import { useEffect, useMemo, useState } from 'react';
-import { Proprio } from '@/views/Entity';
-import { Landlord } from '@/services/Landlord';
-import { ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, useReactTable } from '@tanstack/react-table';
-import Table from '@/components/ui/Table';
-import { Button, Dialog, Pagination, Select, Tag } from '@/components/ui';
-import { PiEyeLight } from 'react-icons/pi';
-import EditEntity from './components/EditEntity';
-import { useSessionUser } from '@/store/authStore';
-import { useWindowSize } from '@/utils/hooks/useWindowSize';
-import UserName from '@/views/bank/show/components/UserName';
-import { formatRelative } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import useTranslation from '@/utils/hooks/useTranslation';
-import { getRegionsByValues } from '@/views/Entity/Regions';
-import { hasAuthority } from '@/utils/RoleChecker';
-import YesOrNoPopup from '@/views/shared/YesOrNoPopup';
-import { deleteLord } from '@/services/firebase/BankService';
-import FilterProprio from './components/FilterProprio';
+} from 'firebase/firestore'
+import db from '@/services/firebase/FirebaseDB'
+import { useEffect, useMemo, useState } from 'react'
+import { Proprio } from '@/views/Entity'
+import { Landlord } from '@/services/Landlord'
+import {
+    ColumnDef,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    useReactTable,
+} from '@tanstack/react-table'
+import Table from '@/components/ui/Table'
+import { Button, Dialog, Pagination, Select, Tag } from '@/components/ui'
+import { PiEyeLight } from 'react-icons/pi'
+import EditEntity from './components/EditEntity'
+import { useSessionUser } from '@/store/authStore'
+import { useWindowSize } from '@/utils/hooks/useWindowSize'
+import UserName from '@/views/bank/show/components/UserName'
+import { formatRelative } from 'date-fns'
+import { fr } from 'date-fns/locale'
+import useTranslation from '@/utils/hooks/useTranslation'
+import { getRegionsByValues } from '@/views/Entity/Regions'
+import { hasAuthority } from '@/utils/RoleChecker'
+import YesOrNoPopup from '@/views/shared/YesOrNoPopup'
+import { deleteLord } from '@/services/firebase/BankService'
+import FilterProprio from './components/FilterProprio'
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -49,320 +55,381 @@ type Option = {
 }
 
 interface Props {
-    name?: string,
-    isUser?: string,
+    name?: string
+    isUser?: string
 }
 
-
-function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
-    const [hasNext, setHasNext] = useState(true);
-    const [data, setData] = useState<Proprio[]>([]);
-    const [totalData, setTotalData] = useState(0);
-    const [page, setPage] = useState(1);
-    const [pageCursors, setPageCursors] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [pageSize, setPageSize] = useState(pageSizeOption[0].value);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [cEnt, setEnt] = useState<Proprio>();
-    const [dialogIsOpen, setIsOpen] = useState(false);
-    const { userId, authority, proprio } = useSessionUser((state) => state.user);
-    const { t } = useTranslation();
-    const { width, height } = useWindowSize();
-    const [regions, setRegions] = useState<number[]>([]);
-    const [roles, setRoles] = useState<string>();
-    const [fullName, setFullName] = useState<string>('');
-    const [migrating, setMigrating] = useState(false);
+function ShowProprio({ name = 'Entités', isUser = undefined }: Props) {
+    const [hasNext, setHasNext] = useState(true)
+    const [data, setData] = useState<Proprio[]>([])
+    const [totalData, setTotalData] = useState(0)
+    const [page, setPage] = useState(1)
+    const [pageCursors, setPageCursors] = useState<
+        QueryDocumentSnapshot<DocumentData>[]
+    >([])
+    const [loading, setLoading] = useState(false)
+    const [pageSize, setPageSize] = useState(pageSizeOption[0].value)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [cEnt, setEnt] = useState<Proprio>()
+    const [dialogIsOpen, setIsOpen] = useState(false)
+    const { userId, authority, proprio } = useSessionUser((state) => state.user)
+    const { t } = useTranslation()
+    const { width, height } = useWindowSize()
+    const [regions, setRegions] = useState<number[]>([])
+    const [roles, setRoles] = useState<string>()
+    const [fullName, setFullName] = useState<string>('')
+    const [migrating, setMigrating] = useState(false)
 
     const migrateFullNameLower = async () => {
-        setMigrating(true);
+        setMigrating(true)
         try {
-            const snapshot = await getDocs(Landlord as CollectionReference<DocumentData>);
-            let updated = 0;
-            const batchSize = 500;
-            let batch = writeBatch(db);
-            let count = 0;
+            const snapshot = await getDocs(
+                Landlord as CollectionReference<DocumentData>,
+            )
+            let updated = 0
+            const batchSize = 500
+            let batch = writeBatch(db)
+            let count = 0
 
             for (const docSnap of snapshot.docs) {
-                const data = docSnap.data();
+                const data = docSnap.data()
                 if (!data.fullName_lower && data.fullName) {
                     batch.update(doc(db, 'landlord', docSnap.id), {
                         fullName_lower: data.fullName.toLowerCase(),
-                    });
-                    updated++;
-                    count++;
+                    })
+                    updated++
+                    count++
                     if (count >= batchSize) {
-                        await batch.commit();
-                        batch = writeBatch(db);
-                        count = 0;
+                        await batch.commit()
+                        batch = writeBatch(db)
+                        count = 0
                     }
                 }
             }
 
             if (count > 0) {
-                await batch.commit();
+                await batch.commit()
             }
 
-            alert(`Migration terminée: ${updated} entités mises à jour.`);
+            alert(`Migration terminée: ${updated} entités mises à jour.`)
         } catch (error) {
-            console.error('Migration error:', error);
-            alert('Erreur lors de la migration.');
+            console.error('Migration error:', error)
+            alert('Erreur lors de la migration.')
         }
-        setMigrating(false);
+        setMigrating(false)
     }
 
     const openDialog = (e: any) => {
-        setEnt(e);
+        setEnt(e)
         setIsOpen(true)
     }
     const yes = async (idToDel: string) => {
-        await deleteLord(idToDel || '');
-        setData(prev => prev.filter(item => item.id !== idToDel));
+        await deleteLord(idToDel || '')
+        setData((prev) => prev.filter((item) => item.id !== idToDel))
     }
 
     const onDialogClose = () => {
         setIsOpen(false)
     }
 
-
-
-
-    const columns = useMemo<ColumnDef<Proprio>[]>(() => {
-        const baseColumns: ColumnDef<Proprio>[] = [
-            {
-                header: 'FullName',
-                cell: ({ row }) => (
-                    <div className="min-w-[100px]">
-                        <div className="font-medium" title={row.original?.id}>{row.original?.fullName || ''}</div>
-                    </div>
-                ),
-            },
-            {
-                header: 'Role',
-                cell: ({ row }) => (
-                    <>
-                        <div className="font-medium text-gray-500">
-                            {t(`roles.${row.original.type_person}`)}
+    const columns = useMemo<ColumnDef<Proprio>[]>(
+        () => {
+            const baseColumns: ColumnDef<Proprio>[] = [
+                {
+                    header: 'FullName',
+                    cell: ({ row }) => (
+                        <div className="min-w-[100px]">
+                            <div
+                                className="font-medium"
+                                title={row.original?.id}
+                            >
+                                {row.original?.fullName || ''}
+                            </div>
                         </div>
-                        <div className="mr-2 rtl:ml-2 mt-2">
-                            {!row.original.active && (
-                                <Tag className="text-red-600 bg-red-100 dark:text-red-100 dark:bg-red-500/20 border-0">
-                                    {t('notActive')}
-                                </Tag>
-                            )}
-                            {row.original.active && (
-                                <Tag className="bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-100 border-0">
-                                    {t('active')}
-                                </Tag>
-                            )}
-                        </div>
-                    </>
-                ),
-            },
-            {
-                header: 'Email',
-                accessorKey: 'email',
-            },
-            {
-                header: 'Coordonées',
-                cell: ({ row }) => (
-                    <div className="min-w-[160px]">
-                        <div className="font-medium">{row.original?.phone || ''}</div>
-                        <div className="text-sm text-gray-500">{row.original?.address || ''}</div>
-                    </div>
-                ),
-            },
-            {
-                header: 'Creation',
-                cell: ({ row }) => (
-                    <div className="min-w-[160px]">
-                        <div className="font-medium">
-                            Crée par :{' '}
-                            {row.original?.createBy ? (
-                                <UserName userId={row.original?.createBy || ''} />
-                            ) : (
-                                ''
-                            )}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                            Crée le :{' '}
-                            {row.original?.createdAt
-                                ? formatRelative(
-                                    row.original?.createdAt?.toDate?.() || row.original.createdAt,
-                                    new Date(),
-                                    { locale: fr }
-                                )
-                                : ''}
-                        </div>
-                    </div>
-                ),
-            },
-            {
-                header: 'Régions',
-                cell: ({ row }) => (
-                    <div className="flex items-center">
-                        <div>
-                            <div className="rtl:ml-2 mb-1">
-                                {row.original?.city && (
-                                    <Tag className="text-white bg-indigo-600 border-0">
-                                        {row.original?.city}
+                    ),
+                },
+                {
+                    header: 'Role',
+                    cell: ({ row }) => (
+                        <>
+                            <div className="font-medium text-gray-500">
+                                {t(`roles.${row.original.type_person}`)}
+                            </div>
+                            <div className="mr-2 rtl:ml-2 mt-2">
+                                {!row.original.active && (
+                                    <Tag className="text-red-600 bg-red-100 dark:text-red-100 dark:bg-red-500/20 border-0">
+                                        {t('notActive')}
+                                    </Tag>
+                                )}
+                                {row.original.active && (
+                                    <Tag className="bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-100 border-0">
+                                        {t('active')}
                                     </Tag>
                                 )}
                             </div>
-                            {row.original?.regions && row.original?.regions?.length > 0 && (
-                                <>
-                                    {getRegionsByValues(row.original.regions)
-                                        .slice(0, 2)
-                                        .map((region: any) => (
-                                            <div key={region.id} className="text-sm text-gray-500">
-                                                {region.name}
-                                            </div>
-                                        ))}
-                                    {getRegionsByValues(row.original.regions).length > 2 && (
-                                        <span className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-2 py-0.5 rounded">
-                                            +{getRegionsByValues(row.original.regions).length - 2}
-                                        </span>
+                        </>
+                    ),
+                },
+                {
+                    header: 'Email',
+                    accessorKey: 'email',
+                },
+                {
+                    header: 'Coordonées',
+                    cell: ({ row }) => (
+                        <div className="min-w-[160px]">
+                            <div className="font-medium">
+                                {row.original?.phone || ''}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                                {row.original?.address || ''}
+                            </div>
+                        </div>
+                    ),
+                },
+                {
+                    header: 'Creation',
+                    cell: ({ row }) => (
+                        <div className="min-w-[160px]">
+                            <div className="font-medium">
+                                Crée par :{' '}
+                                {row.original?.createBy ? (
+                                    <UserName
+                                        userId={row.original?.createBy || ''}
+                                    />
+                                ) : (
+                                    ''
+                                )}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                                Crée le :{' '}
+                                {row.original?.createdAt
+                                    ? formatRelative(
+                                          row.original?.createdAt?.toDate?.() ||
+                                              row.original.createdAt,
+                                          new Date(),
+                                          { locale: fr },
+                                      )
+                                    : ''}
+                            </div>
+                        </div>
+                    ),
+                },
+                {
+                    header: 'Régions',
+                    cell: ({ row }) => (
+                        <div className="flex items-center">
+                            <div>
+                                <div className="rtl:ml-2 mb-1">
+                                    {row.original?.city && (
+                                        <Tag className="text-white bg-indigo-600 border-0">
+                                            {row.original?.city}
+                                        </Tag>
                                     )}
-                                </>
+                                </div>
+                                {row.original?.regions &&
+                                    row.original?.regions?.length > 0 && (
+                                        <>
+                                            {getRegionsByValues(
+                                                row.original.regions,
+                                            )
+                                                .slice(0, 2)
+                                                .map((region: any) => (
+                                                    <div
+                                                        key={region.id}
+                                                        className="text-sm text-gray-500"
+                                                    >
+                                                        {region.name}
+                                                    </div>
+                                                ))}
+                                            {getRegionsByValues(
+                                                row.original.regions,
+                                            ).length > 2 && (
+                                                <span className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-2 py-0.5 rounded">
+                                                    +
+                                                    {getRegionsByValues(
+                                                        row.original.regions,
+                                                    ).length - 2}
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
+                            </div>
+                        </div>
+                    ),
+                },
+            ]
+
+            // ✅ Conditionally push a new column
+            if (hasAuthority(authority, 'admin') || isUser) {
+                baseColumns.push({
+                    header: 'Action',
+                    cell: ({ row }) => (
+                        <div className="flex items-center justify-end">
+                            {(row.original.type_person != 'admin' ||
+                                hasAuthority(authority, 'admin')) && (
+                                <div>
+                                    <Button
+                                        variant="solid"
+                                        shape="circle"
+                                        size="xs"
+                                        onClick={() =>
+                                            openDialog(row?.original)
+                                        }
+                                    >
+                                        <PiEyeLight />
+                                    </Button>
+                                    {!row.original.email && (
+                                        <YesOrNoPopup
+                                            Ok={yes}
+                                            id={row.original.id}
+                                        ></YesOrNoPopup>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    </div>
-                ),
-            },
+                    ),
+                })
+            }
 
-        ];
-
-        // ✅ Conditionally push a new column
-        if (hasAuthority(authority, 'admin') || isUser) {
-            baseColumns.push({
-                header: 'Action',
-                cell: ({ row }) => (
-                    <div className="flex items-center justify-end">
-                        {(row.original.type_person != "admin" || hasAuthority(authority, 'admin')) && <div>
-                            <Button variant="solid" shape='circle' size="xs" onClick={() => openDialog(row?.original)}>
-                                <PiEyeLight />
-                            </Button>
-                            {!row.original.email && <YesOrNoPopup Ok={yes} id={row.original.id} ></YesOrNoPopup>}
-
-                        </div>}
-                    </div>
-                ),
-            },);
-        }
-
-        return baseColumns;
-    }, [/* dependencies if any */]);
-
+            return baseColumns
+        },
+        [
+            /* dependencies if any */
+        ],
+    )
 
     useEffect(() => {
-        fetchCount();
+        fetchCount()
         setCurrentPage(1)
         setPageCursors([])
-        fetchPage(1); // load first page
-    }, [roles, regions, pageSize, fullName]);
+        fetchPage(1) // load first page
+    }, [roles, regions, pageSize, fullName])
 
     const buildBaseQuery = () => {
-        let baseQuery: Query<DocumentData> = Landlord as CollectionReference<DocumentData>;
+        let baseQuery: Query<DocumentData> =
+            Landlord as CollectionReference<DocumentData>
 
         if (isUser !== undefined) {
-            baseQuery = query(baseQuery, where('createBy', '==', isUser));
+            baseQuery = query(baseQuery, where('createBy', '==', isUser))
         }
 
         if (roles && regions.length === 0) {
-            baseQuery = query(baseQuery, where('type_person', '==', roles));
+            baseQuery = query(baseQuery, where('type_person', '==', roles))
         } else if (regions.length > 0 && !roles) {
-            baseQuery = query(baseQuery, where('regions', 'array-contains-any', regions));
+            baseQuery = query(
+                baseQuery,
+                where('regions', 'array-contains-any', regions),
+            )
         } else if (roles && regions.length > 0) {
-            baseQuery = query(baseQuery, where('type_person', '==', roles), where('regions', 'array-contains-any', regions));
+            baseQuery = query(
+                baseQuery,
+                where('type_person', '==', roles),
+                where('regions', 'array-contains-any', regions),
+            )
         }
 
         if (fullName) {
-            const search = fullName.toLowerCase();
-            baseQuery = query(baseQuery, where('fullName_lower', '>=', search), where('fullName_lower', '<=', search + '\uf8ff'));
+            const search = fullName.toLowerCase()
+            baseQuery = query(
+                baseQuery,
+                where('fullName_lower', '>=', search),
+                where('fullName_lower', '<=', search + '\uf8ff'),
+            )
         }
 
-        return baseQuery;
+        return baseQuery
     }
 
     const fetchCount = async () => {
         try {
-            const baseQuery = buildBaseQuery();
-            const snapshot = await getCountFromServer(baseQuery);
+            const baseQuery = buildBaseQuery()
+            const snapshot = await getCountFromServer(baseQuery)
             console.log(snapshot.data().count)
-            setTotalData(snapshot.data().count);
+            setTotalData(snapshot.data().count)
         } catch (error) {
-            console.error('Error fetching count:', error);
+            console.error('Error fetching count:', error)
         }
     }
 
     const fetchPage = async (pageNumber: number) => {
-        setLoading(true);
+        setLoading(true)
         try {
-            let q: Query<DocumentData>;
-            const baseQuery = buildBaseQuery();
+            let q: Query<DocumentData>
+            const baseQuery = buildBaseQuery()
 
             // First page
             if (pageNumber === 1) {
-                q = query(baseQuery, orderBy('fullName'), limit(pageSize));
+                q = query(baseQuery, orderBy('fullName'), limit(pageSize))
             } else {
-                const prevCursor = pageCursors[pageNumber - 2]; // e.g. page 2 → index 0
+                const prevCursor = pageCursors[pageNumber - 2] // e.g. page 2 → index 0
 
                 if (!prevCursor) {
-                    console.warn(`Missing cursor for page ${pageNumber - 1}`);
-                    setLoading(false);
-                    return;
+                    console.warn(`Missing cursor for page ${pageNumber - 1}`)
+                    setLoading(false)
+                    return
                 }
-                q = query(baseQuery, orderBy('fullName'), startAfter(prevCursor), limit(pageSize));
+                q = query(
+                    baseQuery,
+                    orderBy('fullName'),
+                    startAfter(prevCursor),
+                    limit(pageSize),
+                )
             }
 
-            setCurrentPage(pageNumber);
+            setCurrentPage(pageNumber)
 
-            const snapshot = await getDocs(q);
+            const snapshot = await getDocs(q)
 
             const landlords: Proprio[] = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
-            })) as Proprio[];
+            })) as Proprio[]
 
             // Store cursor if not already stored
             if (snapshot.docs.length > 0 && !pageCursors[pageNumber - 1]) {
                 setPageCursors((prev) => {
-                    const updated = [...prev];
-                    updated[pageNumber - 1] = snapshot.docs[snapshot.docs.length - 1];
-                    return updated;
-                });
+                    const updated = [...prev]
+                    updated[pageNumber - 1] =
+                        snapshot.docs[snapshot.docs.length - 1]
+                    return updated
+                })
             }
 
-            setData(landlords);
-            setPage(pageNumber);
-            setHasNext(snapshot.docs.length === pageSize);
+            setData(landlords)
+            setPage(pageNumber)
+            setHasNext(snapshot.docs.length === pageSize)
 
             // Fallback: if count query hasn't resolved yet, estimate a minimum total
             if (snapshot.docs.length === pageSize) {
-                setTotalData((prev) => Math.max(prev, pageNumber * pageSize + 1));
+                setTotalData((prev) =>
+                    Math.max(prev, pageNumber * pageSize + 1),
+                )
             } else {
-                setTotalData((prev) => Math.max(prev, (pageNumber - 1) * pageSize + snapshot.docs.length));
+                setTotalData((prev) =>
+                    Math.max(
+                        prev,
+                        (pageNumber - 1) * pageSize + snapshot.docs.length,
+                    ),
+                )
             }
         } catch (error) {
-            console.error('Error fetching page:', error);
+            console.error('Error fetching page:', error)
         }
 
-        setLoading(false);
-    };
+        setLoading(false)
+    }
 
     const onChange = (payload: any) => {
         if (cEnt?.id) {
-            setEnt(prev => {
-                const p = { ...prev, ...payload };
-                setData(prev =>
-                    prev.map(item =>
-                        item.id === cEnt.id ? p : item
-                    )
-                );
-                return p;
-            });
+            setEnt((prev) => {
+                const p = { ...prev, ...payload }
+                setData((prev) =>
+                    prev.map((item) => (item.id === cEnt.id ? p : item)),
+                )
+                return p
+            })
         }
-
-
     }
 
     const table = useReactTable({
@@ -373,7 +440,7 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
         getFilteredRowModel: getFilteredRowModel(),
         // getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
-        pageCount : Math.ceil(totalData / pageSize)
+        pageCount: Math.ceil(totalData / pageSize),
     })
 
     const onPaginationChange = (page: number) => {
@@ -381,29 +448,30 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
     }
 
     const onSelectChange = (value = 0) => {
-        table.setPageSize(Number(value));
-        setPageSize(Number(value));
+        table.setPageSize(Number(value))
+        setPageSize(Number(value))
     }
 
     const onChangeRegion = async (ids: any[]) => {
-        console.log("onChangeRegion: ", ids);
-        setRegions(ids);
+        console.log('onChangeRegion: ', ids)
+        setRegions(ids)
     }
 
     const onChangeRole = async (role: string) => {
-        console.log("onChangeRegion: ", role);
-        setRoles(role);
+        console.log('onChangeRegion: ', role)
+        setRoles(role)
     }
 
     const onChangeFullName = (name: string) => {
-        setFullName(name);
+        setFullName(name)
     }
 
     return (
-
         <div>
             <div className="flex items-center justify-between mb-4">
-                <h4>{name} - { totalData } </h4>
+                <h4>
+                    {name} - {totalData}{' '}
+                </h4>
                 {hasAuthority(authority, 'admin') && (
                     <Button
                         size="sm"
@@ -415,11 +483,16 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
                     </Button>
                 )}
             </div>
-            <FilterProprio authority={authority || []} proprio={proprio} t={t} onChangeRegion={onChangeRegion} onChangeRole={onChangeRole} onChangeFullName={onChangeFullName} ></FilterProprio>
-
+            <FilterProprio
+                authority={authority || []}
+                proprio={proprio}
+                t={t}
+                onChangeRegion={onChangeRegion}
+                onChangeRole={onChangeRole}
+                onChangeFullName={onChangeFullName}
+            ></FilterProprio>
 
             <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
-
                 <Table>
                     <THead>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -471,8 +544,7 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
                             size="sm"
                             isSearchable={false}
                             value={pageSizeOption.filter(
-                                (option) =>
-                                    option.value === pageSize,
+                                (option) => option.value === pageSize,
                             )}
                             options={pageSizeOption}
                             onChange={(option) => onSelectChange(option?.value)}
@@ -480,8 +552,6 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
                     </div>
                 </div>
             </div>
-
-
 
             <Dialog
                 isOpen={dialogIsOpen}
@@ -491,8 +561,17 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
                 onRequestClose={onDialogClose}
             >
                 <div className="flex flex-col h-full overflow-y-auto">
-                    <h5 className="mb-4">{cEnt?.fullName} - {t(`roles.${cEnt?.type_person}`)}</h5>
-                    {cEnt && <EditEntity userId={userId || ''} lord={cEnt} onChange={onChange} isUser={isUser} ></EditEntity>}
+                    <h5 className="mb-4">
+                        {cEnt?.fullName} - {t(`roles.${cEnt?.type_person}`)}
+                    </h5>
+                    {cEnt && (
+                        <EditEntity
+                            userId={userId || ''}
+                            lord={cEnt}
+                            isUser={isUser}
+                            onChange={onChange}
+                        ></EditEntity>
+                    )}
                     <div className="text-right mt-6">
                         <Button
                             className="ltr:mr-2 rtl:ml-2"
@@ -501,15 +580,11 @@ function ShowProprio({ name = "Entités", isUser = undefined }: Props) {
                         >
                             Fermer
                         </Button>
-
                     </div>
                 </div>
             </Dialog>
-
-
         </div>
-    );
+    )
 }
 
-
-export default ShowProprio;
+export default ShowProprio

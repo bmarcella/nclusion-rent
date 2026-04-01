@@ -9,8 +9,7 @@ interface InputAffix {
 }
 
 interface NumberInputProps
-    extends Omit<InputProps, 'prefix' | 'suffix'>,
-        InputAffix {}
+    extends Omit<InputProps, 'prefix' | 'suffix'>, InputAffix {}
 
 type NumberFormatInputProps = Omit<NumberFormatBaseProps, 'form'> & InputAffix
 
@@ -38,7 +37,7 @@ function caretUnknownFormatBoundary(formattedValue: string) {
     for (let i = 0, ln = boundaryAry.length; i < ln; i++) {
         boundaryAry[i] = Boolean(
             charIsNumber(formattedValue[i]) ||
-                charIsNumber(formattedValue[i - 1]),
+            charIsNumber(formattedValue[i - 1]),
         )
     }
 

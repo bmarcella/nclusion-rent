@@ -42,4 +42,4 @@ export const ReqRejectedEmailTemplate = `
     </table>
   </body>
 </html>
-`;
+`

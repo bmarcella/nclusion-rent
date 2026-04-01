@@ -10,8 +10,8 @@ import { statsigClient } from '../../services/statsigClient'
 
 const Layout = ({ children }: CommonProps) => {
     const layoutType = useThemeStore((state) => state.layout.type)
-    const { authenticated } = useAuth();
-    const location = useLocation();
+    const { authenticated } = useAuth()
+    const location = useLocation()
     useEffect(() => {
         const fullURL = window.location.href
         if (window.location.hostname === 'localhost') {

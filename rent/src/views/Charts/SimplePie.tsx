@@ -3,13 +3,13 @@ import Chart from 'react-apexcharts'
 import { COLORS } from '@/constants/chart.constant'
 
 type Props = {
-    labels: string[];
-    series: number[];
-    height?: number;
-    ptype?: any;
-};
+    labels: string[]
+    series: number[]
+    height?: number
+    ptype?: any
+}
 
-const SimplePie = ({ labels, series , height = 300, ptype="pie"}: Props) => {
+const SimplePie = ({ labels, series, height = 300, ptype = 'pie' }: Props) => {
     return (
         <Chart
             options={{

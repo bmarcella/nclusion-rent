@@ -7,3 +7,4 @@
 /api/.env
 /report/node_modules
 /retool/node_modules
+./CLAUDE.md

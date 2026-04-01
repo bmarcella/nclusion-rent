@@ -1,4 +1,3 @@
- 
 export default function wildCardSearch(
     list: Array<Record<string, string | number>>,
     input: string,

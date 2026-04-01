@@ -1,12 +1,26 @@
+import { z } from 'zod'
 
-import { z } from "zod";
-
-export const USER_ROLES = ["super_manager","vendeur",
-     "proprietaire", 'vendor_management', 
-      "reference", "agent_immobilier", "coordonator", 
-      "assist_coordonator", "manager", "assist_manager",
-       "operation", "super_operation", "admin", "fields_ops", 'accountant', 'assist_accountant', 'super_accountant', 'coordonator_agent_immobilier'] as const;
-export type  USER_ROLE = typeof USER_ROLES[number];
+export const USER_ROLES = [
+    'super_manager',
+    'vendeur',
+    'proprietaire',
+    'vendor_management',
+    'reference',
+    'agent_immobilier',
+    'coordonator',
+    'assist_coordonator',
+    'manager',
+    'assist_manager',
+    'operation',
+    'super_operation',
+    'admin',
+    'fields_ops',
+    'accountant',
+    'assist_accountant',
+    'super_accountant',
+    'coordonator_agent_immobilier',
+] as const
+export type USER_ROLE = (typeof USER_ROLES)[number]
 export const ProprioSchema = z.object({
     id: z.string().optional(),
     fullName: z.string().min(1, 'Full name is required'),
@@ -24,10 +38,10 @@ export const ProprioSchema = z.object({
     updatedAt: z.date().optional(),
     documents: z.array(z.any()).optional(),
     type_person: z.enum(USER_ROLES),
-    regions : z.array(z.number().optional()),
-  })
+    regions: z.array(z.number().optional()),
+})
 
-  export const RoleSchema = z.object({
+export const RoleSchema = z.object({
     type_person: z.enum(USER_ROLES),
-    regions : z.array(z.number().optional()),
-  })
+    regions: z.array(z.number().optional()),
+})

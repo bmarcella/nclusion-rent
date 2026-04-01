@@ -4,8 +4,7 @@ import type { CommonProps } from '../@types/common'
 import type { MouseEvent, ButtonHTMLAttributes, Ref } from 'react'
 
 export interface CloseButtonProps
-    extends CommonProps,
-        ButtonHTMLAttributes<HTMLButtonElement> {
+    extends CommonProps, ButtonHTMLAttributes<HTMLButtonElement> {
     absolute?: boolean
     onClick?: (e: MouseEvent<HTMLButtonElement>) => void
     ref?: Ref<HTMLButtonElement>

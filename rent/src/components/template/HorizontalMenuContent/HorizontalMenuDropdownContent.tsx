@@ -115,7 +115,9 @@ const MenuLink = ({
                 <Avatar
                     className={classNames(
                         'bg-white dark:bg-transparent p-2 border-2 border-gray-200 dark:border-gray-600',
-                        active ? 'text-primary' : 'text-gray-900 dark:text-gray-100',
+                        active
+                            ? 'text-primary'
+                            : 'text-gray-900 dark:text-gray-100',
                     )}
                     size={40}
                     icon={icon}

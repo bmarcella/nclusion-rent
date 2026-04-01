@@ -13,8 +13,7 @@ import type {
 } from 'react'
 
 export interface ButtonProps
-    extends CommonProps,
-        Omit<ComponentPropsWithRef<'button'>, 'onClick'> {
+    extends CommonProps, Omit<ComponentPropsWithRef<'button'>, 'onClick'> {
     asElement?: ElementType
     active?: boolean
     block?: boolean

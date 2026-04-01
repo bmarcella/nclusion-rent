@@ -1,5 +1,5 @@
-import ShowRequest from "./ShowRequest";
+import ShowRequest from './ShowRequest'
 
-export  { ShowRequestBase } from "./ShowRequest";
+export { ShowRequestBase } from './ShowRequest'
 
-export default ShowRequest ;
+export default ShowRequest

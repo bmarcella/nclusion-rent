@@ -1,5 +1,5 @@
-import endpointConfig from "@/configs/endpoint.config";
-import ApiService from "./ApiService";
+import endpointConfig from '@/configs/endpoint.config'
+import ApiService from './ApiService'
 
 export async function ApiSendMail<T>(data: any) {
     return ApiService.fetchDataWithAxios<T>({
