@@ -1,68 +1,172 @@
+# AJI Mobile
 
-## Project Overview
+AJIMobile is a property management and financial operations platform built for **NYLC (Nclusion)**. It provides tools for managing bank locations, landlords, expense requests, lease contracts, and operational reporting across multiple regions in Haiti.
 
-Nclusion-Rent is a full-stack TypeScript application for real estate/property management. The codebase lives under `ui/` with separate packages for the backend API and React frontend.
+## Tech Stack
 
-## Repository Structure
+- **React 19** with TypeScript
+- **Vite** for build and dev server
+- **Tailwind CSS 4** for styling
+- **Firebase** (Firestore, Authentication, Storage)
+- **Zustand** for state management
+- **React Router v6** for routing
+- **react-i18next** for internationalization (French)
+- **ApexCharts** for data visualization
+- **React Hook Form + Zod** for form validation
+- **TanStack Table** for data tables
+- **Statsig** for feature flags
 
-```
-ui/
-├── api/          # Express.js backend (Node 18, TypeScript)
-├── rent/         # React 19 frontend (Vite, "ecme" package)
-├── retool/       # Tailwind CSS framework for Retool
-├── template/demo/# Demo template app
-└── report/       # Reporting module
-```
+## Getting Started
 
-## Development Commands
+### Prerequisites
 
-### Backend (`ui/api/`)
+- Node.js 18+
+- npm
+- Firebase project with Firestore, Auth, and Storage enabled
+
+### Installation
+
 ```bash
-npm run dev          # Start dev server with nodemon + ts-node (watches src/)
-npm run build        # TypeScript compile + tsc-alias path resolution
-npm start            # Run compiled output (node src/index.js)
-npm run format       # Prettier format
-npm run format:check # Prettier check
+cd ui/rent
+npm install
 ```
 
-### Frontend (`ui/rent/`)
+### Environment Variables
+
+Create a `.env` file in `ui/rent/` with your Firebase and API configuration:
+
+```env
+VITE_API_URL=http://localhost:3000/api/v1
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+```
+
+### Development
+
 ```bash
-npm run dev      # Vite dev server (port 5173)
+npm run dev      # Start Vite dev server on port 5173
+```
+
+The dev server proxies `/api` requests to `http://localhost:3000`.
+
+### Build
+
+```bash
 npm run build    # Production build → ./build/
-npm run preview  # Preview production build
-npm run format   # Prettier + ESLint fix
+npm run preview  # Preview production build locally
 ```
 
-### Testing
-No test framework is configured in either package. Husky pre-commit hooks reference `npm test` but the script does not exist — commits may require `--no-verify` or the hook needs to be updated.
+### Formatting
 
-## Architecture
+```bash
+npm run format   # Run Prettier + ESLint fix
+```
 
-### Backend (Damba Framework)
-The API uses Express.
+## Project Structure
 
-**API base path**: `/api/v1` (configured via `BASE_PATH` env var).
+```
+src/
+├── @types/              # Global TypeScript type definitions
+├── assets/styles/       # Tailwind CSS and component styles
+├── auth/                # AuthContext, AuthProvider, useAuth hook
+├── components/
+│   ├── shared/          # Reusable shared components (DebounceInput, DataTable, etc.)
+│   └── ui/              # UI component library (Button, Card, Tabs, Dialog, etc.)
+├── configs/
+│   ├── app.config.ts    # App-level config (API prefix, locale, auth paths)
+│   ├── routes.config/   # Route definitions with lazy loading and role-based access
+│   └── navigation.config/ # Sidebar navigation structure
+├── constants/           # Roles, navigation types, chart colors
+├── locales/lang/        # i18n translation files (fr.json)
+├── services/
+│   └── firebase/        # Firestore collections, CRUD operations
+├── store/               # Zustand stores (auth, theme, locale, routeKey)
+├── utils/               # Hooks, helpers, RoleChecker
+└── views/
+    ├── Home.tsx          # Dashboard with KPIs, charts, request stats
+    ├── bank/             # Bank location management (add, show, approval, review)
+    ├── proprio/          # Landlord/entity management (add, show, edit)
+    ├── request/          # Expense request workflow (add, show, approve, report)
+    ├── report/           # Operational reporting
+    ├── vendor/           # Vendor and contract management
+    ├── Charts/           # Chart components (SimplePie)
+    ├── Entity/           # Shared entities, regions, report steps
+    └── shared/           # Shared view components
+```
 
-### Frontend
-- **State management**: Zustand stores in `src/store/` (authStore, themeStore, localeStore, routeKeyStore)
-- **Auth**: Firebase Authentication with multiple providers (Google, GitHub) via `src/auth/` (AuthContext, AuthProvider, useAuth hook) and `src/services/firebase/`
-- **Routing**: React Router v6 with protected/public route configs in `src/configs/routes.config/`
-- **i18n**: react-i18next with locale files in `src/locales/lang/`
-- **Feature flags**: Statsig SDK
-- **Path alias**: `@/*` maps to `src/*`
+## Core Modules
 
-### Dev Proxy
-Vite proxies `/api` requests to `http://localhost:3000` during development.
+### Bank Management
 
-## Key Conventions
+Manage bank locations through a multi-step workflow:
 
-### TypeScript & Formatting
-- **Backend**: Semicolons, single quotes, trailing commas, 100 char width
-- **Frontend**: No semicolons, single quotes, 4-space tabs
-- Backend uses `src/*` path alias; frontend uses `@/*` path alias
+- **Add Bank** — Submit new bank locations with photos, map coordinates, and details
+- **Approval Pipeline** — Banks progress through: Submitted → Approved → Contract → Renovation → Ready to Use
+- **Review** — Detailed submission review with photos, documents, comments, and timeline
+- **Operations** — View and manage operational (active) banks
 
-### Deployment
-- Vercel serverless deployment (see `vercel.json`)
-- API builds to `api/dist/` as serverless functions (Node 18.x)
-- All routes funnel to `/api/dist/index.js`
-- Docker also available via `ui/api/Dockerfile` (exposes port 3005)
+### Landlord / Entity Management
+
+- **Add/Edit Entities** — Register landlords, agents, and other entities
+- **Search** — Case-insensitive search via `fullName_lower` field
+- **Filter** — By region, role, and name
+- **Admin Tools** — Data migration utilities
+
+### Expense Requests
+
+Multi-type request system supporting 10 categories:
+
+| Type                   | Description                         |
+| ---------------------- | ----------------------------------- |
+| Transport & Logistique | Moving materials, POS, or personnel |
+| OPEX                   | Operational purchases and supplies  |
+| Telecom                | Internet/phone subscriptions        |
+| Locomotif              | Motorcycle fuel and maintenance     |
+| CapEx                  | Equipment and long-term investments |
+| Loyer (Lease)          | Rent/lease payments                 |
+| Renovation             | Bank location repairs               |
+| Bills                  | Operational invoices                |
+| Divers                 | Miscellaneous expenses              |
+| Legal                  | Legal expenses                      |
+
+**Workflow**: Create → Regional Approval → Manager Approval → Accountant Action → Paid/Rejected
+
+**Reports**: Filterable by date range, region, type, status, and demandeur. Breakdown by currency (HTG, USD).
+
+### Reporting
+
+- **Dashboard** — KPIs, bank distribution by region, status breakdown
+- **Weekly Reports** — Bank activity reports by week
+- **Expense Reports** — Financial summaries grouped by type, status, and currency
+
+## Roles & Permissions
+
+The app uses role-based access control. Key roles:
+
+| Role                                 | Access                                        |
+| ------------------------------------ | --------------------------------------------- |
+| `admin`                              | Full access to all features                   |
+| `super_manager`                      | Management dashboard, approvals, reports      |
+| `manager` / `assist_manager`         | Bank approvals, request management            |
+| `coordonator` / `assist_coordonator` | Bank coordination, field operations           |
+| `coordonator_agent_immobilier`       | Real estate agent coordination                |
+| `agent_immobilier`                   | Add banks and entities (simplified dashboard) |
+| `accountant` / `super_accountant`    | Request payment processing                    |
+| `operation`                          | Operational bank management                   |
+| `vendor_management`                  | Vendor                                        |
+
+## Deployment
+
+The app deploys to **Vercel** as part of the monorepo:
+
+- Frontend builds to `ui/rent/build/`
+- API deploys as serverless functions at `/api/`
+- See `vercel.json` in the project root for configuration
+
+## Path Aliases
+
+- `@/*` maps to `src/*` (configured in `tsconfig.json` and `vite.config.ts`)
