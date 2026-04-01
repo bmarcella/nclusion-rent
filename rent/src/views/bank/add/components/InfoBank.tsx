@@ -13,6 +13,7 @@ import { manageAuth } from '@/constants/roles.constant'
 import { BankDoc, Landlord } from '@/services/Landlord'
 import { useSessionUser } from '@/store/authStore'
 import { useTranslation } from '@/utils/hooks/useTranslation'
+import { hasAuthorities, hasAuthority } from '@/utils/RoleChecker'
 import { Bank, getBlankBank, Proprio } from '@/views/Entity'
 import { Regions } from '@/views/Entity/Regions'
 import AddProprioPopup from '@/views/proprio/add/AddProprioPopup'
@@ -25,7 +26,7 @@ import {
     getDoc,
     updateDoc,
 } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z, ZodType } from 'zod'
 
@@ -265,7 +266,8 @@ function InfoBank({
         })
     }, [defaultValues, reset])
 
-    const selectedRegion = watch('id_region')
+    const selectedRegion = watch('id_region');
+    const hasRole = useMemo(()=>hasAuthorities(authority, ['admin', 'coordonator']) , [authority]);
     return (
         <>
             <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
@@ -572,13 +574,19 @@ function InfoBank({
                     </div>
 
                     <div className="mt-6">
+                    
+                       {   ( hasRole ||   [
+                                    'bankSteps.needApproval',
+                                    'bankSteps.needApprobation',
+                                ].includes(defaultValues?.step as any) )
+                                && 
                         <Button
                             type="submit"
                             variant="solid"
                             loading={isSubmitting}
                         >
                             {isEdit ? t('common.update') : t('common.next')}
-                        </Button>
+                        </Button> }
                     </div>
                 </Form>
             </div>

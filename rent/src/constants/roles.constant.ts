@@ -68,12 +68,14 @@ export const getRolesByAhth = (auth: string) => {
                 'agent_immobilier',
                 'assist_coordonator',
                 'vendeur',
+                'coordonator_agent_immobilier'
             ])
             break
         case 'assist_coordonator':
             roles.push('agent_immobilier')
             roles.push('coordonator_agent_immobilier')
             roles.push('vendeur')
+            roles.push('coordonator_agent_immobilier')
             break
         case 'coordonator_agent_immobilier':
             roles.push('agent_immobilier')
@@ -85,6 +87,7 @@ export const getRolesByAhth = (auth: string) => {
                 'assist_manager',
                 'assist_coordonator',
                 'coordonator',
+                'coordonator_agent_immobilier'
             ])
             break
 
@@ -93,6 +96,7 @@ export const getRolesByAhth = (auth: string) => {
                 'agent_immobilier',
                 'assist_coordonator',
                 'coordonator',
+                'coordonator_agent_immobilier'
             ])
             break
 
@@ -109,6 +113,7 @@ export const getRolesByAhth = (auth: string) => {
                 'assist_manager',
                 'assist_coordonator',
                 'coordonator',
+                'coordonator_agent_immobilier'
             ])
             break
         case 'accountant':

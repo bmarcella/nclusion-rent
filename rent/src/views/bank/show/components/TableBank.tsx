@@ -292,8 +292,9 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                     else
                         return (
                             <div className="min-w-[200px]">
-                                {(hasAuthority(authority, 'coordonator') ||
+                                {(  hasAuthority(authority, 'coordonator') ||
                                     hasAuthority(authority, 'admin') ||
+                                    hasAuthority(authority, 'coordonator_agent_immobilier') ||
                                     hasAuthority(
                                         authority,
                                         'super_manager',

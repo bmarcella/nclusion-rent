@@ -5,11 +5,11 @@ import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import { Bank } from '@/views/Entity'
 import { Timestamp, updateDoc } from 'firebase/firestore'
 import DemoDetails from '../../add/components/DemoDetails'
-import InfoBank from '../../add/components/InfoBank'
 import RenovationDetails from '../../add/components/RenovDetails'
 import RentDetails from '../../add/components/RentDetails'
 import SecurityDetails from '../../add/components/SecDetails'
 import { useState } from 'react'
+import InfoBank from '../../add/components/InfoBank'
 
 interface Props {
     docRef: Bank
