@@ -8,6 +8,7 @@ import {
     Input,
     Button,
     Checkbox,
+    Card,
 } from '@/components/ui'
 import { manageAuth } from '@/constants/roles.constant'
 import { BankDoc, Landlord } from '@/services/Landlord'
@@ -72,6 +73,14 @@ interface FormProps {
     defaultValues?: Partial<FormValuesInfo>
     isEdit?: boolean
     userId?: string
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="mb-4 pb-2 border-b border-gray-200 dark:border-gray-600">
+            <h6 className="text-gray-900 dark:text-gray-100">{children}</h6>
+        </div>
+    )
 }
 
 function InfoBank({
@@ -163,9 +172,9 @@ function InfoBank({
         const auth = authority[0]
         const manage = async () => {
             const { regions } = await manageAuth(auth, proprio, t)
-            setRegions(regions) // setRegions first
+            setRegions(regions)
             if (regions.length === 1) {
-                setValue('id_region', regions[0].value) // safe to call here
+                setValue('id_region', regions[0].value)
                 setTypeOptions(
                     convertStringToSelectOptions(regions[0].cities || []),
                 )
@@ -242,7 +251,7 @@ function InfoBank({
         } else {
             addNewBank(data)
         }
-        setTimeout(() => setSubmitting(false), 1000) // simulate loading
+        setTimeout(() => setSubmitting(false), 1000)
     }
 
     useEffect(() => {
@@ -266,28 +275,49 @@ function InfoBank({
         })
     }, [defaultValues, reset])
 
-    const selectedRegion = watch('id_region');
-    const hasRole = useMemo(()=>hasAuthorities(authority, ['admin', 'coordonator']) , [authority]);
-    return (
-        <>
-            <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
-                <Form onSubmit={handleSubmit(onSubmitInfo)}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormItem
-                            label={t('bank.bankName')}
-                            invalid={!!errors.bankName}
-                            errorMessage={errors.bankName?.message}
-                        >
-                            <Controller
-                                name="bankName"
-                                control={control}
-                                render={({ field }) => <Input {...field} />}
-                            />
-                        </FormItem>
+    const selectedRegion = watch('id_region')
+    const hasRole = useMemo(
+        () => hasAuthorities(authority, ['admin', 'coordonator']),
+        [authority],
+    )
 
+    return (
+        <Form onSubmit={handleSubmit(onSubmitInfo)}>
+            <div className="flex flex-col gap-6">
+                {/* Section 1: Property Identification */}
+                <Card bordered>
+                    <SectionTitle>
+                        {t('bank.bankName')}
+                    </SectionTitle>
+                    <FormItem
+                        label={t('bank.bankName')}
+                        asterisk
+                        invalid={!!errors.bankName}
+                        errorMessage={errors.bankName?.message}
+                    >
+                        <Controller
+                            name="bankName"
+                            control={control}
+                            render={({ field }) => (
+                                <Input
+                                    placeholder={t('bank.bankName')}
+                                    {...field}
+                                />
+                            )}
+                        />
+                    </FormItem>
+                </Card>
+
+                {/* Section 2: Location */}
+                <Card bordered>
+                    <SectionTitle>
+                        {t('bank.addresse')}
+                    </SectionTitle>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                         {!hideReg && (
                             <FormItem
                                 label={t('bank.id_region')}
+                                asterisk
                                 invalid={!!errors.id_region}
                                 errorMessage={errors.id_region?.message}
                             >
@@ -296,16 +326,16 @@ function InfoBank({
                                     control={control}
                                     render={({ field }) => (
                                         <Select
-                                            placeholder="Please Select"
+                                            placeholder={t('common.select')}
                                             options={regions}
                                             value={
                                                 regions.find(
-                                                    (option) =>
+                                                    (option: any) =>
                                                         Number(option.value) ===
                                                         Number(field.value),
                                                 ) || null
                                             }
-                                            onChange={(option) => {
+                                            onChange={(option: any) => {
                                                 setTypeOptions(
                                                     convertStringToSelectOptions(
                                                         option?.cities || [],
@@ -324,6 +354,7 @@ function InfoBank({
                         {selectedRegion && (
                             <FormItem
                                 label={t('bank.city')}
+                                asterisk
                                 invalid={!!errors.city}
                                 errorMessage={errors.city?.message}
                             >
@@ -332,16 +363,16 @@ function InfoBank({
                                     control={control}
                                     render={({ field }) => (
                                         <Select
-                                            placeholder="Please Select"
+                                            placeholder={t('common.select')}
                                             options={typeOptions}
                                             value={
                                                 typeOptions.find(
-                                                    (option) =>
+                                                    (option: any) =>
                                                         option.value ===
                                                         field.value,
                                                 ) || null
                                             }
-                                            onChange={(option) =>
+                                            onChange={(option: any) =>
                                                 field.onChange(option?.value)
                                             }
                                         />
@@ -358,46 +389,55 @@ function InfoBank({
                             <Controller
                                 name="addresse"
                                 control={control}
-                                render={({ field }) => <Input {...field} />}
+                                render={({ field }) => (
+                                    <Input
+                                        placeholder={t('bank.addresse')}
+                                        {...field}
+                                    />
+                                )}
                             />
                         </FormItem>
+                    </div>
+                </Card>
 
+                {/* Section 3: Landlord */}
+                <Card bordered>
+                    <SectionTitle>
+                        {t('bank.landlord')}
+                    </SectionTitle>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                         <FormItem
-                            className="w-full"
                             label={t('bank.landlord')}
+                            asterisk
                             invalid={!!errors.landlord}
                             errorMessage={errors.landlord?.message as string}
                         >
                             <Controller
                                 name="landlord"
                                 control={control}
-                                render={({ field }) => {
-                                    return (
-                                        <div className="flex items-center gap-2">
-                                            <Select
-                                                isLoading={ploading}
-                                                className="w-full"
-                                                placeholder="Please Select"
-                                                options={landlordsOptions}
-                                                value={
-                                                    refsOptions.find(
-                                                        (option) =>
-                                                            option.value ==
-                                                            field.value,
-                                                    ) || null
-                                                }
-                                                onChange={(option) =>
-                                                    field.onChange(
-                                                        option?.value,
-                                                    )
-                                                }
-                                            />
-                                            <AddProprioPopup
-                                                done={addNewProprio}
-                                            />
-                                        </div>
-                                    )
-                                }}
+                                render={({ field }) => (
+                                    <div className="flex items-center gap-2">
+                                        <Select
+                                            isLoading={ploading}
+                                            className="w-full"
+                                            placeholder={t('common.select')}
+                                            options={landlordsOptions}
+                                            value={
+                                                refsOptions.find(
+                                                    (option: any) =>
+                                                        option.value ==
+                                                        field.value,
+                                                ) || null
+                                            }
+                                            onChange={(option: any) =>
+                                                field.onChange(option?.value)
+                                            }
+                                        />
+                                        <AddProprioPopup
+                                            done={addNewProprio}
+                                        />
+                                    </div>
+                                )}
                             />
                         </FormItem>
 
@@ -409,31 +449,44 @@ function InfoBank({
                             <Controller
                                 name="reference"
                                 control={control}
-                                render={({ field }) => <Input {...field} />}
-                            />
-                        </FormItem>
-
-                        <FormItem
-                            label={t('bank.yearCount')}
-                            invalid={!!errors.yearCount}
-                            errorMessage={errors.yearCount?.message}
-                        >
-                            <Controller
-                                name="yearCount"
-                                control={control}
                                 render={({ field }) => (
                                     <Input
-                                        type="number"
+                                        placeholder={t('bank.reference')}
                                         {...field}
-                                        onChange={(e) =>
-                                            field.onChange(
-                                                Number(e.target.value),
-                                            )
-                                        }
                                     />
                                 )}
                             />
                         </FormItem>
+
+                        <FormItem
+                            label={t('bank.isrefSameAsLandlord')}
+                            invalid={!!errors.isrefSameAsLandlord}
+                            errorMessage={
+                                errors.isrefSameAsLandlord?.message
+                            }
+                        >
+                            <Controller
+                                name="isrefSameAsLandlord"
+                                control={control}
+                                render={({ field }) => (
+                                    <div className="mt-2">
+                                        <Checkbox
+                                            checked={field.value}
+                                            {...field}
+                                        />
+                                    </div>
+                                )}
+                            />
+                        </FormItem>
+                    </div>
+                </Card>
+
+                {/* Section 4: Property Details */}
+                <Card bordered>
+                    <SectionTitle>
+                        {t('bank.superficie')}
+                    </SectionTitle>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
                         <FormItem
                             label={t('bank.superficie')}
                             invalid={!!errors.superficie}
@@ -445,27 +498,8 @@ function InfoBank({
                                 render={({ field }) => (
                                     <Input
                                         type="number"
-                                        {...field}
-                                        onChange={(e) =>
-                                            field.onChange(
-                                                Number(e.target.value),
-                                            )
-                                        }
-                                    />
-                                )}
-                            />
-                        </FormItem>
-                        <FormItem
-                            label={t('bank.nombre_chambre')}
-                            invalid={!!errors.nombre_chambre}
-                            errorMessage={errors.nombre_chambre?.message}
-                        >
-                            <Controller
-                                name="nombre_chambre"
-                                control={control}
-                                render={({ field }) => (
-                                    <Input
-                                        type="number"
+                                        placeholder="0"
+                                        suffix="m&sup2;"
                                         {...field}
                                         onChange={(e) =>
                                             field.onChange(
@@ -478,7 +512,63 @@ function InfoBank({
                         </FormItem>
 
                         <FormItem
+                            label={t('bank.nombre_chambre')}
+                            invalid={!!errors.nombre_chambre}
+                            errorMessage={errors.nombre_chambre?.message}
+                        >
+                            <Controller
+                                name="nombre_chambre"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        onChange={(e) =>
+                                            field.onChange(
+                                                Number(e.target.value),
+                                            )
+                                        }
+                                    />
+                                )}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            label={t('bank.yearCount')}
+                            asterisk
+                            invalid={!!errors.yearCount}
+                            errorMessage={errors.yearCount?.message}
+                        >
+                            <Controller
+                                name="yearCount"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input
+                                        type="number"
+                                        placeholder="1"
+                                        {...field}
+                                        onChange={(e) =>
+                                            field.onChange(
+                                                Number(e.target.value),
+                                            )
+                                        }
+                                    />
+                                )}
+                            />
+                        </FormItem>
+                    </div>
+                </Card>
+
+                {/* Section 5: Financials & Date */}
+                <Card bordered>
+                    <SectionTitle>
+                        {t('bank.rent')}
+                    </SectionTitle>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                        <FormItem
                             label={t('bank.rentCost')}
+                            asterisk
                             invalid={!!errors.rentCost}
                             errorMessage={errors.rentCost?.message}
                         >
@@ -488,6 +578,7 @@ function InfoBank({
                                 render={({ field }) => (
                                     <Input
                                         type="number"
+                                        placeholder="0"
                                         prefix="HTG"
                                         suffix=".00"
                                         {...field}
@@ -513,6 +604,7 @@ function InfoBank({
                                     render={({ field }) => (
                                         <Input
                                             type="number"
+                                            placeholder="0"
                                             prefix="HTG"
                                             suffix=".00"
                                             {...field}
@@ -529,6 +621,7 @@ function InfoBank({
 
                         <FormItem
                             label={t('bank.date')}
+                            asterisk
                             invalid={!!errors.date}
                             errorMessage={errors.date?.message}
                         >
@@ -545,52 +638,58 @@ function InfoBank({
                                         }
                                         onChange={(date) =>
                                             field.onChange(
-                                                date ? date.toISOString() : '',
+                                                date
+                                                    ? date.toISOString()
+                                                    : '',
                                             )
                                         }
                                     />
                                 )}
                             />
                         </FormItem>
-
-                        <FormItem
-                            label={t('bank.urgency')}
-                            invalid={!!errors.urgency}
-                            errorMessage={errors.urgency?.message}
-                        >
-                            <Controller
-                                name="urgency"
-                                control={control}
-                                render={({ field }) => (
-                                    <Checkbox
-                                        checked={field.value}
-                                        {...field}
-                                    ></Checkbox>
-                                )}
-                            />
-                        </FormItem>
-
-                        {/* More fields follow the same structure — Add as needed */}
                     </div>
+                </Card>
 
-                    <div className="mt-6">
-                    
-                       {   ( hasRole ||   [
-                                    'bankSteps.needApproval',
-                                    'bankSteps.needApprobation',
-                                ].includes(defaultValues?.step as any) )
-                                && 
+                {/* Urgency flag */}
+                <Card bordered>
+                    <div className="flex items-center gap-3">
+                        <Controller
+                            name="urgency"
+                            control={control}
+                            render={({ field }) => (
+                                <Checkbox
+                                    checked={field.value}
+                                    {...field}
+                                />
+                            )}
+                        />
+                        <span className="font-semibold text-gray-700 dark:text-gray-200">
+                            {t('bank.urgency')}
+                        </span>
+                    </div>
+                </Card>
+
+                {/* Submit */}
+                {(hasRole ||
+                    [
+                        'bankSteps.needApproval',
+                        'bankSteps.needApprobation',
+                    ].includes(defaultValues?.step as any)) && (
+                    <div className="flex justify-end">
                         <Button
                             type="submit"
                             variant="solid"
                             loading={isSubmitting}
+                            size="lg"
                         >
-                            {isEdit ? t('common.update') : t('common.next')}
-                        </Button> }
+                            {isEdit
+                                ? t('common.update')
+                                : t('common.next')}
+                        </Button>
                     </div>
-                </Form>
+                )}
             </div>
-        </>
+        </Form>
     )
 }
 

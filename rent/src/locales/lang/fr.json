@@ -232,6 +232,8 @@
         "superficie": "Superficie (m2)",
         "nombre_chambre": "Nombre de chambres",
         "date": "Date",
+        "rent" :"Loyer",
+    
         "rentCost": "Coût du loyer Initial",
         "final_rentCost": "Coût du loyer Final",
         "reference": "Référence",
