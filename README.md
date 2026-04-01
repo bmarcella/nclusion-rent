@@ -39,15 +39,7 @@ No test framework is configured in either package. Husky pre-commit hooks refere
 ## Architecture
 
 ### Backend (Damba Framework)
-The API uses a custom framework called **Damba** built on Express, located in `ui/api/src/common/Damba/`. It has two versions (v1, v2):
-
-- **v2/route/DambaRoute.ts** — Route registration system on Express Router
-- **v2/dao/** — Data access layer with TypeORM (PostgreSQL)
-- **v2/service/** — Service layer with DambaService, ServiceRegistry, ServiceConfig
-- **v1/auth/** — Authentication middleware (Google OAuth via Passport, Keycloak, JWT)
-- **v1/service/DambaHelper.ts** — Shared helper utilities
-
-**Entities** are in `ui/api/src/common/Entity/` (BaseEntity, Project, Application, Service, AppModule, Contributor, CanvasBox, etc.) using TypeORM decorators.
+The API uses Express.
 
 **API base path**: `/api/v1` (configured via `BASE_PATH` env var).
 
