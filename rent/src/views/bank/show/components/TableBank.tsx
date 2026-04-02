@@ -63,7 +63,7 @@ import { deleteBank, getBankImages } from '@/services/firebase/BankService'
 import MapPopup from '../MapPopup'
 import FilterBank from '@/views/bank/show/components/FilterBank'
 import FilterMyBank from './FilterMyBank'
-import { hasAuthority } from '@/utils/RoleChecker'
+import { hasAuthorities, hasAuthority } from '@/utils/RoleChecker'
 import GoogleMapWithMarkers from '../GoogleMapWithMarkers'
 import ChangeLocation from '../../add/components/ChangeLocation'
 import Currency from '@/views/shared/Currency'
@@ -292,13 +292,8 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                     else
                         return (
                             <div className="min-w-[200px]">
-                                {(  hasAuthority(authority, 'coordonator') ||
-                                    hasAuthority(authority, 'admin') ||
-                                    hasAuthority(authority, 'coordonator_agent_immobilier') ||
-                                    hasAuthority(
-                                        authority,
-                                        'super_manager',
-                                    )) && (
+                                { hasAuthorities(authority, [ 'assist_coordonator', 'coordonator_agent_immobilier', 'admin', 'coordonator', 'super_manager'] ) 
+                                    && (
                                     <Button
                                         variant="solid"
                                         shape="circle"
