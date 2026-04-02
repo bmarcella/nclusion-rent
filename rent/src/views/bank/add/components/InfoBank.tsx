@@ -670,7 +670,7 @@ function InfoBank({
                 </Card>
 
                 {/* Submit */}
-                {(hasRole ||
+                {(!isEdit || hasRole ||
                     [
                         'bankSteps.needApproval',
                         'bankSteps.needApprobation',
