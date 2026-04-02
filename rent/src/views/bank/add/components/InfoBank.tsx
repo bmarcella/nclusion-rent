@@ -277,7 +277,7 @@ function InfoBank({
 
     const selectedRegion = watch('id_region')
     const hasRole = useMemo(
-        () => hasAuthorities(authority, ['admin', 'coordonator']),
+        () => hasAuthorities(authority, ['admin', 'coordonator', 'assist_coordonator']),
         [authority],
     )
 
@@ -670,7 +670,7 @@ function InfoBank({
                 </Card>
 
                 {/* Submit */}
-                {(hasRole ||
+                {(!isEdit || hasRole ||
                     [
                         'bankSteps.needApproval',
                         'bankSteps.needApprobation',
