@@ -157,6 +157,7 @@ const navigationConfig: NavigationTree[] = [
         type: NAV_ITEM_TYPE_COLLAPSE,
         authority: [
             'assist_accountant',
+            'super_accountant',
             'accountant',
             'admin',
             'assist_manager',
@@ -182,6 +183,7 @@ const navigationConfig: NavigationTree[] = [
                     'coordonator',
                     'manager',
                     'super_manager',
+                    'super_accountant',
                 ],
                 subMenu: [],
             },
