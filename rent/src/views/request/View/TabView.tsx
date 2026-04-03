@@ -15,139 +15,193 @@ import { AuthRequestDoc } from '@/services/Landlord'
 import { AuthRequest, RequestTypeEnum } from '../entities/AuthRequest'
 import { manageAuth } from '@/constants/roles.constant'
 import { useTranslation } from 'react-i18next'
-import { Spinner } from '@/components/ui';
+import { Spinner } from '@/components/ui'
 import { ShowBankDetailsBase } from '@/views/bank/show/ShowBankDetails'
 import { Bank } from '@/views/Entity'
 import { getBankById } from '@/services/firebase/BankService'
 import BankReqView from './BankReqView'
-export type ParamsApprove = { request: IRequest, old_status: string }
+
+export type ParamsApprove = { request: IRequest; old_status: string }
 interface Props {
-  data: IRequest
-  onDialogClose: (close: boolean, data: IRequest) => void,
-  action: boolean
-  approved?: (params: ParamsApprove) => void,
+    data: IRequest
+    onDialogClose: (close: boolean, data: IRequest) => void
+    action: boolean
+    approved?: (params: ParamsApprove) => void
 }
 
 function TabView({ data, onDialogClose, action, approved }: Props) {
-  const { userId, proprio, authority } = useSessionUser((state) => state.user);
-  const [request, setRequest] = useState<IRequest>(data);
-  const [rules, setRules] = useState<AuthRequest[] | undefined>([]) as any;
-  const [loadingRules, seLoadingRules] = useState<boolean>(false);
-  const { t } = useTranslation();
-  const [bank, setBank] = useState<Bank>();
-  const [loading, setLoading] = useState(true);
-   useEffect(() => {
-      const fetchBank = async () => {
-        setLoading(true);
-        const new_id = request.lease_payment?.id_bank
-        const result = await getBankById(new_id!);
-        setBank(result as any);
-        setLoading(false);
-      };
-      if (request.lease_payment?.id_bank) fetchBank();
-    }, [request.lease_payment?.id_bank]);
+    const { userId, proprio, authority } = useSessionUser((state) => state.user)
+    const [request, setRequest] = useState<IRequest>(data)
+    const [rules, setRules] = useState<AuthRequest[] | undefined>([]) as any
+    const [loadingRules, seLoadingRules] = useState<boolean>(false)
+    const { t } = useTranslation()
+    const [bank, setBank] = useState<Bank>()
+    const [loading, setLoading] = useState(true)
+    useEffect(() => {
+        const fetchBank = async () => {
+            setLoading(true)
+            const new_id = request.lease_payment?.id_bank
+            const result = await getBankById(new_id!)
+            setBank(result as any)
+            setLoading(false)
+        }
+        if (request.lease_payment?.id_bank) fetchBank()
+    }, [request.lease_payment?.id_bank])
 
-  useEffect(() => {
-    let canceled = false;
-    const run = async () => {
-      await fetchRule();
-      if (canceled) return;
+    useEffect(() => {
+        let canceled = false
+        const run = async () => {
+            await fetchRule()
+            if (canceled) return
+        }
+        run()
+        return () => {
+            canceled = true
+        }
+    }, [request.requestType, request.status])
+
+    const save = (data: IRequest): void => {
+        setRequest(data)
+        onDialogClose(false, data)
     }
-    run();
-    return () => {
-      canceled = true;
-    };
-  }, [request.requestType, request.status]);
 
-  const save = (data: IRequest): void => {
-    setRequest(data);
-    onDialogClose(false, data);
-  }
+    const fetchRule = async () => {
+        if (!proprio?.type_person) return // avoid undefined in query
+        seLoadingRules(true)
+        const role = authority![0]
+        const { regions } = await manageAuth(authority![0], proprio, t)
+        const reg = regions.map((r) => r.id)
+        const q =
+            role == 'admin'
+                ? query(
+                      AuthRequestDoc,
+                      where('status', '==', request.status),
+                      where('roles', 'array-contains', role),
+                  )
+                : query(
+                      AuthRequestDoc,
+                      where('status', '==', request.status),
+                      where('region_id', 'in', reg),
+                      where('roles', 'array-contains', role),
+                  )
+        const snapshot = await getDocs(q)
+        seLoadingRules(false)
+        const objs = snapshot.docs
+            .map((docSnap) => {
+                const data = docSnap.data() as any
+                return { id: docSnap.id, ...data }
+            })
+            .filter((rule) =>
+                Array.isArray(rule.reqType)
+                    ? rule.reqType.includes(
+                          request.requestType as RequestTypeEnum,
+                      )
+                    : false,
+            )
+        setRules(objs)
+    }
 
+    const see =
+        rules.length > 0 ||
+        (request.status != 'regionalApproval' &&
+            request.status != 'accountantRegionalApproval' &&
+            request.status != 'accountantRegionalApproval')
+    const end =
+        request.status == 'completed' ||
+        request.status == 'rejected' ||
+        request.status == 'cancelled'
+    // cd ui
+    return (
+        <>
+            {see && (
+                <Tabs defaultValue="tab1" className="w-full">
+                    <TabList>
+                        <TabNav value="tab1">
+                            {' '}
+                            {request.requestType.toUpperCase()}
+                        </TabNav>
+                        {
+                            <>
+                                <TabNav value="tab2"> Documents</TabNav>
+                                <TabNav value="tab3"> Historique</TabNav>
+                                {request.requestType == 'lease_payment' &&
+                                    request.lease_payment?.id_bank && (
+                                        <>
+                                            <TabNav value="tab4"> Bank</TabNav>
+                                        </>
+                                    )}
+                            </>
+                        }
+                    </TabList>
+                    <div className="p-4">
+                        <TabContent value="tab1">
+                            <DetailsRequest
+                                data={request}
+                                getNewreq={save}
+                                rules={rules}
+                                action={action}
+                                approved={approved}
+                            />
+                        </TabContent>
+                        <>
+                            {request.requestType == 'lease_payment' && (
+                                <>
+                                    <TabContent value="tab4">
+                                        {bank && (
+                                            <BankReqView
+                                                bank={bank}
+                                            ></BankReqView>
+                                        )}
+                                    </TabContent>
+                                </>
+                            )}
 
+                            <TabContent value="tab3">
+                                <HistoticView data={request}></HistoticView>
+                            </TabContent>
 
-  const fetchRule = async () => {
-    if (!proprio?.type_person) return; // avoid undefined in query
-    seLoadingRules(true);
-    const role = authority![0];
-    const { regions } = await manageAuth(authority![0], proprio, t);
-    const reg = regions.map((r) => r.id);
-    const q = (role == 'admin') ? query(
-      AuthRequestDoc,
-      where("status", "==", request.status),
-      where("roles", "array-contains", role),
-    ) : query(
-      AuthRequestDoc,
-      where("status", "==", request.status),
-      where("region_id", "in", reg),
-      where("roles", "array-contains", role),
+                            <TabContent value="tab2">
+                                <ImageReq
+                                    reqId={request.id}
+                                    userId={userId || ''}
+                                    isEdit={true}
+                                    owner={data.createdBy == userId}
+                                    end={end}
+                                ></ImageReq>
+                            </TabContent>
+                        </>
+                    </div>
+                </Tabs>
+            )}
+            {!see && (
+                <>
+                    {loadingRules && (
+                        <>
+                            <div className="flex items-center mt-12">
+                                <Spinner
+                                    className="mr-4 text-green-500"
+                                    size="40px"
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    {!loadingRules && (
+                        <>
+                            <DetailsRequest
+                                data={request}
+                                getNewreq={save}
+                                rules={rules}
+                                action={action}
+                                auth={false}
+                                approved={approved}
+                            />
+                        </>
+                    )}
+                </>
+            )}
+        </>
     )
-    const snapshot = await getDocs(q);
-    seLoadingRules(false);
-    const objs = snapshot.docs
-      .map((docSnap) => {
-        const data = docSnap.data() as any;
-        return { id: docSnap.id, ...data };
-      })
-      .filter((rule) =>
-        Array.isArray(rule.reqType)
-          ? rule.reqType.includes(request.requestType as RequestTypeEnum)
-          : false
-      );
-    setRules(objs);
-  };
-
-  const see = (rules.length > 0 || (request.status != 'regionalApproval' && request.status != 'accountantRegionalApproval' && request.status != 'accountantRegionalApproval'))
-  const end = request.status == 'completed' || request.status == 'rejected' || request.status == 'cancelled'
-  // cd ui
-  return (
-    <>
-      {see && <Tabs defaultValue="tab1" className="w-full">
-        <TabList>
-          <TabNav value="tab1"> {request.requestType.toUpperCase()}</TabNav>
-          {<><TabNav value="tab2"> Documents</TabNav>
-            <TabNav value="tab3"> Historique</TabNav>
-             { request.requestType == 'lease_payment'  && request.lease_payment?.id_bank && (<>
-             <TabNav value="tab4"> Bank</TabNav>
-          </>)}
-          </>
-          }
-        </TabList>
-        <div className="p-4">
-          <TabContent value="tab1">
-            <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} approved={approved} />
-          </TabContent>
-          <>
-          { request.requestType == 'lease_payment' && (<>
-            <TabContent value="tab4">
-              { bank && <BankReqView bank={bank} ></BankReqView> }
-            </TabContent>
-          </>)}
-         
-
-            <TabContent value="tab3">
-              <HistoticView data={request}></HistoticView>
-            </TabContent>
-
-            <TabContent value="tab2">
-              <ImageReq reqId={request.id} userId={userId || ''} isEdit={true} owner={data.createdBy == userId} end={end} ></ImageReq>
-            </TabContent>
-          </>
-        </div>
-      </Tabs>}
-      {!see && <>
-        {loadingRules && <>
-          <div className="flex items-center mt-12">
-            <Spinner className="mr-4 text-green-500" size="40px" />
-          </div>
-        </>}
-
-        {!loadingRules && <>
-          <DetailsRequest data={request} getNewreq={save} rules={rules} action={action} auth={false} approved={approved} />
-        </>}
-      </>}
-    </>
-  )
 }
 
 export default TabView

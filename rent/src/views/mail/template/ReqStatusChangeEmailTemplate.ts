@@ -37,4 +37,4 @@ export const ReqStatusChangeEmailTemplate = `
     </table>
   </body>
 </html>
-`;
+`

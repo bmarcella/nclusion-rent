@@ -38,4 +38,4 @@ export const ReqApprovedEmailTemplate = `
     </table>
   </body>
 </html>
-`;
+`

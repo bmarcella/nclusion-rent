@@ -3,7 +3,8 @@ import type { ComponentPropsWithRef, ReactNode, MouseEvent, Ref } from 'react'
 import type { CommonProps } from '../../../@types/common'
 
 export interface DayProps
-    extends CommonProps,
+    extends
+        CommonProps,
         Omit<ComponentPropsWithRef<'button'>, 'value' | 'onMouseEnter'> {
     value: Date
     selected: boolean

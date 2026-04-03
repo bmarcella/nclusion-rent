@@ -1,5 +1,5 @@
-import ViewContrat from "./ViewContrat";
+import ViewContrat from './ViewContrat'
 
-export { ViewContratBase } from "./ViewContrat";
+export { ViewContratBase } from './ViewContrat'
 
-export default ViewContrat;
+export default ViewContrat

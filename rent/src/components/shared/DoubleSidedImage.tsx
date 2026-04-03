@@ -2,11 +2,10 @@ import { useThemeStore } from '@/store/themeStore'
 import { THEME_ENUM } from '@/constants/theme.constant'
 import type { DetailedHTMLProps, ImgHTMLAttributes } from 'react'
 
-interface DoubleSidedImageProps
-    extends DetailedHTMLProps<
-        ImgHTMLAttributes<HTMLImageElement>,
-        HTMLImageElement
-    > {
+interface DoubleSidedImageProps extends DetailedHTMLProps<
+    ImgHTMLAttributes<HTMLImageElement>,
+    HTMLImageElement
+> {
     darkModeSrc: string
 }
 

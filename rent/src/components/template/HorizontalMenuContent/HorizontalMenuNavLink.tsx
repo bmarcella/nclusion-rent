@@ -4,8 +4,7 @@ import type { CommonProps } from '@/@types/common'
 import type { AnchorHTMLAttributes } from 'react'
 
 export interface HorizontalMenuNavLinkProps
-    extends CommonProps,
-        AnchorHTMLAttributes<HTMLAnchorElement> {
+    extends CommonProps, AnchorHTMLAttributes<HTMLAnchorElement> {
     path: string
     isExternalLink?: boolean
     className?: string

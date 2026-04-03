@@ -8,7 +8,8 @@ import type { Modifiers } from './tables/components/types'
 import type { Ref } from 'react'
 
 export interface RangeCalendarProps
-    extends CommonProps,
+    extends
+        CommonProps,
         Omit<
             CalendarSharedProps,
             | 'value'

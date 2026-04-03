@@ -14,7 +14,8 @@ type ChildrenParams = {
 }
 
 export interface SegmentItemProps
-    extends Omit<CommonProps, 'children'>,
+    extends
+        Omit<CommonProps, 'children'>,
         Omit<ComponentPropsWithRef<'button'>, 'children'> {
     children: ((params: ChildrenParams) => ReactNode) | ReactNode
     disabled?: boolean

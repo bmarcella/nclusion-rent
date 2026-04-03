@@ -4,8 +4,7 @@ import type { CommonProps } from '../@types/common'
 import type { CalendarSharedProps } from './CalendarBase'
 
 export interface CalenderProps<MultipleSelection extends boolean = false>
-    extends CommonProps,
-        CalendarSharedProps {
+    extends CommonProps, CalendarSharedProps {
     multipleSelection?: MultipleSelection
     value?: MultipleSelection extends true ? Date[] : Date | null
     onChange?(

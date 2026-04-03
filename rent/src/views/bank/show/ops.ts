@@ -1,5 +1,4 @@
+import showBankOps from './ShowBankOps'
 
-import showBankOps from './ShowBankOps';
-
-export { ShowBankOpsBase } from './ShowBankOps';
-export default showBankOps;
+export { ShowBankOpsBase } from './ShowBankOps'
+export default showBankOps

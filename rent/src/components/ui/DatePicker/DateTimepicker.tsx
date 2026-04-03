@@ -14,7 +14,8 @@ import type { BasePickerSharedProps } from './BasePicker'
 import type { FocusEvent, ChangeEvent, Ref } from 'react'
 
 export interface DateTimepickerProps
-    extends CommonProps,
+    extends
+        CommonProps,
         Omit<
             CalendarSharedProps,
             | 'onMonthChange'

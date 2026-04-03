@@ -2,7 +2,12 @@ import { useRef, useImperativeHandle } from 'react'
 import AuthContext from './AuthContext'
 import appConfig from '@/configs/app.config'
 import { useSessionUser, useToken } from '@/store/authStore'
-import { apiSignIn, apiSignOut, apiSignUp, apiSignUpInside } from '@/services/AuthService'
+import {
+    apiSignIn,
+    apiSignOut,
+    apiSignUp,
+    apiSignUpInside,
+} from '@/services/AuthService'
 import { REDIRECT_URL_KEY } from '@/constants/app.constant'
 import { useNavigate } from 'react-router-dom'
 import type {
@@ -71,8 +76,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         setSessionSignedIn(false)
     }
 
-
-
     const signIn = async (values: SignInCredential): AuthResult => {
         try {
             const resp = await apiSignIn(values)
@@ -120,7 +123,10 @@ function AuthProvider({ children }: AuthProviderProps) {
         }
     }
 
-    const signUpInside = async (values: SignUpCredential, type_entity: string): AuthResult => {
+    const signUpInside = async (
+        values: SignUpCredential,
+        type_entity: string,
+    ): AuthResult => {
         try {
             const resp = await apiSignUpInside(values, type_entity)
             if (resp) {
@@ -178,5 +184,3 @@ function AuthProvider({ children }: AuthProviderProps) {
 }
 
 export default AuthProvider
-
-

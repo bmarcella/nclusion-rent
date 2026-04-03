@@ -17,8 +17,7 @@ type CardFooter = {
 }
 
 export interface CardProps
-    extends CommonProps,
-        Omit<ComponentPropsWithRef<'div'>, 'onClick'> {
+    extends CommonProps, Omit<ComponentPropsWithRef<'div'>, 'onClick'> {
     clickable?: boolean
     header?: CardHeader
     bodyClass?: string

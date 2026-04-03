@@ -16,7 +16,8 @@ import type {
 } from 'react'
 
 export interface InputProps
-    extends CommonProps,
+    extends
+        CommonProps,
         Omit<
             InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement>,
             'size' | 'prefix'

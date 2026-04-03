@@ -9,8 +9,7 @@ interface InputAffix {
 }
 
 interface NumberInputProps
-    extends Omit<InputProps, 'prefix' | 'suffix'>,
-        InputAffix {}
+    extends Omit<InputProps, 'prefix' | 'suffix'>, InputAffix {}
 
 type NumberFormatInputProps = Omit<NumericFormatProps, 'form'> & InputAffix
 

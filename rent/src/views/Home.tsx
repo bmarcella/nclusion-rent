@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useSessionUser } from "@/store/authStore"
 import { useEffect, useMemo, useState } from "react"

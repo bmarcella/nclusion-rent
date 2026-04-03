@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Proprio } from "@/views/Entity"
+import { Proprio } from '@/views/Entity'
 
 export type SignInCredential = {
     email: string
@@ -39,7 +39,7 @@ export type AuthRequestStatus = 'success' | 'failed' | ''
 
 export type AuthResult = Promise<{
     status: AuthRequestStatus
-    message: string,
+    message: string
     data?: any
 }>
 
@@ -48,10 +48,10 @@ export type User = {
     avatar?: string | null
     userName?: string | null
     email?: string | null
-    authority?: string[],
+    authority?: string[]
     proprioId?: string | null
-    proprio?: Proprio;
-    active?: boolean;
+    proprio?: Proprio
+    active?: boolean
 }
 
 export type Token = {

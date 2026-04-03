@@ -14,7 +14,8 @@ import type { FocusEvent, KeyboardEvent, ChangeEvent, Ref } from 'react'
 const DEFAULT_INPUT_FORMAT = 'YYYY-MM-DD'
 
 export interface DatePickerProps
-    extends CommonProps,
+    extends
+        CommonProps,
         Omit<
             CalendarSharedProps,
             | 'onMonthChange'

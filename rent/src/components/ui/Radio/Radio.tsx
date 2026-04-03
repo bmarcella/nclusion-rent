@@ -5,7 +5,8 @@ import type { CommonProps } from '../@types/common'
 import type { InputHTMLAttributes, Ref } from 'react'
 
 export interface RadioProps
-    extends CommonProps,
+    extends
+        CommonProps,
         Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
     checked?: boolean
     radioClass?: string

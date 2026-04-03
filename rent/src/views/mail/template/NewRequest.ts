@@ -43,4 +43,4 @@ export const NewReqEmailTemplate = `
     </table>
   </body>
 </html>
-`;
+`

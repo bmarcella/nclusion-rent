@@ -40,7 +40,7 @@ export const SignUpBase = ({
                 </Alert>
             )}
             <SignUpForm disableSubmit={disableSubmit} setMessage={setMessage} />
-            
+
             <div>
                 <div className="mt-6 text-center">
                     <span>Already have an account? </span>

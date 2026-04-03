@@ -1,4 +1,4 @@
-import ShowInactiveBank from './ShowInactiveBank';
+import ShowInactiveBank from './ShowInactiveBank'
 
-export { ShowInactiveBankBase } from './ShowInactiveBank';
-export default ShowInactiveBank;
+export { ShowInactiveBankBase } from './ShowInactiveBank'
+export default ShowInactiveBank

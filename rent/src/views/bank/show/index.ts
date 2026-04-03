@@ -1,4 +1,4 @@
-import showBank from './ShowBank';
+import showBank from './ShowBank'
 
-export { ShowBankBase } from './ShowBank';
-export default showBank;
+export { ShowBankBase } from './ShowBank'
+export default showBank
