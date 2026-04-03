@@ -224,6 +224,12 @@
         }
     },
     "bank": {
+        "selectVersion": "Choisissez la version du formulaire",
+        "versionV1Title": "Formulaire Classique",
+        "versionV1Desc": "Le formulaire original avec toutes les sections détaillées.",
+        "versionV2Title": "Évaluation avec Notation",
+        "versionV2Desc": "Nouveau formulaire avec notation par critère et score final /21.",
+        "ownerPhone": "Téléphone du propriétaire",
         "bankName": "Nom de la banque",
         "id_region": "Identifiant de la région",
         "city": "Ville",
@@ -233,7 +239,6 @@
         "nombre_chambre": "Nombre de chambres",
         "date": "Date",
         "rent" :"Loyer",
-    
         "rentCost": "Coût du loyer Initial",
         "final_rentCost": "Coût du loyer Final",
         "reference": "Référence",
@@ -517,7 +522,11 @@
         "renovation": "Rénovation",
         "images": "Images",
         "commentaires": "Commentaires",
-        "termine": "Terminé"
+        "termine": "Terminé",
+        "scoring_demographics": "Notation — Trafic & Concurrence",
+        "scoring_security": "Notation — Sécurité",
+        "scoring_condition": "Notation — État & Accès",
+        "score_summary": "Résumé du Score"
     },
     "common": {
         "select": "Veuillez sélectionner",
@@ -538,12 +547,81 @@
         "searchBy": "Rechercher par",
         "searchByName": "Rechercher par nom",
         "addBank": "Ajouter Banque",
-        "thankyou": "Merci"
+        "thankyou": "Merci",
+        "back": "Retour",
+        "previous": "Précédent"
     },
     "upload": {
         "maxSize": "Taille maximale : 15 Mo",
         "dropHere": "Déposez votre image ici, ou",
         "browse": "parcourir",
         "supportedFormats": "Formats supportés : jpeg, png, gif"
+    },
+    "scoring": {
+        "dataOnly": "Données uniquement — non noté",
+        "scoutTotalScore": "Score total du scout",
+        "breakdown": "Détail par critère",
+        "footTraffic": {
+            "label": "Passage de personnes",
+            "hint": "Comment décririez-vous le flux de personnes passant devant cet emplacement en ce moment ?",
+            "constant": "Flux constant — un flot continu de personnes en permanence (3 pts)",
+            "moderate": "Modéré — mouvement régulier, pas continu (2 pts)",
+            "occasional": "Occasionnel — des personnes passent mais rarement (1 pt)",
+            "rare": "Rare — très peu de personnes passent (0 pt)"
+        },
+        "trafficGenerator": {
+            "label": "Proximité d'un générateur de trafic",
+            "hint": "Y a-t-il quelque chose à proximité qui attire régulièrement des gens dans cette zone ?",
+            "rightNextTo": "Oui, juste à côté — marché, boutiques, arrêt de transport, école ou église (3 pts)",
+            "closeBy": "Oui, à proximité mais pas immédiatement à côté (2 pts)",
+            "notReliable": "Quelque chose à proximité mais pas une attraction fiable (1 pt)",
+            "nothing": "Rien qui attire régulièrement des gens ici (0 pt)"
+        },
+        "lotteryCompetitionV2": {
+            "label": "Concurrence loterie à proximité",
+            "hint": "Combien d'autres emplacements de borlette/loterie se trouvent à proximité ?",
+            "none": "Aucun",
+            "oneToThree": "1 à 3 à proximité (marché prouvé)",
+            "fourOrMore": "4 ou plus très proches (marché saturé)"
+        },
+        "physicalSecurity": {
+            "label": "Sécurité physique",
+            "hint": "Cochez tout ce qui existe actuellement à l'emplacement. Score : 3+ = 3 pts, 2 = 2 pts, 1 = 1 pt, aucun = 0 pt.",
+            "metalDoor": "Porte métallique",
+            "barredWindows": "Fenêtres barreaudées",
+            "securedRoof": "Toit sécurisé (béton, métal renforcé)",
+            "padlock": "Cadenas"
+        },
+        "zoneStability": {
+            "label": "Stabilité et sécurité de la zone",
+            "hint": "Comment décririez-vous la sécurité de cette zone ?",
+            "stable": "Stable, aucun problème connu (3 pts)",
+            "generallyStable": "Généralement stable, incidents occasionnels (2 pts)",
+            "sometimesUnstable": "Parfois instable (1 pt)",
+            "knownBanditry": "Banditisme connu ou incidents fréquents (0 pt)"
+        },
+        "buildingCondition": {
+            "label": "État du bâtiment",
+            "hint": "Le bâtiment est-il en assez bon état pour y opérer tel quel ?",
+            "good": "Bon état, prêt à utiliser (3 pts)",
+            "minorFixes": "Acceptable, nécessite des réparations mineures uniquement (porte, fenêtre, peinture) (2 pts)",
+            "poorCondition": "Mauvais état, nécessite des travaux importants (0 pt)"
+        },
+        "physicalAccess": {
+            "label": "Accès physique",
+            "hint": "Est-il facile pour un client d'atteindre physiquement l'entrée ?",
+            "flatDirect": "Terrain plat, pas d'obstacles, entrée directe (3 pts)",
+            "typicalBarriers": "Obstacles typiques — fossé de drainage avec passage stable, légère pente, une ou deux marches (2 pts)",
+            "difficult": "Accès difficile — pont instable, chemin escarpé ou inégal, risque d'inondation saisonnière (1 pt)",
+            "impassable": "Impassable ou dangereux — pas de passage sûr, inondation sévère, structure effondrée (0 pt)"
+        },
+        "visibility": {
+            "label": "Visibilité",
+            "hint": "Un client de passage peut-il clairement voir cet emplacement depuis la rue ?",
+            "fullyVisible": "Directement sur la rue principale, entièrement visible (3 pts)",
+            "partiallyVisible": "Partiellement visible, obstruction mineure (2 pts)",
+            "setBack": "En retrait ou partiellement caché (1 pt)",
+            "notVisible": "Non visible depuis la rue (0 pt)"
+        }
     }
 }

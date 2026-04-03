@@ -105,7 +105,6 @@ export function TableBanks({ step, isAgent = false, all = false, id }: Props) {
     const [alert, setAlert] = useState('success') as any
     const { t } = useTranslation()
     const navigate = useNavigate()
-
     const { userId, proprio, authority } = useSessionUser((state) => state.user)
     const [regions, setRegions] = useState<number>(0)
     const [agents, setAgents] = useState<string>()
@@ -534,6 +533,7 @@ export function TableBanks({ step, isAgent = false, all = false, id }: Props) {
             await fetchBanks(page)
         }
     }
+
     const onSelectChange = (value = 0) => {
         table.setPageSize(Number(value))
         setPageSize(Number(value))

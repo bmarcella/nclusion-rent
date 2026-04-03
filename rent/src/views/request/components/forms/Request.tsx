@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Tabs } from '@/components/ui/Tabs'
 import TabContent from '@/components/ui/Tabs/TabContent'
 import TabList from '@/components/ui/Tabs/TabList'

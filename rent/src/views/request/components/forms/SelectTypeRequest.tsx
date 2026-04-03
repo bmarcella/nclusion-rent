@@ -115,7 +115,7 @@ function SelectTypeRequest({ GetSelected }: Props) {
                     return (
                         <div
                             key={tq.value}
-                            className={`
+                            className={` bg-white 
                                 group relative rounded-2xl border-2 cursor-pointer
                                 transition-all duration-200 ease-in-out overflow-hidden
                                 ${

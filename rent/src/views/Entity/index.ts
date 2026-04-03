@@ -320,7 +320,131 @@ export const FrenchNumber = ({ number }: { number: number }) => {
     return formatted
 }
 
+export enum BankFormVersion {
+    V1 = 'v1',
+    V2 = 'v2',
+}
+
+// ── V2 Scoring Enums ──
+
+export const footTrafficOptions = [
+    'footTraffic.constant',
+    'footTraffic.moderate',
+    'footTraffic.occasional',
+    'footTraffic.rare',
+] as const
+export type FootTraffic = (typeof footTrafficOptions)[number]
+
+export const trafficGeneratorOptions = [
+    'trafficGenerator.rightNextTo',
+    'trafficGenerator.closeBy',
+    'trafficGenerator.notReliable',
+    'trafficGenerator.nothing',
+] as const
+export type TrafficGenerator = (typeof trafficGeneratorOptions)[number]
+
+export const lotteryCompetitionV2Options = [
+    'lotteryCompetitionV2.none',
+    'lotteryCompetitionV2.oneToThree',
+    'lotteryCompetitionV2.fourOrMore',
+] as const
+export type LotteryCompetitionV2 = (typeof lotteryCompetitionV2Options)[number]
+
+export const physicalSecurityItems = [
+    'physicalSecurity.metalDoor',
+    'physicalSecurity.barredWindows',
+    'physicalSecurity.securedRoof',
+    'physicalSecurity.padlock',
+] as const
+export type PhysicalSecurityItem = (typeof physicalSecurityItems)[number]
+
+export const zoneStabilityOptions = [
+    'zoneStability.stable',
+    'zoneStability.generallyStable',
+    'zoneStability.sometimesUnstable',
+    'zoneStability.knownBanditry',
+] as const
+export type ZoneStability = (typeof zoneStabilityOptions)[number]
+
+export const buildingConditionOptions = [
+    'buildingCondition.good',
+    'buildingCondition.minorFixes',
+    'buildingCondition.poorCondition',
+] as const
+export type BuildingCondition = (typeof buildingConditionOptions)[number]
+
+export const physicalAccessOptions = [
+    'physicalAccess.flatDirect',
+    'physicalAccess.typicalBarriers',
+    'physicalAccess.difficult',
+    'physicalAccess.impassable',
+] as const
+export type PhysicalAccess = (typeof physicalAccessOptions)[number]
+
+export const visibilityOptions = [
+    'visibility.fullyVisible',
+    'visibility.partiallyVisible',
+    'visibility.setBack',
+    'visibility.notVisible',
+] as const
+export type Visibility = (typeof visibilityOptions)[number]
+
+// Score mapping per option (points)
+export const scoringMap: Record<string, number> = {
+    'footTraffic.constant': 3,
+    'footTraffic.moderate': 2,
+    'footTraffic.occasional': 1,
+    'footTraffic.rare': 0,
+    'trafficGenerator.rightNextTo': 3,
+    'trafficGenerator.closeBy': 2,
+    'trafficGenerator.notReliable': 1,
+    'trafficGenerator.nothing': 0,
+    'zoneStability.stable': 3,
+    'zoneStability.generallyStable': 2,
+    'zoneStability.sometimesUnstable': 1,
+    'zoneStability.knownBanditry': 0,
+    'buildingCondition.good': 3,
+    'buildingCondition.minorFixes': 2,
+    'buildingCondition.poorCondition': 0,
+    'physicalAccess.flatDirect': 3,
+    'physicalAccess.typicalBarriers': 2,
+    'physicalAccess.difficult': 1,
+    'physicalAccess.impassable': 0,
+    'visibility.fullyVisible': 3,
+    'visibility.partiallyVisible': 2,
+    'visibility.setBack': 1,
+    'visibility.notVisible': 0,
+}
+
+// Physical security score: based on count of selected items
+export const getPhysicalSecurityScore = (items: PhysicalSecurityItem[]): number => {
+    const count = items.length
+    if (count >= 3) return 3
+    return count // 2→2, 1→1, 0→0
+}
+
+export interface V2Scoring {
+    footTraffic?: FootTraffic
+    trafficGenerator?: TrafficGenerator
+    lotteryCompetitionV2?: LotteryCompetitionV2
+    physicalSecurity?: PhysicalSecurityItem[]
+    zoneStability?: ZoneStability
+    buildingCondition?: BuildingCondition
+    physicalAccess?: PhysicalAccess
+    visibility?: Visibility
+    scoutTotalScore?: number
+}
+
+export interface SupervisorReview {
+    supervisorId?: string
+    supervisorScore?: number
+    decision?: 'proceed' | 'reject' | 'review'
+    notes?: string
+    reviewedAt?: Date
+}
+
 export interface Bank {
+    version?: BankFormVersion
     id?: string
     bankName: string
     city: string
@@ -360,6 +484,7 @@ export interface Bank {
         status?: FinalDecisionStatus
         reason_why?: string
     }
+    // ── V1 fields ──
     rentDetails?: {
         paymentMethod?: PaymentMethod[]
         paymentStructure?: PaymentStructureType
@@ -369,19 +494,19 @@ export interface Bank {
         locationArea?: LocationArea
     }
     demoDetails?: {
-        internetService?: InternetProvider[] //done
+        internetService?: InternetProvider[]
         previousUse?: PreviousUse[]
         nonRenewalReason?: NonRenewalReason
-        lotteryCompetition?: LotteryCompetition // done
-        bankEntrance?: BankEntrance[] // done
+        lotteryCompetition?: LotteryCompetition
+        bankEntrance?: BankEntrance[]
         clientVisibility?: ClientVisibility[]
-        populationInArea?: PopulationInArea // d
-        expectedRevenue?: ExpectedRevenue // d
+        populationInArea?: PopulationInArea
+        expectedRevenue?: ExpectedRevenue
         buildingStability?: BuildingStability
         toilet?: boolean
         water?: boolean
         electricity?: boolean
-        airConditioning?: boolean // d
+        airConditioning?: boolean
     }
     securityDetails?: {
         areaStability?: AreaStability
@@ -395,7 +520,18 @@ export interface Bank {
         majorRenovation?: MajorRenovation[]
         minorRenovation?: MinorRenovations[]
     }
+    // ── V2 fields ──
+    ownerPhone?: string
+    v2PaymentMethod?: PaymentMethod[]
+    v2PaymentStructure?: PaymentStructureType
+    v2LocationType?: LocationType
+    v2InternetService?: InternetProvider[]
+    v2VerifyOwner?: VerifyOwner[]
+    scoring?: V2Scoring
+    supervisorReview?: SupervisorReview
 }
+
+
 export const add7DaysToExpirationDate = (expDate?: Date | Timestamp): Date => {
     const baseDate = !expDate
         ? new Date()
@@ -406,7 +542,6 @@ export const add7DaysToExpirationDate = (expDate?: Date | Timestamp): Date => {
     if (Number.isNaN(baseDate.getTime())) {
         throw new Error('Invalid expiration date')
     }
-
     baseDate.setDate(baseDate.getDate() + 7)
     return baseDate
 }
