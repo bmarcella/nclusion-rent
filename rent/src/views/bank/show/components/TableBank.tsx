@@ -917,7 +917,7 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                                 </TabContent>
 
                                 <TabContent value="tab4">
-                                    {cbank?.id && location && (
+                                    {cbank?.id  && (
                                         <ChangeLocation
                                             location={location}
                                             bankId={cbank.id}
