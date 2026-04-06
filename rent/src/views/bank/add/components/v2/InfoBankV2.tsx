@@ -67,6 +67,7 @@ interface FormProps {
     onError: (data: any) => void
     defaultValues?: Partial<Bank>
     userId?: string
+    isEdit?: boolean
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -77,7 +78,13 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     )
 }
 
-function InfoBankV2({ nextStep, onError, defaultValues, userId }: FormProps) {
+function InfoBankV2({
+    nextStep,
+    onError,
+    defaultValues,
+    userId,
+    isEdit = false,
+}: FormProps) {
     const [data, setData] = useState<Proprio[]>([])
     const [landlordsOptions, setLandlordsOptions] = useState<any[]>([])
     const [refsOptions, setRefsOptions] = useState<any[]>([])
@@ -140,6 +147,17 @@ function InfoBankV2({ nextStep, onError, defaultValues, userId }: FormProps) {
         if (landlordsOptions.length === 0) {
             fetchLandlords()
         }
+        if (isEdit && defaultValues?.id_region != null) {
+            const region = Regions.find(
+                (option) =>
+                    Number(option.value) === Number(defaultValues?.id_region),
+            )
+            if (region) {
+                setTypeOptions(
+                    convertStringToSelectOptions(region.cities || []),
+                )
+            }
+        }
     }, [])
 
     useEffect(() => {
@@ -176,7 +194,10 @@ function InfoBankV2({ nextStep, onError, defaultValues, userId }: FormProps) {
             rentCost: Number(defaultValues?.rentCost) || undefined,
             addresse: defaultValues?.addresse,
             id_region: Number(defaultValues?.id_region) || undefined,
-            landlord: defaultValues?.landlord,
+            landlord: isEdit
+                ? (defaultValues?.landlord as any)?.id ||
+                  (defaultValues?.landlord as any)
+                : defaultValues?.landlord,
             reference: defaultValues?.reference,
             ownerPhone: defaultValues?.ownerPhone || '',
             v2PaymentMethod: defaultValues?.v2PaymentMethod || [],
@@ -224,7 +245,11 @@ function InfoBankV2({ nextStep, onError, defaultValues, userId }: FormProps) {
 
     const onSubmitInfo = async (data: FormValues) => {
         setSubmitting(true)
-        addNewBank(data)
+        if (isEdit) {
+            nextStep(1, data)
+        } else {
+            addNewBank(data)
+        }
         setTimeout(() => setSubmitting(false), 1000)
     }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Alert } from '@/components/ui/Alert'
 import Button from '@/components/ui/Button'
 import { getBankDoc } from '@/services/Landlord'

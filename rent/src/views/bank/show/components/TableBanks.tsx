@@ -54,6 +54,7 @@ import { useNavigate } from 'react-router-dom'
 import ImageLandlord from '../../add/components/ImageLandlord'
 import { useTranslation } from 'react-i18next'
 import BankStepBadge from './BankStep'
+import BankVersionBadge from './BankVersionBadge'
 import UserName from './UserName'
 import { getRegionIds } from '@/views/Entity/Regions'
 import classNames from 'classnames'
@@ -137,7 +138,7 @@ export function TableBanks({ step, isAgent = false, all = false, id }: Props) {
             {
                 header: 'Nom Bank',
                 cell: ({ row }) => (
-                    <div>
+                    <div className="min-w-[160px]">
                         <Tooltip
                             title={
                                 <div>
@@ -165,9 +166,12 @@ export function TableBanks({ step, isAgent = false, all = false, id }: Props) {
                                 </div>
                             }
                         >
-                            <span className="cursor-pointer">
-                                {row.original.bankName}
-                            </span>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <span className="cursor-pointer font-medium">
+                                    {row.original.bankName}
+                                </span>
+                                <BankVersionBadge bank={row.original} />
+                            </div>
                         </Tooltip>
                     </div>
                 ),
@@ -772,8 +776,9 @@ export function TableBanks({ step, isAgent = false, all = false, id }: Props) {
             >
                 <div className="flex flex-col h-full px-4 py-6 bg-white dark:bg-gray-900 overflow-hidden">
                     <div className="flex flex-col gap-4">
-                        <h5 className="text-lg font-semibold mb-4">
+                        <h5 className="text-lg font-semibold mb-4 flex items-center gap-2 flex-wrap">
                             {cbank?.bankName || ''}
+                            {cbank && <BankVersionBadge bank={cbank} />}
                         </h5>
                     </div>
 
