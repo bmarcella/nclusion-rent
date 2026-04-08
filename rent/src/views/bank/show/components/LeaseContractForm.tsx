@@ -1,6 +1,5 @@
 import { Bank, Proprio } from '@/views/Entity'
 import React, { useEffect, useState } from 'react'
-import UserName from './UserName'
 import { getLandlordById } from '@/services/firebase/LandlordService'
 import { getRegionsById, RegionType } from '@/views/Entity/Regions'
 import n2words from 'n2words'
@@ -15,7 +14,8 @@ const LeaseContractForm = ({ bank }: Props) => {
     const [landlord, setLL] = useState<Proprio | null>(null)
     const [lreg, setLReg] = useState<RegionType | null>(null)
     const [breg, setBReg] = useState<RegionType | null>(null)
-    const { t } = useTranslation()
+    const { t } = useTranslation();
+
 
     useEffect(() => {
         const getLL = async () => {
@@ -44,8 +44,8 @@ const LeaseContractForm = ({ bank }: Props) => {
                             </span>{' '}
                             demeurant et domicilié à :
                             <span className="w-auto border-b border-gray-400 mr-2">
-                                {landlord.address}, {landlord.city},{' '}
-                                {lreg?.label}
+                                {landlord.address}, {landlord.city}, {' '}
+                                {lreg?.capital}
                             </span>
                             ,
                             <span className="w-auto border-b border-gray-400 mr-2">
@@ -94,17 +94,19 @@ const LeaseContractForm = ({ bank }: Props) => {
                     <h2 className="text-xl font-semibold mt-6 mb-2">
                         Article 1 - Objet
                     </h2>
-                    <p className="text-lg">
+
+                   <p className="text-lg">
                         Le Bailleur donne en bail un espace situé au :
                         <span className="inline-block w-auto border-b border-gray-400 ml-2 mr-2">
                             {bank.addresse}, {bank.city}, {breg?.label}
                         </span>
                         . Recouvert en{' '}
                         <span className="inline-block w-auto border-b border-gray-400 ml-2 mr-2">
-                            {bank.securityDetails?.roof
+                            { bank.securityDetails?.roof
                                 ? t('bank.' + bank.securityDetails?.roof)
-                                : 'Tôle ou béton'}
+                                : (bank.v2RoofType) ?  t('bank.' + bank?.v2RoofType) :  'Tôle ou béton' }
                         </span>
+
                         , d’une superficie :{' '}
                         <span className="inline-block w-auto border-b border-gray-400 ml-2">
                             {bank.superficie}
@@ -114,7 +116,7 @@ const LeaseContractForm = ({ bank }: Props) => {
                             {bank.nombre_chambre}
                         </span>{' '}
                         pièces/chambres.
-                    </p>
+                    </p> 
 
                     <p className="mt-2 text-lg">
                         Utilités : toilette (oui/non), accès à l’eau (oui/non),

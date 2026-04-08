@@ -157,6 +157,9 @@ function EditBank({ docRef, onChangeBank, id, userId }: Props) {
                         v2LocationType: data.v2LocationType,
                         v2InternetService: data.v2InternetService || [],
                         v2VerifyOwner: data.v2VerifyOwner || [],
+                        superficie: data.superficie,
+                        nombre_chambre: data.nombre_chambre,
+                        v2RoofType: data.v2RoofType,
                     }
                     nextLocal = { ...localBank, ...payload }
                     break

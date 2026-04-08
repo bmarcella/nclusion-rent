@@ -527,6 +527,7 @@ export interface Bank {
     v2LocationType?: LocationType
     v2InternetService?: InternetProvider[]
     v2VerifyOwner?: VerifyOwner[]
+    v2RoofType?: RoofType
     scoring?: V2Scoring
     supervisorReview?: SupervisorReview
 }

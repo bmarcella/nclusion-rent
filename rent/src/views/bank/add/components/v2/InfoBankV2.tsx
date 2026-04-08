@@ -25,6 +25,7 @@ import {
     locationTypes,
     internetProviders,
     verifyOwners,
+    roofTypes,
 } from '@/views/Entity'
 import { Regions } from '@/views/Entity/Regions'
 import AddProprioPopup from '@/views/proprio/add/AddProprioPopup'
@@ -58,6 +59,9 @@ const schema = z.object({
     v2LocationType: z.enum(locationTypes),
     v2InternetService: z.array(z.enum(internetProviders)),
     v2VerifyOwner: z.array(z.enum(verifyOwners)),
+    superficie: z.number().optional(),
+    nombre_chambre: z.number().optional(),
+    v2RoofType: z.enum(roofTypes).optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -205,6 +209,9 @@ function InfoBankV2({
             v2LocationType: defaultValues?.v2LocationType,
             v2InternetService: defaultValues?.v2InternetService || [],
             v2VerifyOwner: defaultValues?.v2VerifyOwner || [],
+            superficie: Number(defaultValues?.superficie) || undefined,
+            nombre_chambre: Number(defaultValues?.nombre_chambre) || undefined,
+            v2RoofType: defaultValues?.v2RoofType,
         },
     })
 
@@ -224,6 +231,9 @@ function InfoBankV2({
             bank.v2LocationType = data.v2LocationType
             bank.v2InternetService = data.v2InternetService
             bank.v2VerifyOwner = data.v2VerifyOwner
+            bank.superficie = data.superficie
+            bank.nombre_chambre = data.nombre_chambre
+            bank.v2RoofType = data.v2RoofType
             const docRef = await addDoc(BankDoc, bank)
             const snapshot = await getDoc(docRef)
             if (snapshot.exists()) {
@@ -467,6 +477,92 @@ function InfoBankV2({
                                             field.onChange(
                                                 Number(e.target.value),
                                             )
+                                        }
+                                    />
+                                )}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            label={t('bank.superficie')}
+                            invalid={!!errors.superficie}
+                            errorMessage={errors.superficie?.message}
+                        >
+                            <Controller
+                                name="superficie"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input
+                                        type="number"
+                                        placeholder="0"
+                                        suffix="m²"
+                                        {...field}
+                                        value={field.value ?? ''}
+                                        onChange={(e) =>
+                                            field.onChange(
+                                                e.target.value === ''
+                                                    ? undefined
+                                                    : Number(e.target.value),
+                                            )
+                                        }
+                                    />
+                                )}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            label={t('bank.nombre_chambre')}
+                            invalid={!!errors.nombre_chambre}
+                            errorMessage={errors.nombre_chambre?.message}
+                        >
+                            <Controller
+                                name="nombre_chambre"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input
+                                        type="number"
+                                        placeholder="0"
+                                        {...field}
+                                        value={field.value ?? ''}
+                                        onChange={(e) =>
+                                            field.onChange(
+                                                e.target.value === ''
+                                                    ? undefined
+                                                    : Number(e.target.value),
+                                            )
+                                        }
+                                    />
+                                )}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            label={t('bank.roof.label')}
+                            invalid={!!errors.v2RoofType}
+                            errorMessage={errors.v2RoofType?.message}
+                        >
+                            <Controller
+                                name="v2RoofType"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select
+                                        placeholder={t('common.select')}
+                                        options={roofTypes.map((r) => ({
+                                            value: r,
+                                            label: t(`bank.${r}`),
+                                        }))}
+                                        value={
+                                            field.value
+                                                ? {
+                                                      value: field.value,
+                                                      label: t(
+                                                          `bank.${field.value}`,
+                                                      ),
+                                                  }
+                                                : null
+                                        }
+                                        onChange={(option: any) =>
+                                            field.onChange(option?.value)
                                         }
                                     />
                                 )}
