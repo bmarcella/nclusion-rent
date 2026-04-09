@@ -8,15 +8,39 @@ import { Landlord } from '@/services/Landlord'
 import { Proprio } from '@/views/Entity'
 import { RegionType } from '@/views/Entity/Regions'
 import {
-    Query,
-    DocumentData,
-    CollectionReference,
     query,
     where,
     getDocs,
     orderBy,
 } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
+// Module-level cache so the agent list is fetched at most once per page
+// session, even if the filter component re-mounts.
+let agentCache: Proprio[] | null = null
+let agentInflight: Promise<Proprio[]> | null = null
+
+const fetchAllAgents = async (): Promise<Proprio[]> => {
+    if (agentCache) return agentCache
+    if (agentInflight) return agentInflight
+
+    agentInflight = (async () => {
+        const q = query(
+            Landlord,
+            orderBy('fullName'),
+            where('type_person', '==', 'agent_immobilier'),
+        )
+        const snapshot = await getDocs(q)
+        const landlords: Proprio[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        })) as Proprio[]
+        agentCache = landlords
+        agentInflight = null
+        return landlords
+    })()
+    return agentInflight
+}
 
 interface OptionType {
     label: string
@@ -59,12 +83,10 @@ function FilterBank({
     onChangeMap = (value: any) => {},
 }: Props) {
     const [regions, setRegions] = useState<OptionType[]>([])
-    const [agents, setAgents] = useState<OptionType[]>([])
+    const [allAgents, setAllAgents] = useState<Proprio[]>([])
 
-    //
     const [selectedRegions, setSelectedRegions] = useState<number>()
     const [selectedAgents, setSelectedAgents] = useState<string>()
-    //
     const [start, setStart] = useState<Date>()
     const [end, setEnd] = useState<Date>()
 
@@ -75,60 +97,40 @@ function FilterBank({
             const regs = convertToSelectOptionsRegion(regions)
             regs.unshift({ label: 'All', value: 0 })
             setRegions(regs)
-            await fetchProprio()
+            if (onChangeAgent) {
+                const list = await fetchAllAgents()
+                setAllAgents(list)
+            }
         }
         fetchData()
     }, [authority, proprio, t])
 
     useEffect(() => {
-        if (!onChangeAgent) return
-        const fetchData = async () => {
-            await fetchProprio()
-        }
-        fetchData()
-    }, [selectedRegions])
-
-    useEffect(() => {
         onChangeDate?.(start!, end)
     }, [start, end])
 
+    // Was previously triggering on `setSelectedAgents` (a stable setter),
+    // so the parent never received agent updates. Track the value instead.
     useEffect(() => {
-        console.log('selectedAgents:', selectedAgents)
         if (selectedAgents && onChangeAgent) onChangeAgent(selectedAgents)
-    }, [setSelectedAgents])
+    }, [selectedAgents])
 
-    const fetchProprio = async () => {
-        try {
-            let q: Query<DocumentData>
-            let baseQuery: Query<DocumentData> =
-                Landlord as CollectionReference<DocumentData>
-            q = query(
-                baseQuery,
-                orderBy('fullName'),
-                where('type_person', '==', 'agent_immobilier'),
-            )
-
-            if (selectedRegions != 0 && selectedRegions != undefined) {
-                q = query(
-                    baseQuery,
-                    where('regions', 'array-contains', selectedRegions),
-                    orderBy('fullName'),
-                    where('type_person', '==', 'agent_immobilier'),
-                )
-                console.log('regions:', selectedRegions)
-            }
-            const snapshot = await getDocs(q)
-            const landlords: Proprio[] = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            })) as Proprio[]
-            const a = convertToSelectOptionsProprio(landlords)
-            a.unshift({ label: 'All', value: undefined })
-            setAgents(a)
-        } catch (error) {
-            console.error('Error fetching page:', error)
-        }
-    }
+    // Filter the cached agent list client-side instead of re-querying
+    // Firestore on every region change.
+    const agents = useMemo<OptionType[]>(() => {
+        if (!onChangeAgent) return []
+        const filtered =
+            !selectedRegions || selectedRegions === 0
+                ? allAgents
+                : allAgents.filter((a: any) =>
+                      Array.isArray(a.regions)
+                          ? a.regions.includes(selectedRegions)
+                          : false,
+                  )
+        const opts = convertToSelectOptionsProprio(filtered)
+        opts.unshift({ label: 'All', value: undefined as any })
+        return opts
+    }, [allAgents, selectedRegions, onChangeAgent])
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded">

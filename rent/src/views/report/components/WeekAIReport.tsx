@@ -1,9 +1,17 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLandlordMap } from '@/utils/hooks/useLandlordMap'
 import Table from '@/components/ui/Table'
 import THead from '@/components/ui/Table/THead'
 import TBody from '@/components/ui/Table/TBody'
+import Card from '@/components/ui/Card'
+import {
+    formatNumber,
+    ReportEmpty,
+    ReportSkeleton,
+    reportTableClasses as cls,
+} from './reportUi'
 import {
     fetchReportPerCreatorPerWeek,
     getLast4Weeks,
@@ -50,6 +58,7 @@ function WeekAIReport() {
     const [totalData, setTotalData] = useState<any[]>([])
     const [div, setDiv] = useState<number>(0)
     const [prevTotal, setPrevTotal] = useState<number>(0)
+    const landlordMap = useLandlordMap()
 
     const fetchTotalCount = async (
         regions: number,
@@ -136,6 +145,7 @@ function WeekAIReport() {
     }
 
     useEffect(() => {
+        setLoading(true)
         setPrevTotal(0)
         if (!type_rep) simpleReport()
         else advencedReport()
@@ -187,300 +197,387 @@ function WeekAIReport() {
         })
     }
 
-    if (loading) return <p>Chargement du rapport...</p>
-
-    // Calculate total per column (step)
-    // const columnTotals = steps.map((_, index) =>
-    //   data.reduce((sum, item) => sum + (item.values[index].value || 0), 0)
-    // );
-
-    // Calculate total per column (step)
-    const columnTotals = steps.map((_, index) =>
-        datab.reduce((sum, item) => sum + (item.values[index] || 0), 0),
+    // Memoize totals so they only recompute when the underlying data changes.
+    const columnTotals = useMemo(
+        () =>
+            steps.map((_, index) =>
+                datab.reduce(
+                    (sum, item) => sum + (item.values[index] || 0),
+                    0,
+                ),
+            ),
+        [steps, datab],
     )
 
-    // Calculate grand total (sum of all values)
-    const grandTotal = columnTotals.reduce((acc, val) => acc + val, 0)
-    const grandTotalAgent = datab.reduce(
-        (acc, item) => acc + item.total_agents,
-        0,
+    const grandTotal = useMemo(
+        () => columnTotals.reduce((acc, val) => acc + val, 0),
+        [columnTotals],
     )
 
-    const onChangeRegion = async (id: number) => {
-        setRegions(id)
-    }
+    const grandTotalAgent = useMemo(
+        () => datab.reduce((acc, item) => acc + item.total_agents, 0),
+        [datab],
+    )
 
-    const onChangeType = async (type_rep: boolean) => {
-        setTypeRep(type_rep)
-    }
-
-    const onChangeAgent = async (id: string) => {
-        setAgents(id)
-    }
-
-    const onChangeDate = async (start: Date) => {
-        setStart(start)
-    }
-
-    // Calculate grand total (sum of all values)
-    // const grandTotal = columnTotals.reduce((acc, val) => acc + val, 0);
     const totalAgents = totalData.reduce((acc, val) => acc + val.new, 0)
+
+    const onChangeRegion = (id: number) => setRegions(id)
+    const onChangeType = (v: boolean) => setTypeRep(v)
+    const onChangeAgent = (id: string) => setAgents(id)
+    const onChangeDate = (s: Date) => setStart(s)
+
+    const showSimple = !type_rep
+    const showAdvanced = type_rep && datab.length > 0
+    const isEmpty =
+        !loading &&
+        ((showSimple && data.length === 0) ||
+            (type_rep && datab.length === 0))
+
     return (
-        <div className="overflow-x-auto p-1 bg-white rounded-lg shadow-md">
-            <FilterBankWeek
-                authority={authority || []}
-                proprio={proprio}
-                t={t}
-                message={t('report.weekAIReport.message')}
-                isMap={true}
-                onChangeRegion={onChangeRegion}
-                onChangeAgent={onChangeAgent}
-                onChangeDate={onChangeDate}
-                onChangeMap={onChangeType}
-            ></FilterBankWeek>
+        <Card bordered className="overflow-hidden">
+            <div className="border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+                <h5 className="font-semibold text-gray-900 dark:text-gray-100">
+                    {type_rep
+                        ? 'Rapport hebdomadaire par statut'
+                        : 'Rapport par agent immobilier par semaine'}
+                </h5>
+                <p className="text-xs text-gray-500 mt-0.5">
+                    {showSimple
+                        ? `${data.length} agent${data.length !== 1 ? 's' : ''}`
+                        : `${datab.length} semaine${datab.length !== 1 ? 's' : ''}`}
+                </p>
+            </div>
 
-            {!type_rep && (
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                <FilterBankWeek
+                    authority={authority || []}
+                    proprio={proprio}
+                    t={t}
+                    message={t('report.weekAIReport.message')}
+                    isMap={true}
+                    onChangeRegion={onChangeRegion}
+                    onChangeAgent={onChangeAgent}
+                    onChangeDate={onChangeDate}
+                    onChangeMap={onChangeType}
+                />
+            </div>
+
+            {loading ? (
+                <ReportSkeleton rows={6} cols={Math.max(steps.length + 2, 6)} />
+            ) : isEmpty ? (
+                <ReportEmpty />
+            ) : (
                 <>
-                    <Table>
-                        <caption className="text-lg font-semibold text-gray-700 p-4">
-                            Rapport par agent immobilier par semaine
-                        </caption>
-                        <THead>
-                            <tr>
-                                <th>Agents</th>
-                                <th>Total</th>
-                                {steps.map((step, index) => (
-                                    <th
-                                        key={index}
-                                        className="text-center capitalize"
-                                    >
-                                        {step.name}
-                                        <StepDateRange
-                                            start={step.start}
-                                            end={step.end}
-                                        >
-                                            {' '}
-                                        </StepDateRange>
-                                    </th>
-                                ))}
-                            </tr>
-                        </THead>
-                        <TBody>
-                            {data.map(({ name, values }) => {
-                                return (
-                                    <tr key={name} className="border-t">
-                                        <td className="p-2">
-                                            <UserName userId={name} />
-                                        </td>
-
-                                        <td className="text-center font-semibold">
-                                            {values.reduce(
-                                                (total, arr) =>
-                                                    total +
-                                                    arr.reduce(
-                                                        (sum, item) =>
-                                                            sum + item.value,
-                                                        0,
-                                                    ),
-                                                0,
-                                            )}
-                                        </td>
-
-                                        {values.map(
-                                            (value: any[], index: number) => {
-                                                const rowTotal = value.reduce(
-                                                    (sum, item) =>
-                                                        sum + item.value,
-                                                    0,
-                                                )
-                                                const val2 =
-                                                    value[2]?.value ?? 0
-                                                const val1 =
-                                                    value[1]?.value ?? 0
-                                                let colorClass = ''
-                                                if (val2 <= 2)
-                                                    colorClass = 'text-red-500'
-                                                else if (val2 === 3)
-                                                    colorClass =
-                                                        'text-orange-500'
-                                                else if (val2 >= 4)
-                                                    colorClass =
-                                                        'text-green-500'
-
-                                                return (
-                                                    <td
-                                                        key={`${name}-${index}`}
-                                                        className={`text-center ${colorClass}`}
+                    {showSimple && (
+                        <div className={`${cls.wrapper} m-4`}>
+                            <Table className={cls.table}>
+                                <THead className={cls.thead}>
+                                    <tr>
+                                        <th className={cls.thLeft}>Agent</th>
+                                        <th className={cls.th}>Total</th>
+                                        {steps.map((step, index) => (
+                                            <th
+                                                key={index}
+                                                className={`${cls.th} capitalize`}
+                                            >
+                                                {step.name}
+                                                <div className="text-[10px] font-normal opacity-70 mt-0.5">
+                                                    <StepDateRange
+                                                        start={step.start}
+                                                        end={step.end}
                                                     >
-                                                        {`${val2} / ${rowTotal - val1}`}{' '}
-                                                        <br /> ({rowTotal})
-                                                    </td>
-                                                )
-                                            },
-                                        )}
+                                                        {' '}
+                                                    </StepDateRange>
+                                                </div>
+                                            </th>
+                                        ))}
                                     </tr>
-                                )
-                            })}
-
-                            {/* Total Row */}
-                        </TBody>
-                    </Table>
-                </>
-            )}
-
-            {type_rep && datab.length > 0 && (
-                <>
-                    <Table>
-                        <caption className="text-lg font-semibold text-gray-700 p-4">
-                            Rapport par agent immobilier par semaine & status
-                        </caption>
-                        <THead>
-                            <tr>
-                                <th>Week</th>
-                                {<th>Nouveau Agent</th>}
-                                {<th>Total Agents</th>}
-                                <th className="text-center p-2">Total</th>
-                                {steps.map((step, idx) => (
-                                    <th
-                                        key={
-                                            typeof step === 'string'
-                                                ? step
-                                                : (step.name ?? idx)
-                                        }
-                                        className="text-center capitalize"
-                                    >
-                                        {typeof step === 'string'
-                                            ? step
-                                            : step.name}
-                                    </th>
-                                ))}
-                                {type_rep && (
-                                    <th className="text-center p-2">
-                                        Progression
-                                    </th>
-                                )}
-                            </tr>
-                        </THead>
-                        <TBody>
-                            <tr className="font-semibold bg-gray-100 border-t">
-                                <td className="p-2 text-left">Total</td>
-                                {totalData && totalData.length > 0 && (
-                                    <td className="text-center p-2">
-                                        {' '}
-                                        {totalAgents}{' '}
-                                    </td>
-                                )}
-                                {totalData && totalData.length > 0 && (
-                                    <td className="text-center p-2">
-                                        {(grandTotalAgent / div).toFixed(2)} /{' '}
-                                        {totalAgents} (
-                                        {(
-                                            (grandTotalAgent /
-                                                div /
-                                                totalAgents) *
-                                            100
-                                        ).toFixed(2)}
-                                        %){' '}
-                                    </td>
-                                )}
-                                <td className="text-center p-2">
-                                    {grandTotal}
-                                </td>
-                                {columnTotals.map((val, idx) => (
-                                    <td
-                                        key={`col-total-${idx}`}
-                                        className="text-center p-2"
-                                    >
-                                        {val}
-                                    </td>
-                                ))}
-                                {type_rep && (
-                                    <td className="text-center p-2">
-                                        {' '}
-                                        {(
-                                            (columnTotals[1] / grandTotal) *
-                                            100
-                                        ).toFixed(2)}
-                                        %
-                                    </td>
-                                )}
-                            </tr>
-
-                            {datab.map(
-                                ({ week, values, total_agents, index }, i) => {
-                                    const rowTotal = values.reduce(
-                                        (acc, val) => acc + val,
-                                        0,
-                                    )
-                                    const perc = (values[2] / rowTotal) * 100
-                                    let colorClass = ''
-                                    if (perc <= 50) colorClass = 'text-red-500'
-                                    else if (perc < 80)
-                                        colorClass = 'text-orange-500'
-                                    else if (perc >= 80)
-                                        colorClass = 'text-green-500'
-
-                                    return (
-                                        <tr key={index} className="border-t">
-                                            <td className="p-2 text-left font-semibold">
-                                                <StepDateRange
-                                                    key={index}
-                                                    start={week.start}
-                                                    end={week.end}
-                                                >
-                                                    {' '}
-                                                </StepDateRange>
-                                            </td>
-                                            {totalData &&
-                                                totalData.length > 0 && (
-                                                    <td className="text-center font-semibold">
-                                                        {totalData[i].new || 0}
-                                                    </td>
-                                                )}
-                                            {totalData &&
-                                                totalData.length > 0 && (
-                                                    <td className="text-center font-semibold">
-                                                        {total_agents} /{' '}
-                                                        {totalData[i].total ||
-                                                            0}{' '}
-                                                        ({' '}
-                                                        {(
-                                                            (total_agents /
-                                                                (totalData[i]
-                                                                    .total ||
-                                                                    0)) *
-                                                            100
-                                                        ).toFixed(2)}{' '}
-                                                        %)
-                                                    </td>
-                                                )}
-                                            <td className="text-center font-semibold">
-                                                {rowTotal}
-                                            </td>
-                                            {values.map((value, i) => (
-                                                <td
-                                                    key={`${i}`}
-                                                    className="text-center"
-                                                >
-                                                    {value || 0}
+                                </THead>
+                                <TBody>
+                                    {data.map(({ name, values }) => {
+                                        const total = values.reduce(
+                                            (t: number, arr: any[]) =>
+                                                t +
+                                                arr.reduce(
+                                                    (s: number, item: any) =>
+                                                        s + item.value,
+                                                    0,
+                                                ),
+                                            0,
+                                        )
+                                        return (
+                                            <tr
+                                                key={name}
+                                                className={cls.row}
+                                            >
+                                                <td className={cls.tdLeft}>
+                                                    <UserName
+                                                        userId={name}
+                                                        landlord={landlordMap?.get(
+                                                            name,
+                                                        )}
+                                                    />
                                                 </td>
-                                            ))}
-                                            {type_rep && (
-                                                <th className={colorClass}>
-                                                    {perc.toFixed(2)}%
-                                                </th>
-                                            )}
-                                        </tr>
-                                    )
-                                },
-                            )}
+                                                <td
+                                                    className={`${cls.td} font-semibold`}
+                                                >
+                                                    {formatNumber(total)}
+                                                </td>
+                                                {values.map(
+                                                    (
+                                                        value: any[],
+                                                        index: number,
+                                                    ) => {
+                                                        const rowTotal =
+                                                            value.reduce(
+                                                                (
+                                                                    sum: number,
+                                                                    item: any,
+                                                                ) =>
+                                                                    sum +
+                                                                    item.value,
+                                                                0,
+                                                            )
+                                                        const val2 =
+                                                            value[2]?.value ?? 0
+                                                        const val1 =
+                                                            value[1]?.value ?? 0
+                                                        let colorClass = ''
+                                                        if (val2 <= 2)
+                                                            colorClass =
+                                                                'text-red-500'
+                                                        else if (val2 === 3)
+                                                            colorClass =
+                                                                'text-orange-500'
+                                                        else if (val2 >= 4)
+                                                            colorClass =
+                                                                'text-green-500'
 
-                            {/* Total Row */}
-                        </TBody>
-                    </Table>
+                                                        return (
+                                                            <td
+                                                                key={`${name}-${index}`}
+                                                                className={`${cls.td} ${colorClass}`}
+                                                            >
+                                                                <span className="font-semibold">{`${val2} / ${rowTotal - val1}`}</span>
+                                                                <div className="text-[10px] opacity-70">
+                                                                    ({rowTotal})
+                                                                </div>
+                                                            </td>
+                                                        )
+                                                    },
+                                                )}
+                                            </tr>
+                                        )
+                                    })}
+                                </TBody>
+                            </Table>
+                        </div>
+                    )}
+
+                    {showAdvanced && (
+                        <div className={`${cls.wrapper} m-4`}>
+                            <Table className={cls.table}>
+                                <THead className={cls.thead}>
+                                    <tr>
+                                        <th className={cls.thLeft}>Semaine</th>
+                                        <th className={cls.th}>
+                                            Nouveaux agents
+                                        </th>
+                                        <th className={cls.th}>Total agents</th>
+                                        <th className={cls.th}>Total</th>
+                                        {steps.map((step, idx) => (
+                                            <th
+                                                key={
+                                                    typeof step === 'string'
+                                                        ? step
+                                                        : (step.name ?? idx)
+                                                }
+                                                className={`${cls.th} capitalize`}
+                                            >
+                                                {typeof step === 'string'
+                                                    ? step
+                                                    : step.name}
+                                            </th>
+                                        ))}
+                                        <th className={cls.th}>Progression</th>
+                                    </tr>
+                                </THead>
+                                <TBody>
+                                    <tr className={cls.totalRow}>
+                                        <td className={cls.tdLeft}>Total</td>
+                                        {totalData && totalData.length > 0 ? (
+                                            <td className={cls.td}>
+                                                {formatNumber(totalAgents)}
+                                            </td>
+                                        ) : (
+                                            <td className={cls.td}>—</td>
+                                        )}
+                                        {totalData && totalData.length > 0 ? (
+                                            <td className={cls.td}>
+                                                {(
+                                                    grandTotalAgent / div
+                                                ).toFixed(2)}{' '}
+                                                / {formatNumber(totalAgents)} (
+                                                {totalAgents
+                                                    ? (
+                                                          (grandTotalAgent /
+                                                              div /
+                                                              totalAgents) *
+                                                          100
+                                                      ).toFixed(2)
+                                                    : '0.00'}
+                                                %)
+                                            </td>
+                                        ) : (
+                                            <td className={cls.td}>—</td>
+                                        )}
+                                        <td className={cls.td}>
+                                            {formatNumber(grandTotal)}
+                                        </td>
+                                        {columnTotals.map((val, idx) => (
+                                            <td
+                                                key={`col-total-${idx}`}
+                                                className={cls.td}
+                                            >
+                                                {formatNumber(val)}
+                                            </td>
+                                        ))}
+                                        <td className={cls.td}>
+                                            {grandTotal
+                                                ? (
+                                                      (columnTotals[1] /
+                                                          grandTotal) *
+                                                      100
+                                                  ).toFixed(2)
+                                                : '0.00'}
+                                            %
+                                        </td>
+                                    </tr>
+
+                                    {datab.map(
+                                        (
+                                            { week, values, total_agents },
+                                            i,
+                                        ) => {
+                                            const rowTotal = values.reduce(
+                                                (acc: number, v: number) =>
+                                                    acc + v,
+                                                0,
+                                            )
+                                            const perc = rowTotal
+                                                ? (values[2] / rowTotal) * 100
+                                                : 0
+                                            let colorClass = ''
+                                            if (perc <= 50)
+                                                colorClass = 'text-red-500'
+                                            else if (perc < 80)
+                                                colorClass = 'text-orange-500'
+                                            else colorClass = 'text-green-500'
+
+                                            return (
+                                                <tr
+                                                    key={i}
+                                                    className={cls.row}
+                                                >
+                                                    <td
+                                                        className={`${cls.tdLeft} font-semibold`}
+                                                    >
+                                                        <StepDateRange
+                                                            start={week.start}
+                                                            end={week.end}
+                                                        >
+                                                            {' '}
+                                                        </StepDateRange>
+                                                    </td>
+                                                    <td
+                                                        className={`${cls.td} font-semibold`}
+                                                    >
+                                                        {formatNumber(
+                                                            totalData &&
+                                                                totalData[i]
+                                                                ? totalData[i]
+                                                                      .new || 0
+                                                                : 0,
+                                                        )}
+                                                    </td>
+                                                    <td
+                                                        className={`${cls.td} font-semibold`}
+                                                    >
+                                                        {totalData &&
+                                                        totalData[i] ? (
+                                                            <>
+                                                                {formatNumber(
+                                                                    total_agents,
+                                                                )}{' '}
+                                                                /{' '}
+                                                                {formatNumber(
+                                                                    totalData[i]
+                                                                        .total ||
+                                                                        0,
+                                                                )}{' '}
+                                                                <span className="text-[10px] opacity-70">
+                                                                    (
+                                                                    {totalData[
+                                                                        i
+                                                                    ].total
+                                                                        ? (
+                                                                              (total_agents /
+                                                                                  totalData[
+                                                                                      i
+                                                                                  ]
+                                                                                      .total) *
+                                                                              100
+                                                                          ).toFixed(
+                                                                              2,
+                                                                          )
+                                                                        : '0.00'}
+                                                                    %)
+                                                                </span>
+                                                            </>
+                                                        ) : (
+                                                            formatNumber(
+                                                                total_agents,
+                                                            )
+                                                        )}
+                                                    </td>
+                                                    <td
+                                                        className={`${cls.td} font-semibold`}
+                                                    >
+                                                        {formatNumber(rowTotal)}
+                                                    </td>
+                                                    {values.map(
+                                                        (
+                                                            value: number,
+                                                            j: number,
+                                                        ) => (
+                                                            <td
+                                                                key={j}
+                                                                className={
+                                                                    cls.td
+                                                                }
+                                                            >
+                                                                {formatNumber(
+                                                                    value,
+                                                                )}
+                                                            </td>
+                                                        ),
+                                                    )}
+                                                    <td
+                                                        className={`${cls.td} font-semibold ${colorClass}`}
+                                                    >
+                                                        {perc.toFixed(2)}%
+                                                    </td>
+                                                </tr>
+                                            )
+                                        },
+                                    )}
+                                </TBody>
+                            </Table>
+                        </div>
+                    )}
                 </>
             )}
-        </div>
+        </Card>
     )
 }
 

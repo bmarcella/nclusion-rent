@@ -8,14 +8,19 @@ interface ImageGalleryProps {
     userId: string
     keyName?: string
     sub_str?: number
+    // Optional pre-resolved landlord. When provided, no Firestore lookup
+    // is performed — used by report components that pre-fetch in bulk to
+    // avoid the N+1 query pattern.
+    landlord?: any
 }
 
 const UserName: React.FC<ImageGalleryProps> = ({
     userId,
     keyName = 'id_user',
     sub_str = -1,
+    landlord,
 }) => {
-    const [lord, setLord] = useState() as any
+    const [lord, setLord] = useState<any>(landlord)
     const { t } = useTranslation()
     const getLandlordByUserId = async (userId: string) => {
         const q = query(LandlordDoc, where(keyName, '==', userId))
@@ -28,10 +33,15 @@ const UserName: React.FC<ImageGalleryProps> = ({
         }
     }
     useEffect(() => {
+        // Pre-resolved landlord wins — skip the per-row fetch entirely.
+        if (landlord) {
+            setLord(landlord)
+            return
+        }
         getLandlordByUserId(userId).then((lord: any) => {
             setLord(lord)
         })
-    }, [userId])
+    }, [userId, landlord])
     return (
         <>
             {lord && sub_str == -1 && (

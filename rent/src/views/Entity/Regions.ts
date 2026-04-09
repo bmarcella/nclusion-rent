@@ -4,9 +4,9 @@ import { BankDoc } from '@/services/Landlord'
 import {
     DocumentData,
     getDocs,
-    orderBy,
     Query,
     query,
+    Timestamp,
     where,
 } from 'firebase/firestore'
 
@@ -424,102 +424,163 @@ interface ReportItem {
     values?: number[]
 }
 
+// Coerce a Firestore Timestamp / Date / string into a JS Date.
+const toJsDate = (value: any): Date | null => {
+    if (!value) return null
+    if (value instanceof Date) return value
+    if (typeof value?.toDate === 'function') return value.toDate()
+    const d = new Date(value)
+    return isNaN(d.getTime()) ? null : d
+}
+
+// Single-pass aggregation: fetch all matching banks once, then bucket by
+// region × step. Replaces the original O(regions × steps) query loop.
 export const fetchReportPerReport = async (
-    ReportSteps: [],
+    ReportSteps: any[],
     hq: Query<DocumentData>,
 ) => {
-    const report: ReportItem[] = (
-        await Promise.all(
-            Regions.map(async (region) => {
-                const steps: string[] = []
-                const values: number[] = []
-                const listAgent: string[] = []
-                await Promise.all(
-                    ReportSteps.map(async (step: any) => {
-                        const q = query(
-                            hq,
-                            orderBy('createdAt', 'desc'),
-                            where('step', 'in', step.key),
-                            where('id_region', '==', region.id),
-                        )
+    const snapshot = await getDocs(hq)
+    const labels = ReportSteps.map((s: any) => s.label)
 
-                        const snapshot = await getDocs(q)
-                        snapshot.docs.map(async (docSnap) => {
-                            const data = docSnap.data() as Bank
-                            if (!listAgent.includes(data.createdBy))
-                                return listAgent.push(data.createdBy)
-                            return null
-                        })
-                        steps.push(step.label)
-                        values.push(snapshot.size)
-                    }),
-                )
+    // region id -> { counts per step, agents who created matching banks }
+    const byRegion = new Map<
+        number,
+        { counts: number[]; agents: Set<string> }
+    >()
 
-                // Skip region if all values are 0
-                if (values.every((v) => v === 0)) return null
+    snapshot.forEach((docSnap) => {
+        const data = docSnap.data() as Bank
+        const regionId = Number(data.id_region)
+        if (!regionId) return
 
-                return {
-                    name: region.label,
-                    steps,
-                    values,
-                    agents: listAgent,
-                    total_agents: listAgent.length,
-                }
-            }),
-        )
-    ).filter((item): item is ReportItem => item !== null) // Remove nulls and narrow the type
+        let bucket = byRegion.get(regionId)
+        if (!bucket) {
+            bucket = {
+                counts: new Array(ReportSteps.length).fill(0),
+                agents: new Set<string>(),
+            }
+            byRegion.set(regionId, bucket)
+        }
+
+        let matched = false
+        ReportSteps.forEach((step: any, idx: number) => {
+            if (step.key.includes(data.step)) {
+                bucket!.counts[idx]++
+                matched = true
+            }
+        })
+        if (matched && data.createdBy) {
+            bucket.agents.add(data.createdBy)
+        }
+    })
+
+    const report: ReportItem[] = []
+    Regions.forEach((region) => {
+        const bucket = byRegion.get(region.id)
+        if (!bucket) return
+        if (bucket.counts.every((v) => v === 0)) return
+
+        report.push({
+            name: region.label,
+            steps: labels,
+            values: bucket.counts,
+            ...({
+                agents: Array.from(bucket.agents),
+                total_agents: bucket.agents.size,
+            } as any),
+        })
+    })
     return report
 }
+
+// Single-pass aggregation: fetch banks within the global week range once,
+// then bucket by week × step. Replaces the original O(weeks × steps) query
+// loop. Also preserves the original `step.sub` matching semantics where
+// sub-steps filter on `renovStep` instead of `step`.
 export const fetchReportPerReportWeek = async (
-    weeks: [],
-    ReportSteps: [],
+    weeks: any[],
+    ReportSteps: any[],
     q: Query<DocumentData>,
 ) => {
-    const report: ReportItem[] = (
-        await Promise.all(
-            weeks.map(async (week: any, index) => {
-                const steps: string[] = []
-                const values: number[] = []
-                const listAgent: string[] = []
-                await Promise.all(
-                    ReportSteps.map(async (step: any) => {
-                        const w = !step.sub
-                            ? where('step', 'in', step.key)
-                            : where('renovStep', 'in', step.subKey)
+    if (weeks.length === 0) return []
 
-                        const nq = query(
-                            q,
-                            orderBy('createdAt', 'desc'),
-                            where('createdAt', '>=', week.start),
-                            where('createdAt', '<=', week.end),
-                            w,
-                        )
+    const labels = ReportSteps.map((s: any) => s.label)
+    const weekRanges = weeks.map((w: any) => ({
+        start: toJsDate(w.start),
+        end: toJsDate(w.end),
+    }))
 
-                        const snapshot = await getDocs(nq)
-                        snapshot.docs.map(async (docSnap) => {
-                            const data = docSnap.data() as Bank
-                            if (!listAgent.includes(data.createdBy))
-                                return listAgent.push(data.createdBy)
-                            return null
-                        })
-                        steps.push(step.label)
-                        values.push(snapshot.size)
-                    }),
-                )
+    // Compute the union date range so we only pull banks once.
+    const minStart = weekRanges.reduce<Date | null>(
+        (min, w) => (w.start && (!min || w.start < min) ? w.start : min),
+        null,
+    )
+    const maxEnd = weekRanges.reduce<Date | null>(
+        (max, w) => (w.end && (!max || w.end > max) ? w.end : max),
+        null,
+    )
 
-                // Skip region if all values are 0
-                if (values.every((v) => v === 0)) return null
-
-                return {
-                    week: week,
-                    steps,
-                    values,
-                    agents: listAgent,
-                    total_agents: listAgent.length,
-                    index: index,
-                }
-            }),
+    const constraints: any[] = []
+    if (minStart)
+        constraints.push(
+            where('createdAt', '>=', Timestamp.fromDate(minStart)),
         )
-    ).filter((item): item is ReportItem => item !== null) // Remove nulls and narrow the type
+    if (maxEnd)
+        constraints.push(where('createdAt', '<=', Timestamp.fromDate(maxEnd)))
+
+    const dateQ = constraints.length ? query(q, ...constraints) : q
+    const snapshot = await getDocs(dateQ)
+
+    // week index -> { counts per step, agents who created matching banks }
+    const buckets = weeks.map(() => ({
+        counts: new Array(ReportSteps.length).fill(0),
+        agents: new Set<string>(),
+    }))
+
+    snapshot.forEach((docSnap) => {
+        const data = docSnap.data() as Bank
+        const createdAt = toJsDate((data as any).createdAt)
+        if (!createdAt) return
+
+        const weekIdx = weekRanges.findIndex(
+            (w) =>
+                w.start != null &&
+                w.end != null &&
+                createdAt >= w.start &&
+                createdAt <= w.end,
+        )
+        if (weekIdx === -1) return
+
+        const bucket = buckets[weekIdx]
+        let matched = false
+        ReportSteps.forEach((step: any, stepIdx: number) => {
+            const isMatch = !step.sub
+                ? step.key.includes(data.step)
+                : step.subKey.includes((data as any).renovStep)
+            if (isMatch) {
+                bucket.counts[stepIdx]++
+                matched = true
+            }
+        })
+        if (matched && data.createdBy) {
+            bucket.agents.add(data.createdBy)
+        }
+    })
+
+    const report: ReportItem[] = []
+    weeks.forEach((week, idx) => {
+        const bucket = buckets[idx]
+        if (bucket.counts.every((v: number) => v === 0)) return
+        report.push({
+            ...({
+                week,
+                steps: labels,
+                values: bucket.counts,
+                agents: Array.from(bucket.agents),
+                total_agents: bucket.agents.size,
+                index: idx,
+            } as any),
+        })
+    })
     return report
 }
