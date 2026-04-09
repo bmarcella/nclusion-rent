@@ -74,25 +74,44 @@ function AIReport() {
         [columnTotals],
     )
 
+    // "Progression" = banques qui ont dépassé les deux premières colonnes
+    // (Rejeté + Non-Vues). On somme tout ce qui suit l'index 1 pour rester
+    // robuste aux deux jeux d'étapes (ReportSteps / ReportStepsFull).
+    const progressedTotal = useMemo(
+        () =>
+            columnTotals
+                .slice(2)
+                .reduce((sum, v) => sum + (Number(v) || 0), 0),
+        [columnTotals],
+    )
+
     // Pre-compute per-row totals & progression once per data refresh.
     const rows = useMemo(
         () =>
             data.map(({ name, values }) => {
                 const rowTotal = values.reduce(
-                    (acc: number, val: number) => acc + val,
+                    (acc: number, val: number) => acc + (Number(val) || 0),
                     0,
                 )
-                const progressed =
-                    (values[2] || 0) +
-                    (values[3] || 0) +
-                    (values[4] || 0) +
-                    (values[5] || 0)
+                const progressed = values
+                    .slice(2)
+                    .reduce(
+                        (acc: number, val: number) => acc + (Number(val) || 0),
+                        0,
+                    )
                 const perc = rowTotal ? (progressed / rowTotal) * 100 : 0
                 let colorClass = ''
                 if (perc <= 50) colorClass = 'text-red-500'
                 else if (perc < 80) colorClass = 'text-orange-500'
                 else colorClass = 'text-green-500'
-                return { name, values, rowTotal, perc, colorClass }
+                return {
+                    name,
+                    values,
+                    rowTotal,
+                    progressed,
+                    perc,
+                    colorClass,
+                }
             }),
         [data],
     )
@@ -139,8 +158,12 @@ function AIReport() {
                         <THead className={cls.thead}>
                             <tr>
                                 <th className={cls.thLeft}>Agent</th>
-                                <th className={cls.th}>Total banques proposees</th>
-                                {/* <th className={cls.th}>Total banques Valider</th> */}
+                                <th className={cls.th}>
+                                    Total banques proposées
+                                </th>
+                                <th className={cls.th}>
+                                    Total banques validées
+                                </th>
                                 {steps.map((step) => (
                                     <th
                                         key={step}
@@ -160,6 +183,9 @@ function AIReport() {
                                 <td className={cls.td}>
                                     {formatNumber(grandTotal)}
                                 </td>
+                                <td className={cls.td}>
+                                    {formatNumber(progressedTotal)}
+                                </td>
                                 {columnTotals.map((val, idx) => (
                                     <td
                                         key={`col-total-${idx}`}
@@ -172,10 +198,7 @@ function AIReport() {
                                     <td className={cls.td}>
                                         {grandTotal
                                             ? (
-                                                  ((columnTotals[2] +
-                                                      columnTotals[3] +
-                                                      columnTotals[4] +
-                                                      columnTotals[5]) /
+                                                  (progressedTotal /
                                                       grandTotal) *
                                                   100
                                               ).toFixed(2)
@@ -189,6 +212,7 @@ function AIReport() {
                                     name,
                                     values,
                                     rowTotal,
+                                    progressed,
                                     perc,
                                     colorClass,
                                 }) => (
@@ -205,6 +229,11 @@ function AIReport() {
                                             className={`${cls.td} font-semibold`}
                                         >
                                             {formatNumber(rowTotal)}
+                                        </td>
+                                        <td
+                                            className={`${cls.td} font-semibold`}
+                                        >
+                                            {formatNumber(progressed)}
                                         </td>
                                         {values.map(
                                             (value: number, index: number) => (
