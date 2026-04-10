@@ -78,7 +78,7 @@ const SubmissionReview = ({
                 setLImages(imgs)
             })
     }, [bank])
-    useEffect(() => {}, [bankId])
+
 
     const print = async () => {
         setPdf(true)
