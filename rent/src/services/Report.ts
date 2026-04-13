@@ -2,7 +2,6 @@
 import {
     DocumentData,
     getDocs,
-    orderBy,
     Query,
     query,
     QueryConstraint,
@@ -108,116 +107,142 @@ export const getQueryFiltersDate = (
     return filters.length > 0 ? query(q, ...filters) : q
 }
 
+// Coerce a Firestore Timestamp / Date / string into a JS Date.
+const toJsDate = (value: any): Date | null => {
+    if (!value) return null
+    if (value instanceof Date) return value
+    if (typeof value?.toDate === 'function') return value.toDate()
+    const d = new Date(value)
+    return isNaN(d.getTime()) ? null : d
+}
+
+// Single-pass aggregation: fetch all matching banks once, then bucket by
+// createdBy × step. Replaces the original O(creators × steps) query loop.
 export const fetchReportPerCreator = async (
-    ReportSteps: [],
+    ReportSteps: any[],
     q: Query<DocumentData>,
 ): Promise<ReportItem[]> => {
-    const creatorsSet = new Set<string>()
-    const allBanksSnapshot = await getDocs(q)
-    // 1. Extract all unique creators
-    allBanksSnapshot.forEach((doc) => {
+    const snapshot = await getDocs(q)
+    const labels = ReportSteps.map((s: any) => s.label)
+    const byCreator = new Map<string, number[]>()
+
+    snapshot.forEach((doc) => {
         const data = doc.data()
-        if (data.createdBy) {
-            creatorsSet.add(data.createdBy)
+        const creator = data.createdBy
+        if (!creator) return
+
+        let counts = byCreator.get(creator)
+        if (!counts) {
+            counts = new Array(ReportSteps.length).fill(0)
+            byCreator.set(creator, counts)
         }
+
+        ReportSteps.forEach((step: any, idx: number) => {
+            if (step.key.includes(data.step)) {
+                counts![idx]++
+            }
+        })
     })
 
-    const creators = Array.from(creatorsSet)
-    // 2. Generate report
-    const report: ReportItem[] = (
-        await Promise.all(
-            creators.map(async (creator) => {
-                const steps: string[] = []
-                const values: number[] = []
-
-                await Promise.all(
-                    ReportSteps.map(async (step: any) => {
-                        const nq = query(
-                            q,
-                            orderBy('createdAt', 'desc'),
-                            where('step', 'in', step.key),
-                            where('createdBy', '==', creator),
-                        )
-                        const snapshot = await getDocs(nq)
-
-                        steps.push(step.label)
-                        values.push(snapshot.size)
-                    }),
-                )
-
-                if (values.every((v) => v === 0)) return null
-
-                return {
-                    name: creator,
-                    steps,
-                    values,
-                }
-            }),
-        )
-    ).filter((item): item is ReportItem => item !== null)
-
+    const report: ReportItem[] = []
+    byCreator.forEach((values, name) => {
+        if (values.some((v) => v > 0)) {
+            report.push({ name, steps: labels, values })
+        }
+    })
     return report
 }
 
+// Single-pass aggregation: fetch banks within the global week range once,
+// then bucket by createdBy × week × step. Replaces the original
+// O(creators × weeks × steps) query loop.
 export const fetchReportPerCreatorPerWeek = async (
     q: Query<DocumentData>,
-    ReportSteps: [],
-    weeks: [],
+    ReportSteps: any[],
+    weeks: any[],
 ): Promise<ReportItem[]> => {
-    const creatorsSet = new Set<string>()
-    // 1. Extract all unique creators
-    const allBanksSnapshot = await getDocs(q)
-    // 1. Extract all unique creators
-    allBanksSnapshot.forEach((doc) => {
+    if (weeks.length === 0) return []
+
+    // Compute the union date range so we only pull banks once.
+    const weekRanges = weeks.map((w: any) => ({
+        start: toJsDate(w.start),
+        end: toJsDate(w.end),
+    }))
+    const minStart = weekRanges.reduce<Date | null>(
+        (min, w) => (w.start && (!min || w.start < min) ? w.start : min),
+        null,
+    )
+    const maxEnd = weekRanges.reduce<Date | null>(
+        (max, w) => (w.end && (!max || w.end > max) ? w.end : max),
+        null,
+    )
+
+    const constraints: any[] = []
+    if (minStart)
+        constraints.push(
+            where('createdAt', '>=', Timestamp.fromDate(minStart)),
+        )
+    if (maxEnd)
+        constraints.push(where('createdAt', '<=', Timestamp.fromDate(maxEnd)))
+
+    const dateQ = constraints.length ? query(q, ...constraints) : q
+    const snapshot = await getDocs(dateQ)
+
+    // creator -> (week index -> step counts)
+    const byCreator = new Map<string, number[][]>()
+
+    snapshot.forEach((doc) => {
         const data = doc.data()
-        if (data.createdBy) {
-            creatorsSet.add(data.createdBy)
+        const creator = data.createdBy
+        if (!creator) return
+
+        const createdAt = toJsDate(data.createdAt)
+        if (!createdAt) return
+
+        const weekIdx = weekRanges.findIndex(
+            (w) =>
+                w.start != null &&
+                w.end != null &&
+                createdAt >= w.start &&
+                createdAt <= w.end,
+        )
+        if (weekIdx === -1) return
+
+        let matrix = byCreator.get(creator)
+        if (!matrix) {
+            matrix = weeks.map(() =>
+                new Array(ReportSteps.length).fill(0),
+            )
+            byCreator.set(creator, matrix)
         }
+
+        ReportSteps.forEach((step: any, stepIdx: number) => {
+            if (step.key.includes(data.step)) {
+                matrix![weekIdx][stepIdx]++
+            }
+        })
     })
 
-    const creators = Array.from(creatorsSet)
-    // 2. Generate report
-    const report: ReportItem[] = (
-        await Promise.all(
-            creators.map(async (creator) => {
-                const steps: any[] = []
-                const values: any[] = []
+    const report: ReportItem[] = []
+    byCreator.forEach((matrix, name) => {
+        const hasAny = matrix.some((row) => row.some((v) => v > 0))
+        if (!hasAny) return
 
-                await Promise.all(
-                    weeks.map(async (week: any) => {
-                        const new_val = await Promise.all(
-                            ReportSteps.map(async (step: any) => {
-                                const nq = query(
-                                    q,
-                                    orderBy('createdAt', 'desc'),
-                                    where('createdAt', '>=', week.start),
-                                    where('createdAt', '<=', week.end),
-                                    where('step', 'in', step.key),
-                                    where('createdBy', '==', creator),
-                                )
-                                const snapshot = await getDocs(nq)
-                                return {
-                                    label: step.label,
-                                    value: snapshot.size,
-                                }
-                            }),
-                        )
-                        steps.push(week)
-                        values.push(new_val)
-                    }),
-                )
-
-                if (values.every((v) => v === 0)) return null
-
-                return {
-                    name: creator,
-                    steps,
-                    values,
-                }
-            }),
+        // Preserve the original return shape:
+        // steps = array of week objects
+        // values = [week][step] of { label, value }
+        const values: any = matrix.map((row) =>
+            row.map((value, stepIdx) => ({
+                label: ReportSteps[stepIdx].label,
+                value,
+            })),
         )
-    ).filter((item): item is ReportItem => item !== null)
-
+        report.push({
+            name,
+            steps: weeks as any,
+            values,
+        })
+    })
     return report
 }
 

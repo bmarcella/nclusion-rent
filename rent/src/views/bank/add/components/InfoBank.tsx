@@ -674,8 +674,8 @@ function InfoBank({
                                 render={({ field }) => (
                                     <div className="mt-2">
                                         <Checkbox
-                                            checked={field.value}
                                             {...field}
+                                            checked={!!field.value}
                                         />
                                     </div>
                                 )}
@@ -861,8 +861,8 @@ function InfoBank({
                             control={control}
                             render={({ field }) => (
                                 <Checkbox
-                                    checked={field.value}
                                     {...field}
+                                    checked={!!field.value}
                                 />
                             )}
                         />

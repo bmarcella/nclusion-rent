@@ -31,14 +31,15 @@ export const ShowBankDetailsBase = () => {
     const [dialogIsOpen, setIsOpen] = useState(false)
     const [modalContent, setModalContent] = useState<React.ReactNode>(null)
     const [bank, setBank] = useState<Bank>()
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(true);
     const { userId } = useSessionUser((state) => state.user)
     const [nameDialog, setDialogName] = useState<any>(null)
+
     useEffect(() => {
         const fetchBank = async () => {
             setLoading(true)
             const result = await getBankById(bankId!)
-            setBank(result)
+            setBank(result as any)
             setLoading(false)
         }
         if (bankId) fetchBank()

@@ -9,9 +9,9 @@ import React, { useState } from 'react'
 function ChangeLocation({
     location,
     bankId,
-    hide,
+    hide = false,
 }: {
-    location: string
+    location: any
     bankId: string
     hide?: boolean
 }) {
@@ -48,11 +48,13 @@ function ChangeLocation({
                     bouton ci-dessous.
                 </p>
             )}
+
             {message && !hide && (
                 <Alert showIcon className="mt-6 w-full block" type={alert}>
                     <span className="break-all">{message}</span>
                 </Alert>
             )}
+            
             <Button
                 className="btn btn-secondary mt-6"
                 onClick={() => {
