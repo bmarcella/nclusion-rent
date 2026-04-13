@@ -55,7 +55,8 @@ import { convertStringToSelectOptions } from '@/views/bank/add/components/InfoBa
 import { getBankImages, getLordImages } from '@/services/firebase/BankService'
 import { IRequest } from './IRequest'
 import { HiChevronDown } from 'react-icons/hi'
-import GoogleMapApp from '@/views/bank/show/Map'
+import GoogleMapApp, { useStreetViewAvailable } from '@/views/bank/show/Map'
+import { useJsApiLoader } from '@react-google-maps/api'
 import ImageGallery, {
     BankImage,
 } from '@/views/bank/show/components/ImageGallery'
@@ -1536,6 +1537,12 @@ export function LeasePaymentFields({ t, categories }: any) {
     const [reqs, setReqs] = useState([]) as any
     const [can, setCan] = useState(false) as any
     const [loading, setLoading] = useState(false) as any
+    const [streetView, setStreetView] = useState(false)
+    const { isLoaded: mapsLoaded } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_APIKEY,
+        mapIds: [import.meta.env.VITE_GOOGLE_MAP_ID],
+    })
+    const streetViewAvailable = useStreetViewAvailable(cbank?.location, mapsLoaded)
     const sregion = watch('general.id_region_user')
     const [images, setImages] = useState<BankImage[]>([])
     const [lImages, setLImages] = useState<LordImage[]>([])
@@ -1876,7 +1883,20 @@ export function LeasePaymentFields({ t, categories }: any) {
                             {cbank && (
                                 <GoogleMapApp
                                     position={cbank.location}
-                                ></GoogleMapApp>
+                                    streetView={streetView}
+                                />
+                            )}
+                            {streetViewAvailable && (
+                                <div className="flex justify-end mt-2">
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="plain"
+                                        onClick={() => setStreetView(!streetView)}
+                                    >
+                                        {streetView ? 'Carte' : 'Street View'}
+                                    </Button>
+                                </div>
                             )}
                         </div>
                         <div>

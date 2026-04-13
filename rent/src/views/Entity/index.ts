@@ -13,6 +13,7 @@ export interface Document {
 export interface Person {
     id: string
     fullName: string
+    fullName_lower: string
     nickName?: string
     companyName?: string
     id_user?: string
@@ -473,6 +474,16 @@ export interface Bank {
     comptoireBuildedAt?: Date
     images: any[]
     first_approval?: string
+    internetSpeed?: {
+        natcom ?: {
+         upload: number,
+         download: number
+        },
+        digicel?: {
+         upload: number,
+         download: number  
+        }
+    }
     location: {
         lat: any
         lng: any

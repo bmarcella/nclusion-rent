@@ -224,6 +224,14 @@
         }
     },
     "bank": {
+        "internetSpeed" : {
+           "download" : "Telechargement",
+           "upload" : "Televersement",
+           "runTest" : "Démarrer le Test"
+        },
+        "locationRequired": "La position GPS est requise",
+        "recapturePosition": "Recapturer la position",
+        "location":"Map",
         "selectVersion": "Choisissez la version du formulaire",
         "versionV1Title": "Formulaire Classique",
         "versionV1Desc": "Le formulaire original avec toutes les sections détaillées.",

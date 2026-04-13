@@ -194,6 +194,18 @@ const BankInfoV2: React.FC<BankInfoV2Props> = ({ bank }) => {
                         <strong>{t('bank.internetProviders.label')}: </strong>
                         {renderTranslatedArray(bank.v2InternetService)}
                     </p>
+                    {bank.internetSpeed?.natcom && (
+                        <p>
+                            <strong>Natcom: </strong>
+                            {bank.internetSpeed.natcom.download ?? '—'} Mbps ↓ / {bank.internetSpeed.natcom.upload ?? '—'} Mbps ↑
+                        </p>
+                    )}
+                    {bank.internetSpeed?.digicel && (
+                        <p>
+                            <strong>Digicel: </strong>
+                            {bank.internetSpeed.digicel.download ?? '—'} Mbps ↓ / {bank.internetSpeed.digicel.upload ?? '—'} Mbps ↑
+                        </p>
+                    )}
                     <p className="md:col-span-2">
                         <strong>{t('bank.verifyOwners.label')}: </strong>
                         {renderTranslatedArray(bank.v2VerifyOwner)}

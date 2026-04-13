@@ -11,10 +11,9 @@ import {
     Radio,
 } from '@/components/ui'
 import { manageAuth } from '@/constants/roles.constant'
-import { BankDoc, Landlord } from '@/services/Landlord'
+import { BankDoc } from '@/services/Landlord'
 import { useSessionUser } from '@/store/authStore'
 import { useTranslation } from '@/utils/hooks/useTranslation'
-import { hasAuthorities } from '@/utils/RoleChecker'
 import {
     Bank,
     BankFormVersion,
@@ -30,18 +29,22 @@ import {
 import { Regions } from '@/views/Entity/Regions'
 import AddProprioPopup from '@/views/proprio/add/AddProprioPopup'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    query,
-    where,
-    getDocs,
-    addDoc,
-    getDoc,
-    updateDoc,
-} from 'firebase/firestore'
-import { useEffect, useMemo, useState } from 'react'
+import { addDoc, getDoc, updateDoc } from 'firebase/firestore'
+import AsyncSelect from 'react-select/async'
+import { motion } from 'framer-motion'
+import { useEffect, useState, useCallback } from 'react'
+import { HiChevronDown, HiRefresh, HiEye, HiMap } from 'react-icons/hi'
+import GoogleMapApp, { useStreetViewAvailable } from '@/views/bank/show/Map'
+import { useJsApiLoader } from '@react-google-maps/api'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { convertToSelectOptions, convertStringToSelectOptions } from '../InfoBank'
+import {
+    convertStringToSelectOptions,
+    loadLandlordOptions,
+    loadSingleLandlord,
+    getPrecisePosition,
+    runSpeedTest,
+} from '../InfoBank'
 
 const schema = z.object({
     bankName: z.string().min(1, 'Required'),
@@ -58,6 +61,16 @@ const schema = z.object({
     v2PaymentStructure: z.enum(paymentStructures),
     v2LocationType: z.enum(locationTypes),
     v2InternetService: z.array(z.enum(internetProviders)),
+    internetSpeed: z.object({
+        natcom: z.object({
+            upload: z.number().optional(),
+            download: z.number().optional(),
+        }).optional(),
+        digicel: z.object({
+            upload: z.number().optional(),
+            download: z.number().optional(),
+        }).optional(),
+    }).optional(),
     v2VerifyOwner: z.array(z.enum(verifyOwners)),
     superficie: z.number().optional(),
     nombre_chambre: z.number().optional(),
@@ -89,12 +102,12 @@ function InfoBankV2({
     userId,
     isEdit = false,
 }: FormProps) {
-    const [data, setData] = useState<Proprio[]>([])
-    const [landlordsOptions, setLandlordsOptions] = useState<any[]>([])
-    const [refsOptions, setRefsOptions] = useState<any[]>([])
+    const [selectedLandlord, setSelectedLandlord] = useState<{
+        value: string
+        label: string
+    } | null>(null)
     const [typeOptions, setTypeOptions] = useState<any[]>(Regions[0].cities)
     const [isSubmitting, setSubmitting] = useState(false)
-    const [loading, setLoading] = useState(false)
     const [location, setLocation] = useState<{
         lat: number
         lng: number
@@ -102,54 +115,59 @@ function InfoBankV2({
     const [regions, setRegions] = useState([]) as any
     const [hideReg, setHideReg] = useState(false)
     const { authority, proprio } = useSessionUser((state) => state.user)
-    const [ploading, setPloading] = useState(false)
     const { t } = useTranslation()
+    const [selectKey, setSelectKey] = useState(0)
+    const [extraLandlords, setExtraLandlords] = useState<{ value: string; label: string }[]>([])
+    const [mapOpen, setMapOpen] = useState(false)
+    const [recapturing, setRecapturing] = useState(false)
+    const [streetView, setStreetView] = useState(false)
+    const { isLoaded: mapsLoaded } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_APIKEY,
+        mapIds: [import.meta.env.VITE_GOOGLE_MAP_ID],
+    })
+    const streetViewAvailable = useStreetViewAvailable(location, mapsLoaded)
+    const [speedTesting, setSpeedTesting] = useState<'natcom' | 'digicel' | null>(null)
+    const [speedPhase, setSpeedPhase] = useState<'download' | 'upload' | null>(null)
 
-    const fetchLandlords = async () => {
-        try {
-            setPloading(true)
-            setLoading(true)
-            const q = query(
-                Landlord,
-                where('type_person', '==', 'proprietaire'),
-            )
-            const snapshot = await getDocs(q)
-            const landlords: Proprio[] = []
-            snapshot.forEach((doc) => {
-                const data = doc.data() as Proprio
-                data.id = doc.id
-                landlords.push(data)
-            })
-            const persons = await convertToSelectOptions(landlords)
-            setLandlordsOptions(persons)
-            setRefsOptions(persons)
-            setData(landlords)
-            setLoading(false)
-            setPloading(false)
-        } catch (err) {
-            console.error('Error fetching landlords:', err)
-            setLoading(false)
-            setPloading(false)
+    const addNewProprio = async (newData: Proprio) => {
+        const option = {
+            value: newData.id,
+            label: newData.fullName,
         }
+        setValue('landlord', newData.id, { shouldValidate: true })
+        setSelectedLandlord(option)
+        setExtraLandlords((prev) => [option, ...prev])
+        setSelectKey((prev) => prev + 1)
     }
 
-    const addNewProprio = async (new_data: Proprio) => {
-        await fetchLandlords()
-        setValue('landlord', new_data.id)
+    const recapturePosition = () => {
+        setRecapturing(true)
+        getPrecisePosition().then((position) => {
+            const { latitude, longitude } = position.coords
+            setLocation({ lat: latitude, lng: longitude })
+            setRecapturing(false)
+        }).catch((err) => {
+            onError(`Error: ${err.message}`)
+            setRecapturing(false)
+        })
     }
 
     useEffect(() => {
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords
-                setLocation({ lat: latitude, lng: longitude })
-            },
-            (err) => {
-                onError(`Error: ${err.message}`)
-            },
-        )
-        if (landlordsOptions.length === 0) {
-            fetchLandlords()
+        getPrecisePosition().then((position) => {
+            const { latitude, longitude } = position.coords
+            setLocation({ lat: latitude, lng: longitude })
+        }).catch((err) => {
+            onError(`Error: ${err.message}`)
+        })
+
+
+        const landlordId = isEdit
+            ? (defaultValues?.landlord as any)?.id || defaultValues?.landlord
+            : defaultValues?.landlord
+        if (landlordId && typeof landlordId === 'string') {
+            loadSingleLandlord(landlordId).then((opt) => {
+                if (opt) setSelectedLandlord(opt)
+            })
         }
         if (isEdit && defaultValues?.id_region != null) {
             const region = Regions.find(
@@ -208,12 +226,38 @@ function InfoBankV2({
             v2PaymentStructure: defaultValues?.v2PaymentStructure,
             v2LocationType: defaultValues?.v2LocationType,
             v2InternetService: defaultValues?.v2InternetService || [],
+            internetSpeed: defaultValues?.internetSpeed || {},
             v2VerifyOwner: defaultValues?.v2VerifyOwner || [],
             superficie: Number(defaultValues?.superficie) || undefined,
             nombre_chambre: Number(defaultValues?.nombre_chambre) || undefined,
             v2RoofType: defaultValues?.v2RoofType,
         },
     })
+
+    const handleLoadOptions = useCallback(
+        (inputValue: string) => loadLandlordOptions(inputValue, extraLandlords),
+        [],
+    )
+
+    const handleSpeedTest = async (carrier: 'natcom' | 'digicel') => {
+        setSpeedTesting(carrier)
+        try {
+            const result = await runSpeedTest((phase) => setSpeedPhase(phase))
+            const current = watch('internetSpeed') || {}
+            setValue('internetSpeed', {
+                ...current,
+                [carrier]: {
+                    download: result.download,
+                    upload: result.upload,
+                },
+            }, { shouldDirty: true })
+        } catch (err) {
+            onError(t('bank.internetSpeed.error') || 'Speed test failed')
+        } finally {
+            setSpeedTesting(null)
+            setSpeedPhase(null)
+        }
+    }
 
     const addNewBank = async (data: FormValues) => {
         try {
@@ -230,6 +274,7 @@ function InfoBankV2({
             bank.v2PaymentStructure = data.v2PaymentStructure
             bank.v2LocationType = data.v2LocationType
             bank.v2InternetService = data.v2InternetService
+            bank.internetSpeed = data.internetSpeed
             bank.v2VerifyOwner = data.v2VerifyOwner
             bank.superficie = data.superficie
             bank.nombre_chambre = data.nombre_chambre
@@ -254,6 +299,11 @@ function InfoBankV2({
     }
 
     const onSubmitInfo = async (data: FormValues) => {
+        if (!location) {
+            onError(t('bank.locationRequired') || 'La position GPS est requise')
+            setMapOpen(true)
+            return
+        }
         setSubmitting(true)
         if (isEdit) {
             nextStep(1, data)
@@ -264,10 +314,69 @@ function InfoBankV2({
     }
 
     const selectedRegion = watch('id_region')
+    const selectedProviders = watch('v2InternetService') || []
+    const hasNatcom = selectedProviders.includes('internetProviders.natcom')
+    const hasDigicel = selectedProviders.includes('internetProviders.digicel')
 
     return (
         <Form onSubmit={handleSubmit(onSubmitInfo) as any}>
             <div className="flex flex-col gap-6">
+                {/* GPS Location Map */}
+                <Card bordered>
+                    <div
+                        className="flex items-center justify-between cursor-pointer"
+                        onClick={() => setMapOpen(!mapOpen)}
+                    >
+                        <h6 className="text-gray-900 dark:text-gray-100">
+                            {t('bank.location')} {location ? `(${location.lat.toFixed(5)}, ${location.lng.toFixed(5)})` : ''}
+                        </h6>
+                        <motion.span
+                            animate={{ rotate: mapOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <HiChevronDown className="text-lg" />
+                        </motion.span>
+                    </div>
+                    {mapOpen && (
+                        <div className="mt-4">
+                            {location ? (
+                                <GoogleMapApp position={location} streetView={streetView} />
+                            ) : (
+                                <div className="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-700 rounded">
+                                    <span className="text-gray-400">
+                                        {t('bank.capturingPosition') || 'Capturing position...'}
+                                    </span>
+                                </div>
+                            )}
+                            <div className="flex justify-end gap-2 mt-3">
+                                {streetViewAvailable && (
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="plain"
+                                        icon={streetView ? <HiMap /> : <HiEye />}
+                                        onClick={() => setStreetView(!streetView)}
+                                    >
+                                        {streetView
+                                            ? (t('bank.mapView') || 'Carte')
+                                            : (t('bank.streetView') || 'Street View')}
+                                    </Button>
+                                )}
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="plain"
+                                    loading={recapturing}
+                                    icon={<HiRefresh />}
+                                    onClick={recapturePosition}
+                                >
+                                    {t('bank.recapturePosition') || 'Recapturer la position'}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </Card>
+
                 {/* Location Name */}
                 <Card bordered>
                     <SectionTitle>{t('bank.bankName')}</SectionTitle>
@@ -393,25 +502,22 @@ function InfoBankV2({
                                 control={control}
                                 render={({ field }) => (
                                     <div className="flex items-center gap-2">
-                                        <Select
-                                            isLoading={ploading}
-                                            className="w-full"
-                                            placeholder={t('common.select')}
-                                            options={landlordsOptions}
-                                            value={
-                                                refsOptions.find(
-                                                    (option: any) =>
-                                                        option.value ==
-                                                        field.value,
-                                                ) || null
-                                            }
-                                            onChange={(option: any) =>
-                                                field.onChange(option?.value)
-                                            }
-                                        />
-                                        <AddProprioPopup
-                                            done={addNewProprio}
-                                        />
+                                        <div className="w-full">
+                                            <AsyncSelect
+                                                key={selectKey}
+                                                classNamePrefix="react-select"
+                                                placeholder={t('common.select')}
+                                                defaultOptions
+                                                cacheOptions={false}
+                                                loadOptions={handleLoadOptions}
+                                                value={selectedLandlord}
+                                                onChange={(option: any) => {
+                                                    field.onChange(option?.value || '')
+                                                    setSelectedLandlord(option)
+                                                }}
+                                            />
+                                        </div>
+                                        <AddProprioPopup done={addNewProprio} />
                                     </div>
                                 )}
                             />
@@ -730,6 +836,140 @@ function InfoBankV2({
                             )}
                         />
                     </FormItem>
+
+                    {/* Natcom Speed */}
+                    {hasNatcom && <div className="mt-4 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                            <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Natcom</h6>
+                            <Button
+                                type="button"
+                                size="xs"
+                                variant="solid"
+                                loading={speedTesting === 'natcom'}
+                                disabled={speedTesting !== null}
+                                onClick={() => handleSpeedTest('natcom')}
+                            >
+                                {speedTesting === 'natcom'
+                                    ? (speedPhase === 'download'
+                                        ? (t('bank.internetSpeed.testingDownload') || 'Test download...')
+                                        : (t('bank.internetSpeed.testingUpload') || 'Test upload...'))
+                                    : (t('bank.internetSpeed.runTest') || 'Tester la vitesse')}
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-4">
+                            <FormItem label="Download">
+                                <Controller
+                                    name="internetSpeed.natcom.download"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Input
+                                            type="number"
+                                            placeholder="0"
+                                            suffix="Mbps"
+                                            {...field}
+                                            value={field.value ?? ''}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value === ''
+                                                        ? undefined
+                                                        : Number(e.target.value),
+                                                )
+                                            }
+                                        />
+                                    )}
+                                />
+                            </FormItem>
+                            <FormItem label="Upload">
+                                <Controller
+                                    name="internetSpeed.natcom.upload"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Input
+                                            type="number"
+                                            placeholder="0"
+                                            suffix="Mbps"
+                                            {...field}
+                                            value={field.value ?? ''}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value === ''
+                                                        ? undefined
+                                                        : Number(e.target.value),
+                                                )
+                                            }
+                                        />
+                                    )}
+                                />
+                            </FormItem>
+                        </div>
+                    </div>}
+
+                    {/* Digicel Speed */}
+                    {hasDigicel && <div className="mt-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                            <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Digicel</h6>
+                            <Button
+                                type="button"
+                                size="xs"
+                                variant="solid"
+                                loading={speedTesting === 'digicel'}
+                                disabled={speedTesting !== null}
+                                onClick={() => handleSpeedTest('digicel')}
+                            >
+                                {speedTesting === 'digicel'
+                                    ? (speedPhase === 'download'
+                                        ? (t('bank.internetSpeed.testingDownload') || 'Test download...')
+                                        : (t('bank.internetSpeed.testingUpload') || 'Test upload...'))
+                                    : (t('bank.internetSpeed.runTest') || 'Tester la vitesse')}
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-4">
+                            <FormItem label="Download">
+                                <Controller
+                                    name="internetSpeed.digicel.download"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Input
+                                            type="number"
+                                            placeholder="0"
+                                            suffix="Mbps"
+                                            {...field}
+                                            value={field.value ?? ''}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value === ''
+                                                        ? undefined
+                                                        : Number(e.target.value),
+                                                )
+                                            }
+                                        />
+                                    )}
+                                />
+                            </FormItem>
+                            <FormItem label="Upload">
+                                <Controller
+                                    name="internetSpeed.digicel.upload"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Input
+                                            type="number"
+                                            placeholder="0"
+                                            suffix="Mbps"
+                                            {...field}
+                                            value={field.value ?? ''}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value === ''
+                                                        ? undefined
+                                                        : Number(e.target.value),
+                                                )
+                                            }
+                                        />
+                                    )}
+                                />
+                            </FormItem>
+                        </div>
+                    </div>}
                 </Card>
 
                 {/* Verify Owner */}

@@ -156,6 +156,7 @@ function EditBank({ docRef, onChangeBank, id, userId }: Props) {
                         v2PaymentStructure: data.v2PaymentStructure,
                         v2LocationType: data.v2LocationType,
                         v2InternetService: data.v2InternetService || [],
+                        internetSpeed: data.internetSpeed || {},
                         v2VerifyOwner: data.v2VerifyOwner || [],
                         superficie: data.superficie,
                         nombre_chambre: data.nombre_chambre,
