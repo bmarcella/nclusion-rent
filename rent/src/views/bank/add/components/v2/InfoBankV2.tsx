@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unknown-property */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     FormItem,
@@ -327,8 +328,8 @@ function InfoBankV2({
                         className="flex items-center justify-between cursor-pointer"
                         onClick={() => setMapOpen(!mapOpen)}
                     >
-                        <h6 className="text-gray-900 dark:text-gray-100">
-                            {t('bank.location')} {location ? `(${location.lat.toFixed(5)}, ${location.lng.toFixed(5)})` : ''}
+                        <h6  className="text-gray-900 dark:text-gray-100">
+                            {t('bank.location')} {'*'} {location ? `(${location.lat.toFixed(5)}, ${location.lng.toFixed(5)})` : ''}
                         </h6>
                         <motion.span
                             animate={{ rotate: mapOpen ? 180 : 0 }}

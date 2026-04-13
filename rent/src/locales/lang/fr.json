@@ -224,6 +224,7 @@
         }
     },
     "bank": {
+        "imageInstruction": "Veuillez ajouter au moins 3 ou 4 photos de la banque (façade, intérieur, environs, etc.. ).",
         "internetSpeed" : {
            "download" : "Telechargement",
            "upload" : "Televersement",
