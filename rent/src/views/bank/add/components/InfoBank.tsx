@@ -139,49 +139,81 @@ export const runSpeedTest = async (
     return { download: downloadMbps, upload: uploadMbps };
 }
 
-export const getPrecisePosition = (targetAccuracy = 30, timeoutMs = 20000): Promise<GeolocationPosition> => {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error("Geolocation not supported"));
-      return;
-    }
-
-    let bestPosition: GeolocationPosition | null = null;
-
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const acc = position.coords.accuracy;
-        console.log("accuracy:", acc, "meters");
-        if (!bestPosition || acc < bestPosition.coords.accuracy) {
-            bestPosition = position;
+export const getPrecisePosition = (
+    targetAccuracy = 10,
+    maxTimeoutMs = 30000,
+    minDurationMs = 8000,
+    stableSamples = 3,
+): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation not supported'))
+            return
         }
-        // stop when accuracy is good enough
-        if (acc <= targetAccuracy) {
-          navigator.geolocation.clearWatch(watchId);
-          resolve(position);
-        }
-      },
-      (error) => {
-        navigator.geolocation.clearWatch(watchId);
-        reject(error);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: timeoutMs,
-        maximumAge: 0,
-      }
-    );
 
-    // fallback: return the best result found before timeout
-    setTimeout(() => {
-      navigator.geolocation.clearWatch(watchId);
-      if (bestPosition) {
-        resolve(bestPosition);
-      } else {
-        reject(new Error("Could not get location"));
-      }
-    }, timeoutMs);
-  });
+        let bestPosition: GeolocationPosition | null = null
+        let goodSampleCount = 0
+        let settled = false
+        const startedAt = Date.now()
+
+        const finish = (
+            outcome: 'resolve' | 'reject',
+            payload: GeolocationPosition | Error,
+        ) => {
+            if (settled) return
+            settled = true
+            navigator.geolocation.clearWatch(watchId)
+            clearTimeout(hardTimeout)
+            if (outcome === 'resolve') resolve(payload as GeolocationPosition)
+            else reject(payload as Error)
+        }
+
+        const watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                const acc = position.coords.accuracy
+                if (!bestPosition || acc < bestPosition.coords.accuracy) {
+                    bestPosition = position
+                }
+
+                if (acc <= targetAccuracy) {
+                    goodSampleCount += 1
+                } else {
+                    goodSampleCount = 0
+                }
+
+                const elapsed = Date.now() - startedAt
+                // Only resolve once we've sampled long enough AND have consecutive
+                // good readings — first GPS fixes are often optimistic.
+                if (
+                    goodSampleCount >= stableSamples &&
+                    elapsed >= minDurationMs &&
+                    bestPosition
+                ) {
+                    finish('resolve', bestPosition)
+                }
+            },
+            (error) => {
+                // Permission denied / unavailable are fatal; transient errors are
+                // ignored so the watcher can keep trying until maxTimeoutMs.
+                if (
+                    error.code === error.PERMISSION_DENIED ||
+                    error.code === error.POSITION_UNAVAILABLE
+                ) {
+                    finish('reject', error)
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: maxTimeoutMs,
+                maximumAge: 0,
+            },
+        )
+
+        const hardTimeout = setTimeout(() => {
+            if (bestPosition) finish('resolve', bestPosition)
+            else finish('reject', new Error('Could not get location'))
+        }, maxTimeoutMs)
+    })
 }
 
 const schema: ZodType<Partial<Bank>> = z.object({
@@ -244,6 +276,7 @@ function InfoBank({
     const [mapOpen, setMapOpen] = useState(false)
     const [recapturing, setRecapturing] = useState(false)
     const [streetView, setStreetView] = useState(false)
+    const [tilt3d, setTilt3d] = useState(false)
     const { isLoaded: mapsLoaded } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_APIKEY,
         mapIds: [import.meta.env.VITE_GOOGLE_MAP_ID],
@@ -452,7 +485,7 @@ function InfoBank({
                     {mapOpen && (
                         <div className="mt-4">
                             {location ? (
-                                <GoogleMapApp position={location} streetView={streetView} />
+                                <GoogleMapApp position={location} streetView={streetView} tilt3d={tilt3d} />
                             ) : (
                                 <div className="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-700 rounded">
                                     <span className="text-gray-400">
@@ -460,7 +493,14 @@ function InfoBank({
                                     </span>
                                 </div>
                             )}
-                            <div className="flex justify-end gap-2 mt-3">
+                            <div className="flex items-center justify-end gap-3 mt-3">
+                                <label className="flex items-center gap-1.5 cursor-pointer text-sm text-gray-600 dark:text-gray-400">
+                                    <Checkbox
+                                        checked={tilt3d}
+                                        onChange={(checked) => setTilt3d(checked)}
+                                    />
+                                    3D
+                                </label>
                                 {streetViewAvailable && (
                                     <Button
                                         type="button"

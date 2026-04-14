@@ -10,6 +10,7 @@ const containerStyle = {
 interface MyMapProps {
     position: { lat: number; lng: number }
     streetView?: boolean
+    tilt3d?: boolean
 }
 
 export const checkStreetViewCoverage = (
@@ -41,7 +42,7 @@ export const useStreetViewAvailable = (
     return available
 }
 
-const GoogleMapApp: React.FC<MyMapProps> = ({ position, streetView = false }) => {
+const GoogleMapApp: React.FC<MyMapProps> = ({ position, streetView = false, tilt3d = false }) => {
     const { isLoaded } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_APIKEY,
         mapIds: [import.meta.env.VITE_GOOGLE_MAP_ID],
@@ -53,8 +54,8 @@ const GoogleMapApp: React.FC<MyMapProps> = ({ position, streetView = false }) =>
         <GoogleMap
             mapContainerStyle={containerStyle}
             center={position}
-            zoom={18}
-            tilt={45}
+            zoom={tilt3d ? 18 : 15}
+            tilt={tilt3d ? 45 : 0}
             options={{
                 mapId: import.meta.env.VITE_GOOGLE_MAP_ID,
                 streetViewControl: true,

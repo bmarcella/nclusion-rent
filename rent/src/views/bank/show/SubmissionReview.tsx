@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
 import { getBankImages, getLordImages } from '@/services/firebase/BankService'
 import { useEffect, useState, useRef } from 'react'
 import { PiCheckFatFill, PiThumbsDownFill } from 'react-icons/pi'
@@ -256,8 +255,9 @@ const SubmissionReview = ({
             )}
 
             <div ref={contentRef} className="p-6 space-y-6">
+
                 {bank && (contrat || bank.step == 'bankSteps.needContract') && (
-                    <LeaseContractForm bank={bank}></LeaseContractForm>
+                    <LeaseContractForm bank={bank} pdf={pdf}></LeaseContractForm>
                 )}
 
                 {bank &&

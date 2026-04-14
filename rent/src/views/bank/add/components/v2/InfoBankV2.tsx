@@ -122,6 +122,7 @@ function InfoBankV2({
     const [mapOpen, setMapOpen] = useState(false)
     const [recapturing, setRecapturing] = useState(false)
     const [streetView, setStreetView] = useState(false)
+    const [tilt3d, setTilt3d] = useState(false)
     const { isLoaded: mapsLoaded } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_APIKEY,
         mapIds: [import.meta.env.VITE_GOOGLE_MAP_ID],
@@ -341,7 +342,7 @@ function InfoBankV2({
                     {mapOpen && (
                         <div className="mt-4">
                             {location ? (
-                                <GoogleMapApp position={location} streetView={streetView} />
+                                <GoogleMapApp position={location} streetView={streetView} tilt3d={tilt3d} />
                             ) : (
                                 <div className="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-700 rounded">
                                     <span className="text-gray-400">
@@ -349,7 +350,14 @@ function InfoBankV2({
                                     </span>
                                 </div>
                             )}
-                            <div className="flex justify-end gap-2 mt-3">
+                            <div className="flex items-center justify-end gap-3 mt-3">
+                                <label className="flex items-center gap-1.5 cursor-pointer text-sm text-gray-600 dark:text-gray-400">
+                                    <Checkbox
+                                        checked={tilt3d}
+                                        onChange={(checked) => setTilt3d(checked)}
+                                    />
+                                    3D
+                                </label>
                                 {streetViewAvailable && (
                                     <Button
                                         type="button"
