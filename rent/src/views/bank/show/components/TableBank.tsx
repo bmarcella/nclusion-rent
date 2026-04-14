@@ -597,29 +597,31 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
     }, [])
 
     return (
-        <div>
-            <div className="grid grid-cols-6 gap-4 mt-6 mb-6">
-                <div
-                    className={classNames(
-                        'rounded-2xl p-4 flex flex-col justify-center',
-                        'bg-green-100',
-                    )}
-                >
-                    <div className="flex justify-between items-center relative">
+        <div className="space-y-6 mt-6">
+            {/* KPI row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-green-100 dark:from-gray-800 dark:to-gray-900 border border-emerald-100 dark:border-gray-700 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
                         <div>
-                            <div className="mb-4 text-gray-900 font-bold">
-                                {'Total banks'}
-                            </div>
-                            <h1 className="mb-1 text-gray-900">{totalData}</h1>
+                            <p className="text-xs uppercase tracking-wider font-semibold text-emerald-700/80 dark:text-emerald-300">
+                                Total banks
+                            </p>
+                            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 leading-none">
+                                {totalData}
+                            </p>
+                            <p className="mt-2 text-xs text-gray-500">
+                                {step
+                                    ? t('bank.' + step)
+                                    : all
+                                      ? 'Toutes les banks'
+                                      : 'Mes banks'}
+                            </p>
                         </div>
-                        <div
-                            className={
-                                'flex items-center justify-center min-h-12 min-w-12 max-h-12 max-w-12 bg-gray-900 text-white rounded-full text-2xl md:hidden'
-                            }
-                        >
-                            <HiHome />
+                        <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/70 dark:bg-gray-700 text-emerald-600 shadow-sm">
+                            <HiHome className="text-2xl" />
                         </div>
                     </div>
+                    <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-emerald-200/40 blur-2xl pointer-events-none" />
                 </div>
             </div>
             {(step || all) && (
@@ -671,11 +673,11 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                 ></FilterMyBank>
             )}
 
-            <div className="w-full  mt-6 bg-gray-50 dark:bg-gray-700 rounded-sm p-6 shadow">
+            <div className="w-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                 {!isMap && (
-                    <>
-                        <Table>
-                            <THead>
+                    <div className="overflow-x-auto">
+                        <Table className="min-w-full">
+                            <THead className="bg-gray-50 dark:bg-gray-900/60 sticky top-0 z-10">
                                 {table.getHeaderGroups().map((headerGroup) => (
                                     <Tr key={headerGroup.id}>
                                         {headerGroup.headers.map((header) => {
@@ -683,6 +685,7 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                                                 <Th
                                                     key={header.id}
                                                     colSpan={header.colSpan}
+                                                    className="text-xs uppercase tracking-wider font-semibold text-gray-600 dark:text-gray-300 py-3 px-4"
                                                 >
                                                     {flexRender(
                                                         header.column.columnDef
@@ -696,14 +699,46 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                                 ))}
                             </THead>
                             <TBody>
-                                {table.getRowModel().rows.map((row) => {
+                                {table.getRowModel().rows.length === 0 && (
+                                    <Tr>
+                                        <Td
+                                            colSpan={columns.length}
+                                            className="text-center py-16"
+                                        >
+                                            <div className="flex flex-col items-center gap-3 text-gray-400">
+                                                <div className="h-14 w-14 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-2xl">
+                                                    <HiHome />
+                                                </div>
+                                                <p className="text-sm font-medium text-gray-500">
+                                                    Aucune bank trouvée
+                                                </p>
+                                                <p className="text-xs text-gray-400">
+                                                    Essayez d'ajuster vos filtres
+                                                </p>
+                                            </div>
+                                        </Td>
+                                    </Tr>
+                                )}
+                                {table.getRowModel().rows.map((row, idx) => {
                                     return (
-                                        <Tr key={row.id}>
+                                        <Tr
+                                            key={row.id}
+                                            className={classNames(
+                                                'transition-colors',
+                                                idx % 2 === 1
+                                                    ? 'bg-gray-50/40 dark:bg-gray-900/20'
+                                                    : '',
+                                                'hover:bg-emerald-50/60 dark:hover:bg-emerald-900/20',
+                                            )}
+                                        >
                                             {row
                                                 .getVisibleCells()
                                                 .map((cell) => {
                                                     return (
-                                                        <Td key={cell.id}>
+                                                        <Td
+                                                            key={cell.id}
+                                                            className="py-3 px-4 align-middle"
+                                                        >
                                                             {flexRender(
                                                                 cell.column
                                                                     .columnDef
@@ -718,33 +753,49 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                                 })}
                             </TBody>
                         </Table>
-                    </>
+                    </div>
                 )}
                 {isMap && mapData && mapData.length > 0 && (
-                    <GoogleMapWithMarkers
-                        locations={mapData}
-                        // zoom={8} // optional
-                    />
+                    <div className="p-2">
+                        <GoogleMapWithMarkers locations={mapData} />
+                    </div>
                 )}
-                <div className="flex items-center justify-between mt-4">
-                    <Pagination
-                        pageSize={pageSize}
-                        currentPage={currentPage}
-                        total={totalData}
-                        onChange={onPaginationChange}
-                    />
-                    <div style={{ minWidth: 130 }}>
-                        <Select<Option>
-                            size="sm"
-                            isSearchable={false}
-                            value={pageSizeOption.filter(
-                                (option) =>
-                                    option.value ===
-                                    table.getState().pagination.pageSize,
-                            )}
-                            options={pageSizeOption}
-                            onChange={(option) => onSelectChange(option?.value)}
+
+                {/* Pagination bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
+                    <div className="text-xs text-gray-500">
+                        Page{' '}
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                            {currentPage}
+                        </span>{' '}
+                        —{' '}
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                            {totalData}
+                        </span>{' '}
+                        résultat{totalData > 1 ? 's' : ''}
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Pagination
+                            pageSize={pageSize}
+                            currentPage={currentPage}
+                            total={totalData}
+                            onChange={onPaginationChange}
                         />
+                        <div style={{ minWidth: 130 }}>
+                            <Select<Option>
+                                size="sm"
+                                isSearchable={false}
+                                value={pageSizeOption.filter(
+                                    (option) =>
+                                        option.value ===
+                                        table.getState().pagination.pageSize,
+                                )}
+                                options={pageSizeOption}
+                                onChange={(option) =>
+                                    onSelectChange(option?.value)
+                                }
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -755,13 +806,24 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                 height={height * 0.9}
                 onClose={onDialogClose}
             >
-                <div className="flex flex-col h-full px-4 py-6 bg-white dark:bg-gray-900 overflow-hidden">
-                    <div className="flex flex-col gap-4">
-                        <h5 className="text-lg font-semibold mb-4 flex items-center gap-2 flex-wrap">
-                            {cbank?.bankName || ''}
-                            {cbank && <BankVersionBadge bank={cbank} />}
-                        </h5>
+                <div className="flex flex-col h-full bg-white dark:bg-gray-900 overflow-hidden">
+                    <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 via-white to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <div className="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                <HiHome className="text-xl" />
+                            </div>
+                            <div className="flex flex-col">
+                                <p className="text-xs uppercase tracking-wider text-gray-500">
+                                    Détails de la bank
+                                </p>
+                                <h5 className="text-lg font-semibold flex items-center gap-2 flex-wrap text-gray-900 dark:text-gray-100">
+                                    {cbank?.bankName || ''}
+                                    {cbank && <BankVersionBadge bank={cbank} />}
+                                </h5>
+                            </div>
+                        </div>
                     </div>
+                    <div className="px-4 py-4 flex flex-col flex-1 overflow-hidden">
 
                     <div className="flex-1 overflow-y-auto">
                         <Tabs defaultValue="tab1">
@@ -939,14 +1001,15 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                         </Tabs>
                     </div>
 
-                    <div className="text-right mt-6">
-                        <Button
-                            className="ltr:mr-2 rtl:ml-2"
-                            variant="plain"
-                            onClick={onDialogClose}
-                        >
-                            Fermer
-                        </Button>
+                        <div className="flex justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <Button
+                                className="rounded-full px-5"
+                                variant="plain"
+                                onClick={onDialogClose}
+                            >
+                                Fermer
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </Dialog>

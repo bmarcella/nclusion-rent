@@ -3,7 +3,6 @@ import Button from '@/components/ui/Button'
 import { getBankImages, getLordImages } from '@/services/firebase/BankService'
 import { useEffect, useState, useRef } from 'react'
 import { PiCheckFatFill, PiThumbsDownFill } from 'react-icons/pi'
-import GoogleMapApp from './Map'
 import CommentsBank from '../add/components/CommentsBank'
 import ImageGallery, { BankImage } from './components/ImageGallery'
 import ImageLordComp, { LordImage } from './components/ImageLord'
@@ -21,6 +20,9 @@ import { BiPrinter } from 'react-icons/bi'
 import AllTask from './components/AllTask'
 import Tabs from '@/components/ui/Tabs'
 import StepHistory from './components/StepHistory'
+import GoogleMapApp from './Map'
+import PrintableMap from './PrintableMap'
+import GoogleMapAppV2 from './MapV2'
 
 interface Props {
     bankId: string
@@ -60,6 +62,9 @@ const SubmissionReview = ({
     const [h3, setH3] = useState(null)
     const [pConfig, setPConfig] = useState(false)
     const [activeTab, setActiveTab] = useState('comments')
+    const [contractVersion, setContractVersion] = useState<'v1' | 'v2'>('v2')
+    const [headerSize, setHeaderSize] = useState<number>(14.8)
+    const [descSize, setDescSize] = useState<number>(13.5)
     const { authority } = useSessionUser((state) => state.user)
     const { t } = useTranslation()
     const role = authority?.[0] || null
@@ -169,12 +174,12 @@ const SubmissionReview = ({
 
     return (
         <>
-            <div className="flex gap-2 pt-6  space-y-6 rounded bg-white pl-1 mb-4 pr-1">
-                <div className="w-full">
+            <div className="flex items-center gap-4 pt-6 rounded bg-white pl-1 mb-4 pr-1">
+                <div className="flex-shrink-0">
                     <Button
                         loading={pdf}
                         variant="solid"
-                        className=" ml-4"
+                        className="ml-4 mb-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center gap-1"
                         icon={<BiPrinter />}
                         onClick={() => {
                             print()
@@ -183,7 +188,7 @@ const SubmissionReview = ({
                         {' '}
                     </Button>
                 </div>
-                <div>
+                <div className="flex items-center ml-auto">
                     <Checkbox
                         defaultChecked={false}
                         onChange={(e) => {
@@ -193,8 +198,8 @@ const SubmissionReview = ({
                         Outils
                     </Checkbox>
                 </div>
-                <div>
-                    {bank && bank.step != 'bankSteps.needContract' && (
+                {bank && bank.step != 'bankSteps.needContract' && (
+                    <div className="flex items-center">
                         <Checkbox
                             defaultChecked={false}
                             onChange={(e) => {
@@ -203,37 +208,102 @@ const SubmissionReview = ({
                         >
                             Contrat
                         </Checkbox>
-                    )}
-                </div>
-                {pConfig && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4  rounded bg-white p-2 mb-6">
+                    </div>
+                )}
+                {(contrat || bank?.step == 'bankSteps.needContract') && (
+                    <div className="flex items-center gap-2">
+                        <label
+                            htmlFor="contractVersion"
+                            className="text-sm font-medium text-gray-700"
+                        >
+                            Version
+                        </label>
+                        <select
+                            id="contractVersion"
+                            value={contractVersion}
+                            onChange={(e) =>
+                                setContractVersion(
+                                    e.target.value as 'v1' | 'v2',
+                                )
+                            }
+                            className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm"
+                        >
+                            <option value="v1">Contrat V1</option>
+                            <option value="v2">Contrat V2</option>
+                        </select>
+                    </div>
+                )}
+            </div>
+
+            {pConfig && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded bg-white p-4 mb-6 border border-gray-200">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Margin Contrats
+                        </label>
                         <Input
                             type="number"
-                            value={h3}
+                            value={h3 ?? ''}
                             placeholder="Margin Contrats"
                             onChange={(v: any) => {
                                 setH3(v.target.value)
                             }}
                         />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Margin Pictures
+                        </label>
                         <Input
                             type="number"
-                            value={h}
+                            value={h ?? ''}
                             placeholder="Margin Pictures"
                             onChange={(v: any) => {
                                 setH(v.target.value)
                             }}
                         />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Margin Details
+                        </label>
                         <Input
                             type="number"
-                            value={h2}
+                            value={h2 ?? ''}
                             placeholder="Margin Details"
                             onChange={(v: any) => {
                                 setH2(v.target.value)
                             }}
                         />
                     </div>
-                )}
-            </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Taille des articles (px)
+                        </label>
+                        <Input
+                            type="number"
+                            value={headerSize}
+                            placeholder="Taille des articles"
+                            onChange={(v: any) => {
+                                setHeaderSize(Number(v.target.value) || 0)
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Taille des descriptions (px)
+                        </label>
+                        <Input
+                            type="number"
+                            value={descSize}
+                            placeholder="Taille des descriptions"
+                            onChange={(v: any) => {
+                                setDescSize(Number(v.target.value) || 0)
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
 
             {ListBankStepsDetails.findIndex((step) => step.key == bank?.step) !=
                 -1 && (
@@ -257,7 +327,13 @@ const SubmissionReview = ({
             <div ref={contentRef} className="p-6 space-y-6">
 
                 {bank && (contrat || bank.step == 'bankSteps.needContract') && (
-                    <LeaseContractForm bank={bank} pdf={pdf}></LeaseContractForm>
+                    <LeaseContractForm
+                        bank={bank}
+                        pdf={pdf}
+                        version={contractVersion}
+                        headerSize={headerSize}
+                        descSize={descSize}
+                    />
                 )}
 
                 {bank &&
@@ -287,9 +363,7 @@ const SubmissionReview = ({
                 </h2>
                 {/* Map section */}
                 <div className="w-full h-100 mb-6 rounded-lg shadow-lg overflow-hidden">
-                    {bank && (
-                        <GoogleMapApp position={bank.location}></GoogleMapApp>
-                    )}
+                    { bank && <GoogleMapAppV2 position={bank.location} /> }
                 </div>
 
                 {/* Photos */}
@@ -428,129 +502,159 @@ const SubmissionReview = ({
                     ></div>
                 )}
 
-                {/* Action buttons */}
+                {/* Action footer */}
                 {!pdf && (
-                    <div className="flex justify-around items-center pt-6">
-                        {bank &&
-                            bank.step == 'bankSteps.needRenovation' &&
-                            bank?.approve && (
-                                <Button
-                                    className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
-                                    onClick={() =>
-                                        onChangeState(
-                                            <Rejected
-                                                bankId={bankId}
-                                                userId={userId || ''}
-                                                onSubmit={() => {
-                                                    onRenovOk()
-                                                }}
-                                            />,
-                                            'Approbation',
-                                        )
-                                    }
-                                >
-                                    <PiCheckFatFill /> Rénovation terminée
-                                </Button>
-                            )}
+                    <div className="sticky bottom-4 mt-8 z-10">
+                        <div className="rounded-2xl border border-gray-200 bg-white/90 backdrop-blur-md shadow-lg px-5 py-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                {/* Status / context label */}
+                                <div className="flex items-center gap-3">
+                                    <span className="inline-flex h-2.5 w-2.5 rounded-full bg-pink-500 animate-pulse" />
+                                    <div className="flex flex-col">
+                                        <span className="text-xs uppercase tracking-wide text-gray-500">
+                                            Étape actuelle
+                                        </span>
+                                        <span className="text-sm font-semibold text-gray-800">
+                                            {bank?.step
+                                                ? t('bank.' + bank.step)
+                                                : '—'}
+                                        </span>
+                                    </div>
+                                </div>
 
-                        {canSignedContract() && (
-                            <Button
-                                className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
-                                onClick={() =>
-                                    onChangeState(
-                                        <Rejected
-                                            bankId={bankId}
-                                            userId={userId || ''}
-                                            onSubmit={() => {
-                                                onContratOk()
-                                            }}
-                                        />,
-                                        'Approbation',
-                                    )
-                                }
-                            >
-                                <PiCheckFatFill /> Contrat Signé
-                            </Button>
-                        )}
+                                {/* Destructive / secondary actions */}
+                                <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+                                    {canReject() && (
+                                        <Button
+                                            className="bg-white hover:bg-red-50 text-red-600 border border-red-300 rounded-full flex items-center gap-1 px-4"
+                                            onClick={() =>
+                                                onChangeState(
+                                                    <Rejected
+                                                        bankId={bankId}
+                                                        userId={userId || ''}
+                                                        onSubmit={onRejectOk}
+                                                    />,
+                                                )
+                                            }
+                                        >
+                                            <PiThumbsDownFill className="text-red-500" />
+                                            Rejeté
+                                        </Button>
+                                    )}
 
-                        {canValidate() && (
-                            <Button
-                                className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
-                                onClick={() =>
-                                    onChangeState(
-                                        <Rejected
-                                            bankId={bankId}
-                                            userId={userId || ''}
-                                            onSubmit={(data) => {
-                                                onApproveOk(data)
-                                            }}
-                                        />,
-                                        'Approbation',
-                                    )
-                                }
-                            >
-                                <PiCheckFatFill /> Validé
-                            </Button>
-                        )}
+                                    {canPending() && (
+                                        <Button
+                                            className="bg-white hover:bg-amber-50 text-amber-700 border border-amber-300 rounded-full flex items-center gap-1 px-4"
+                                            onClick={() =>
+                                                onChangeState(
+                                                    <Rejected
+                                                        bankId={bankId}
+                                                        userId={userId || ''}
+                                                        onSubmit={(data) => {
+                                                            onPendingOk(data)
+                                                        }}
+                                                    />,
+                                                    'Consideration',
+                                                )
+                                            }
+                                        >
+                                            <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+                                            Attente
+                                        </Button>
+                                    )}
 
-                        {canApprove() && (
-                            <Button
-                                className="bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center gap-1"
-                                onClick={() =>
-                                    onChangeState(
-                                        <Rejected
-                                            bankId={bankId}
-                                            userId={userId || ''}
-                                            onSubmit={() => {
-                                                onPermitOk()
-                                            }}
-                                        />,
-                                        'Approbation',
-                                    )
-                                }
-                            >
-                                <PiCheckFatFill /> Approuvé
-                            </Button>
-                        )}
+                                    {/* Primary action — only one is ever visible at a time per flow */}
+                                    {bank &&
+                                        bank.step ==
+                                            'bankSteps.needRenovation' &&
+                                        bank?.approve && (
+                                            <Button
+                                                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-full flex items-center gap-2 px-5 shadow-sm"
+                                                onClick={() =>
+                                                    onChangeState(
+                                                        <Rejected
+                                                            bankId={bankId}
+                                                            userId={
+                                                                userId || ''
+                                                            }
+                                                            onSubmit={() => {
+                                                                onRenovOk()
+                                                            }}
+                                                        />,
+                                                        'Approbation',
+                                                    )
+                                                }
+                                            >
+                                                <PiCheckFatFill />
+                                                Rénovation terminée
+                                            </Button>
+                                        )}
 
-                        <>
-                            {canReject() && (
-                                <Button
-                                    className="bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center gap-1"
-                                    onClick={() =>
-                                        onChangeState(
-                                            <Rejected
-                                                bankId={bankId}
-                                                userId={userId || ''}
-                                                onSubmit={onRejectOk}
-                                            />,
-                                        )
-                                    }
-                                >
-                                    <PiThumbsDownFill /> Rejeté
-                                </Button>
-                            )}
+                                    {canSignedContract() && (
+                                        <Button
+                                            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-full flex items-center gap-2 px-5 shadow-sm"
+                                            onClick={() =>
+                                                onChangeState(
+                                                    <Rejected
+                                                        bankId={bankId}
+                                                        userId={userId || ''}
+                                                        onSubmit={() => {
+                                                            onContratOk()
+                                                        }}
+                                                    />,
+                                                    'Approbation',
+                                                )
+                                            }
+                                        >
+                                            <PiCheckFatFill />
+                                            Contrat Signé
+                                        </Button>
+                                    )}
 
-                            {canPending() && (
-                                <Button
-                                    className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full"
-                                    onClick={() =>
-                                        onChangeState(
-                                            <Rejected
-                                                bankId={bankId}
-                                                userId={userId || ''}
-                                                onSubmit={(data) => {
-                                                    onPendingOk(data)
-                                                }}
-                                            />,
-                                            'Consideration',
-                                        )
-                                    }
-                                >
-                                    Attente
-                                </Button>
-                            )}
-                        </>
+                                    {canValidate() && (
+                                        <Button
+                                            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-full flex items-center gap-2 px-5 shadow-sm"
+                                            onClick={() =>
+                                                onChangeState(
+                                                    <Rejected
+                                                        bankId={bankId}
+                                                        userId={userId || ''}
+                                                        onSubmit={(data) => {
+                                                            onApproveOk(data)
+                                                        }}
+                                                    />,
+                                                    'Approbation',
+                                                )
+                                            }
+                                        >
+                                            <PiCheckFatFill />
+                                            Validé
+                                        </Button>
+                                    )}
+
+                                    {canApprove() && (
+                                        <Button
+                                            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-full flex items-center gap-2 px-5 shadow-sm"
+                                            onClick={() =>
+                                                onChangeState(
+                                                    <Rejected
+                                                        bankId={bankId}
+                                                        userId={userId || ''}
+                                                        onSubmit={() => {
+                                                            onPermitOk()
+                                                        }}
+                                                    />,
+                                                    'Approbation',
+                                                )
+                                            }
+                                        >
+                                            <PiCheckFatFill />
+                                            Approuvé
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

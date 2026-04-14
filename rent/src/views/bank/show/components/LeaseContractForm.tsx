@@ -6,12 +6,15 @@ import n2words from 'n2words'
 import useTranslation from '@/utils/hooks/useTranslation'
 import FrenchDate from './FrenchDate '
 
-interface Props {
-    bank: Bank,
-    pdf?: boolean
-}
-
 type ContractVersion = 'v1' | 'v2'
+
+interface Props {
+    bank: Bank
+    pdf?: boolean
+    version?: ContractVersion
+    headerSize?: number
+    descSize?: number
+}
 
 interface InlineFieldProps {
     children?: ReactNode
@@ -27,19 +30,27 @@ const InlineField = ({ children, className = '' }: InlineFieldProps) => (
 )
 
 const SectionTitle = ({ children }: { children: ReactNode }) => (
-    <h2 className="text-xl font-semibold mt-6 mb-3">{children}</h2>
+    <h2
+        className="font-semibold mt-6 mb-3"
+        style={{ fontSize: 'var(--contract-header-size, 1.25rem)' }}
+    >
+        {children}
+    </h2>
 )
 
 const WarningText = ({ children }: { children: ReactNode }) => (
     <p className="text-red-400 text-lg mt-3">{children}</p>
 )
 
-const LeaseContractForm = ({ bank, pdf }: Props) => {
+const LeaseContractForm = ({
+    bank,
+    version = 'v2',
+    headerSize = 14.7,
+    descSize = 13.5,
+}: Props) => {
     const [landlord, setLandlord] = useState<Proprio | null>(null)
     const [landlordRegion, setLandlordRegion] = useState<RegionType | null>(null)
     const [bankRegion, setBankRegion] = useState<RegionType | null>(null)
-    const [contractVersion, setContractVersion] =
-        useState<ContractVersion>('v1')
 
     const { t } = useTranslation()
 
@@ -613,32 +624,20 @@ const LeaseContractForm = ({ bank, pdf }: Props) => {
         )
     }
 
-    if (!landlord) return null
+    const scopeId = `contract-scope`
+    const overrideCss =
+        (headerSize
+            ? `.${scopeId} h1, .${scopeId} h2, .${scopeId} h3 { font-size: ${headerSize}px !important; }`
+            : '') +
+        (descSize
+            ? ` .${scopeId} p, .${scopeId} span, .${scopeId} div { font-size: ${descSize}px !important; }`
+            : '')
 
     return (
-        <div className="mx-auto">
-           { !pdf && <div className="mb-4 flex items-center gap-3">
-                <label
-                    htmlFor="contractVersion"
-                    className="font-medium text-gray-700"
-                >
-                    Version du contrat
-                </label>
-
-                <select
-                    id="contractVersion"
-                    value={contractVersion}
-                    onChange={(e) =>
-                        setContractVersion(e.target.value as ContractVersion)
-                    }
-                    className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value="v1">Contrat V1</option>
-                    <option value="v2">Contrat V2</option>
-                </select>
-            </div>}
-
-            {contractVersion === 'v1' ? renderContractV1() : renderContractV2()}
+        <div className={`mx-auto ${scopeId}`}>
+            {overrideCss && <style>{overrideCss}</style>}
+            {landlord &&
+                (version === 'v1' ? renderContractV1() : renderContractV2())}
         </div>
     )
 }
