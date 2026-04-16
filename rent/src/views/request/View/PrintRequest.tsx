@@ -49,7 +49,6 @@ const PrintRequest: React.FC<Props> = ({ request }) => {
         documentTitle: `Request_${request.id}`,
     })
 
-    //
     const print = async () => {
         setPdf(true)
         setTimeout(async () => {
@@ -58,7 +57,7 @@ const PrintRequest: React.FC<Props> = ({ request }) => {
         }, 2000)
     }
 
-    // ---- Section renderers ----------------------------------------------------
+    // ---- Section renderers ----------------
     const renderDivers = () => {
         if (!request.divers) return null
         const { price, description, target_date, categorie } = request.divers

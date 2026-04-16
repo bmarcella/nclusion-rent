@@ -15,6 +15,7 @@ import { authorize } from '../common/Damba/v1/auth/AuthMiddleware';
 import { parseBoolean, SameSiteOption, mustEnv, AppShutdownParams } from '../common/Damba/v1/config/ConfigHelper';
 import { IAppConfig } from '../common/Damba/v1/config/IAppConfig';
 import { extrasToJSON } from '../common/Damba/v1/Extras';
+import { firebaseAuth, firestore } from '../firebase/admin';
 
 dotenv.config();
 
@@ -84,8 +85,12 @@ export const AppConfig: IAppConfig<DataSource> = {
   call: {
     helper: () => {
       const resend = new Resend(process.env.RESEND_API_KEY!);
+      const db = firestore();
+      const fbAuth = firebaseAuth();
       return (req: Request, _res: Response, next: NextFunction) => {
         req.resend = resend;
+        req.firestore = db;
+        req.firebaseAuth = fbAuth;
         next();
       };
     },

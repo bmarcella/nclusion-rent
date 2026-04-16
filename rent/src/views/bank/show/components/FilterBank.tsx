@@ -66,7 +66,7 @@ interface Props {
     proprio: any
     t: (key: string) => string
     onChangeRegion: (id: number) => void
-    onChangeAgent?: (d: string) => void
+    onChangeAgent?: (d?: string) => void
     onChangeDate?: (start?: Date, end?: Date) => void
     onChangeMap?: (value: boolean) => void
     isMap?: boolean
@@ -191,7 +191,7 @@ function FilterBank({
                     placeholder="Region"
                     options={regions}
                     value={regionValue}
-                    onChange={(options: OptionType) => {
+                    onChange={(options: OptionType | null) => {
                         if (!options) {
                             setSelectedRegions(0)
                             onChangeRegion(0)
@@ -208,7 +208,7 @@ function FilterBank({
                     placeholder="Agent"
                     options={agents}
                     value={agentValue}
-                    onChange={(options: OptionType) => {
+                    onChange={(options: OptionType | null) => {
                         if (!options || options.value == undefined) {
                             setSelectedAgents(undefined)
                             onChangeAgent(undefined)

@@ -1,33 +1,17 @@
-import appConfig from '@/configs/app.config'
-import {
-    TOKEN_TYPE,
-    REQUEST_HEADER_AUTH_KEY,
-    TOKEN_NAME_IN_STORAGE,
-} from '@/constants/api.constant'
+import { TOKEN_TYPE, REQUEST_HEADER_AUTH_KEY } from '@/constants/api.constant'
+import FirebaseAuth from '@/services/firebase/FirebaseAuth'
 import type { InternalAxiosRequestConfig } from 'axios'
 
-const AxiosRequestIntrceptorConfigCallback = (
+const AxiosRequestIntrceptorConfigCallback = async (
     config: InternalAxiosRequestConfig,
 ) => {
-    const storage = appConfig.accessTokenPersistStrategy
-
-    if (storage === 'localStorage' || storage === 'sessionStorage') {
-        let accessToken = ''
-
-        if (storage === 'localStorage') {
-            accessToken = localStorage.getItem(TOKEN_NAME_IN_STORAGE) || ''
-        }
-
-        if (storage === 'sessionStorage') {
-            accessToken = sessionStorage.getItem(TOKEN_NAME_IN_STORAGE) || ''
-        }
-
-        if (accessToken) {
-            config.headers[REQUEST_HEADER_AUTH_KEY] =
-                `${TOKEN_TYPE}${accessToken}`
-        }
+    const user = FirebaseAuth.currentUser
+    if (user) {
+        // getIdToken() returns the cached Firebase ID token and auto-refreshes
+        // it if it is within ~5 minutes of its 1-hour expiry.
+        const token = await user.getIdToken()
+        config.headers[REQUEST_HEADER_AUTH_KEY] = `${TOKEN_TYPE}${token}`
     }
-
     return config
 }
 

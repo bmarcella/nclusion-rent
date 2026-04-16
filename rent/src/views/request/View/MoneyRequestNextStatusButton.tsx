@@ -6,6 +6,7 @@ import { Button, Card, Input } from '@/components/ui'
 import StatusPopup from './StatusPopup'
 import { useMemo, useState } from 'react'
 import { isBeforeToday } from '@/views/Entity'
+import OtpDialog from './OtpDialog'
 
 interface Props {
     request: IRequest
@@ -34,7 +35,14 @@ export default function MoneyRequestNextStatusButton({
     )
     const [comment, setComment] = useState<string>()
     const [canClick, setCanClick] = useState<boolean>(true)
-    const handleClick = async () => {
+    const [otpOpen, setOtpOpen] = useState(false)
+
+    const handleClick = () => {
+        if (!nextStep) return
+        setOtpOpen(true)
+    }
+
+    const handleOtpVerified = async () => {
         if (!nextStep) return
         setCanClick(false)
         await onNextStatus(nextStep.value, true, currentStatus, comment)
@@ -124,6 +132,14 @@ export default function MoneyRequestNextStatusButton({
                         </div>
                     )}
                 </Card>
+            )}
+            {request.id && (
+                <OtpDialog
+                    isOpen={otpOpen}
+                    requestId={request.id}
+                    onClose={() => setOtpOpen(false)}
+                    onVerified={handleOtpVerified}
+                />
             )}
         </>
     )

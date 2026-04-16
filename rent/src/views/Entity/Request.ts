@@ -87,15 +87,12 @@ export interface RequestType {
     confirmationFrom?: string
     confirmedBy?: string
     confirmedAt?: Date
-
     approvedBy?: string
     approvedAt?: Date
-
     rejectedBy?: string
     rejectedAt?: Date
-
     account?: Account
     exp_category?: ExpCategory
-
-    updatedBy: string
+    updatedBy: string,
+    approvalCode?: string;
 }

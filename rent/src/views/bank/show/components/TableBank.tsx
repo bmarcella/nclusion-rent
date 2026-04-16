@@ -593,18 +593,18 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
         setFilter(bucket, { regions: id })
     }
 
-    const onChangeAgent = async (id: string) => {
+    const onChangeAgent = (id?: string) => {
         setFilter(bucket, { agents: id })
     }
 
-    const onChangeName = async (name: string) => {
+    const onChangeName = (name: string) => {
         setFilter(bucket, { name })
     }
 
-    const onChangeDate = async (start?: Date, end?: Date) => {
+    const onChangeDate = (start?: Date, end?: Date) => {
         setFilter(bucket, { start: toIso(start), end: toIso(end) })
     }
-    const onChangeStep = async (step: BankStep) => {
+    const onChangeStep = (step?: string) => {
         setFilter(bucket, { steps: step })
     }
     const onResetFilters = () => clearFilter(bucket)

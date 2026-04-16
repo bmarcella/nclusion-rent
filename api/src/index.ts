@@ -18,6 +18,7 @@ import { SessionUser } from './common/Entity/UserDto';
 import { Mail } from './common/Damba/mail';
 import { ExtrasMap } from './common/Damba/v1/service/IServiceDamba';
 import { DambaRepository } from './common/Damba/v2/dao';
+import type admin from 'firebase-admin';
 
 declare global {
   namespace Express {
@@ -31,7 +32,11 @@ declare global {
       DRepository: DambaRepository<DataSource>;
       extras: ExtrasMap;
       data: any;
-      resend: any
+      resend: any;
+      firestore: FirebaseFirestore.Firestore;
+      firebaseAuth: admin.auth.Auth;
+      firebaseUser?: admin.auth.DecodedIdToken;
+      userProfile?: any;
     }
   }
 }

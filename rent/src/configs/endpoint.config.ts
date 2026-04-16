@@ -7,6 +7,8 @@ const endpointConfig = {
     forgotPassword: '/forgot-password',
     resetPassword: '/reset-password',
     mail: '/mail',
+    otpCreate: '/otp/createOtpForRequest',
+    otpVerify: '/otp/verifyOtpForRequest',
 }
 
 export default endpointConfig

@@ -1429,6 +1429,30 @@
         }
       ],
       "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "RequestOtp",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "id_user", "order": "ASCENDING" },
+        { "fieldPath": "request_id", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "ASCENDING" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "RequestOtp",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "id_user", "order": "ASCENDING" },
+        { "fieldPath": "request_id", "order": "ASCENDING" },
+        { "fieldPath": "code", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ],
+      "density": "SPARSE_ALL"
     }
   ],
   "fieldOverrides": [

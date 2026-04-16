@@ -12,7 +12,7 @@ interface OptionType {
 
 interface Props {
     onChangeDate?: (start?: Date, end?: Date) => void
-    onChangeStep: (d: string) => void
+    onChangeStep: (d?: string) => void
     inBankSteps?: string[]
     t: (key: string) => string
     all: boolean
@@ -41,11 +41,11 @@ export const convertToSelectOptionsProprio = (items: Proprio[]) => {
 }
 
 export const convertToSelectOptionsSteps = (items: string[], t: any) => {
-    const a = items.map((obj) => ({
+    const a: OptionType[] = items.map((obj) => ({
         value: obj,
         label: t('bank.' + obj),
     }))
-    a.unshift({ label: 'Tout', value: undefined })
+    a.unshift({ label: 'Tout', value: undefined as any })
     return a
 }
 
@@ -62,7 +62,7 @@ function FilterMyBank({
     initialStep,
     onReset,
 }: Props) {
-    const bs = inBankSteps ? inBankSteps : bankSteps
+    const bs: string[] = inBankSteps ? inBankSteps : [...bankSteps]
     const [start, setStart] = useState<Date | undefined>(initialStart)
     const [end, setEnd] = useState<Date | undefined>(initialEnd)
     const [name, setName] = useState<string>(initialName ?? '')
@@ -103,10 +103,10 @@ function FilterMyBank({
                     placeholder="Etape"
                     options={steps}
                     value={stepOptionValue}
-                    onChange={(options: OptionType) => {
+                    onChange={(options: OptionType | null) => {
                         if (!options) {
                             setStepValue(undefined)
-                            onChangeStep(undefined as any)
+                            onChangeStep(undefined)
                             return
                         }
                         setStepValue(options.value as string)
