@@ -26,8 +26,15 @@ import {
     addDoc,
     getDoc,
     updateDoc,
+    limit,
+    doc,
 } from 'firebase/firestore'
-import { useEffect, useMemo, useState } from 'react'
+import AsyncSelect from 'react-select/async'
+import { motion } from 'framer-motion'
+import { useEffect, useMemo, useState, useCallback } from 'react'
+import { HiChevronDown, HiRefresh, HiEye, HiMap } from 'react-icons/hi'
+import GoogleMapApp, { useStreetViewAvailable } from '@/views/bank/show/Map'
+import { useJsApiLoader } from '@react-google-maps/api'
 import { Controller, useForm } from 'react-hook-form'
 import { z, ZodType } from 'zod'
 
@@ -47,6 +54,166 @@ export const convertStringToSelectOptions = (
         value: obj,
         label: t ? t(`${key}.${obj}`) : obj,
     }))
+}
+
+export const loadLandlordOptions = async (inputValue: string, new_options:  { value: string; label: string }[]=[]) => {
+    try {
+        const search = inputValue.toLowerCase().trim()
+        console.log('loadLandlordOptions input:', inputValue, 'normalized:', search)
+
+        let q
+        if (search) {
+            q = query(
+                Landlord,
+                where('type_person', '==', 'proprietaire'),
+                where('fullName_lower', '>=', search),
+                where('fullName_lower', '<=', search + '\uf8ff'),
+                limit(20),
+            )
+        } else {
+            q = query(
+                Landlord,
+                where('type_person', '==', 'proprietaire'),
+                limit(20),
+            )
+        }
+
+        const snapshot = await getDocs(q);
+
+        const options: { value: string; label: string }[] = []
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data() as Proprio
+            options.push({
+                value: docSnap.id,
+                label: data.fullName,
+            })
+        })
+        
+        if(new_options.length==0) return options;
+        const merged = [...options, ...new_options]
+        const unique = merged.filter(
+            (opt, index, arr) =>
+                arr.findIndex((x) => x.value === opt.value) === index,
+        )
+       return unique
+    } catch (error) {
+        console.error('loadLandlordOptions error:', error)
+        return []
+    }
+}
+
+export const loadSingleLandlord = async (landlordId: string) => {
+    const snapshot = await getDoc(doc(Landlord, landlordId))
+    if (snapshot.exists()) {
+        const data = snapshot.data() as Proprio
+        return { value: snapshot.id, label: data.fullName }
+    }
+    return null
+}
+
+
+export const runSpeedTest = async (
+    onProgress?: (phase: 'download' | 'upload') => void,
+): Promise<{ download: number; upload: number }> => {
+    // Download test: fetch 5MB from Cloudflare
+    onProgress?.('download')
+    const downloadBytes = 5_000_000
+    const dlStart = performance.now()
+    const dlResponse = await fetch(
+        `https://speed.cloudflare.com/__down?bytes=${downloadBytes}&cachebust=${Date.now()}`,
+    )
+    await dlResponse.arrayBuffer()
+    const dlTime = (performance.now() - dlStart) / 1000
+    const downloadMbps = Math.round(((downloadBytes * 8) / dlTime / 1_000_000) * 100) / 100
+    // Upload test: send 2MB to Cloudflare
+    onProgress?.('upload')
+    const uploadBytes = 2_000_000
+    const uploadData = new ArrayBuffer(uploadBytes)
+    const ulStart = performance.now()
+    await fetch('https://speed.cloudflare.com/__up', {
+        method: 'POST',
+        body: uploadData,
+    })
+    const ulTime = (performance.now() - ulStart) / 1000
+    const uploadMbps = Math.round(((uploadBytes * 8) / ulTime / 1_000_000) * 100) / 100
+    return { download: downloadMbps, upload: uploadMbps };
+}
+
+export const getPrecisePosition = (
+    targetAccuracy = 10,
+    maxTimeoutMs = 30000,
+    minDurationMs = 8000,
+    stableSamples = 3,
+): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation not supported'))
+            return
+        }
+
+        let bestPosition: GeolocationPosition | null = null
+        let goodSampleCount = 0
+        let settled = false
+        const startedAt = Date.now()
+
+        const finish = (
+            outcome: 'resolve' | 'reject',
+            payload: GeolocationPosition | Error,
+        ) => {
+            if (settled) return
+            settled = true
+            navigator.geolocation.clearWatch(watchId)
+            clearTimeout(hardTimeout)
+            if (outcome === 'resolve') resolve(payload as GeolocationPosition)
+            else reject(payload as Error)
+        }
+
+        const watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                const acc = position.coords.accuracy
+                if (!bestPosition || acc < bestPosition.coords.accuracy) {
+                    bestPosition = position
+                }
+
+                if (acc <= targetAccuracy) {
+                    goodSampleCount += 1
+                } else {
+                    goodSampleCount = 0
+                }
+
+                const elapsed = Date.now() - startedAt
+                // Only resolve once we've sampled long enough AND have consecutive
+                // good readings — first GPS fixes are often optimistic.
+                if (
+                    goodSampleCount >= stableSamples &&
+                    elapsed >= minDurationMs &&
+                    bestPosition
+                ) {
+                    finish('resolve', bestPosition)
+                }
+            },
+            (error) => {
+                // Permission denied / unavailable are fatal; transient errors are
+                // ignored so the watcher can keep trying until maxTimeoutMs.
+                if (
+                    error.code === error.PERMISSION_DENIED ||
+                    error.code === error.POSITION_UNAVAILABLE
+                ) {
+                    finish('reject', error)
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: maxTimeoutMs,
+                maximumAge: 0,
+            },
+        )
+
+        const hardTimeout = setTimeout(() => {
+            if (bestPosition) finish('resolve', bestPosition)
+            else finish('reject', new Error('Could not get location'))
+        }, maxTimeoutMs)
+    })
 }
 
 const schema: ZodType<Partial<Bank>> = z.object({
@@ -90,12 +257,12 @@ function InfoBank({
     isEdit = false,
     userId,
 }: FormProps) {
-    const [data, setData] = useState<Proprio[]>([])
-    const [landlordsOptions, setLandlordsOptions] = useState<any[]>([])
-    const [refsOptions, setRefsOptions] = useState<any[]>([])
+    const [selectedLandlord, setSelectedLandlord] = useState<{
+        value: string
+        label: string
+    } | null>(null)
     const [typeOptions, setTypeOptions] = useState<any[]>(Regions[0].cities)
     const [isSubmitting, setSubmitting] = useState(false)
-    const [loading, setLoading] = useState(false)
     const [location, setLocation] = useState<{
         lat: number
         lng: number
@@ -103,54 +270,58 @@ function InfoBank({
     const [regions, setRegions] = useState([]) as any
     const [hideReg, setHideReg] = useState(false)
     const { authority, proprio } = useSessionUser((state) => state.user)
-    const [ploading, setPloading] = useState(false)
     const { t } = useTranslation()
-    const fetchLandlords = async () => {
-        try {
-            setPloading(true)
-            setLoading(true)
-            const q = query(
-                Landlord,
-                where('type_person', '==', 'proprietaire'),
-            )
-            const snapshot = await getDocs(q)
-            const landlords: Proprio[] = []
+    const [selectKey, setSelectKey] = useState(0)
+    const [extraLandlords, setExtraLandlords] = useState<{ value: string; label: string }[]>([])
+    const [mapOpen, setMapOpen] = useState(false)
+    const [recapturing, setRecapturing] = useState(false)
+    const [streetView, setStreetView] = useState(false)
+    const [tilt3d, setTilt3d] = useState(false)
+    const { isLoaded: mapsLoaded } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_APIKEY,
+        mapIds: [import.meta.env.VITE_GOOGLE_MAP_ID],
+    })
+    const streetViewAvailable = useStreetViewAvailable(location, mapsLoaded)
 
-            snapshot.forEach((doc) => {
-                const data = doc.data() as Proprio
-                data.id = doc.id
-                landlords.push(data)
-            })
-            const persons = await convertToSelectOptions(landlords)
-            setLandlordsOptions(persons)
-            setRefsOptions(persons)
-            setData(landlords)
-            setLoading(false)
-            setPloading(false)
-        } catch (err) {
-            console.error('Error fetching landlords:', err)
-            setLoading(false)
-            setPloading(false)
-        }
+
+    const addNewProprio = async (newData: Proprio) => {
+        const option = {
+        value: newData.id,
+        label: newData.fullName,
+    }
+    setValue('landlord', newData.id, { shouldValidate: true })
+    setSelectedLandlord(option)
+    setExtraLandlords((prev) => [option, ...prev])
+    setSelectKey((prev) => prev + 1)
     }
 
-    const addNewProprio = async (new_data: Proprio) => {
-        await fetchLandlords()
-        setValue('landlord', new_data.id)
+    const recapturePosition = () => {
+        setRecapturing(true)
+        getPrecisePosition().then((position) => {
+            const { latitude, longitude } = position.coords
+            setLocation({ lat: latitude, lng: longitude })
+            setRecapturing(false)
+        }).catch((err) => {
+            onError(`Error: ${err.message}`)
+            setRecapturing(false)
+        })
     }
 
     useEffect(() => {
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords
-                setLocation({ lat: latitude, lng: longitude })
-            },
-            (err) => {
-                onError(`Error: ${err.message}`)
-            },
-        )
-        if (landlordsOptions.length === 0) {
-            fetchLandlords()
+        getPrecisePosition().then((position) => {
+            const { latitude, longitude } = position.coords
+            setLocation({ lat: latitude, lng: longitude })
+        }).catch((err) => {
+            onError(`Error: ${err.message}`)
+        });
+
+        const landlordId = isEdit
+            ? defaultValues?.landlord?.id || defaultValues?.landlord
+            : defaultValues?.landlord
+        if (landlordId && typeof landlordId === 'string') {
+            loadSingleLandlord(landlordId).then((opt) => {
+                if (opt) setSelectedLandlord(opt)
+            })
         }
         if (isEdit) {
             const region =
@@ -214,6 +385,13 @@ function InfoBank({
             urgency: defaultValues?.urgency,
         },
     })
+
+    
+    const handleLoadOptions = useCallback(
+        (inputValue: string) => loadLandlordOptions(inputValue, extraLandlords),
+        [],
+    )
+
     const addNewBank = async (data: FormValuesInfo) => {
         try {
             setSubmitting(true)
@@ -243,8 +421,12 @@ function InfoBank({
     }
 
     const onSubmitInfo = async (data: FormValuesInfo) => {
+        if (!location) {
+            onError(t('bank.locationRequired') || 'La position GPS est requise')
+            setMapOpen(true)
+            return
+        }
         setSubmitting(true)
-
         setValue('bank', data)
         if (isEdit) {
             nextStep(1, data)
@@ -284,6 +466,69 @@ function InfoBank({
     return (
         <Form onSubmit={handleSubmit(onSubmitInfo)}>
             <div className="flex flex-col gap-6">
+                {/* GPS Location Map */}
+                <Card bordered>
+                    <div
+                        className="flex items-center justify-between cursor-pointer"
+                        onClick={() => setMapOpen(!mapOpen)}
+                    >
+                        <h6 className="text-gray-900 dark:text-gray-100">
+                            {t('bank.location')} {location ? `(${location.lat.toFixed(5)}, ${location.lng.toFixed(5)})` : ''}
+                        </h6>
+                        <motion.span
+                            animate={{ rotate: mapOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <HiChevronDown className="text-lg" />
+                        </motion.span>
+                    </div>
+                    {mapOpen && (
+                        <div className="mt-4">
+                            {location ? (
+                                <GoogleMapApp position={location} streetView={streetView} tilt3d={tilt3d} />
+                            ) : (
+                                <div className="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-700 rounded">
+                                    <span className="text-gray-400">
+                                        {t('bank.capturingPosition') || 'Capturing position...'}
+                                    </span>
+                                </div>
+                            )}
+                            <div className="flex items-center justify-end gap-3 mt-3">
+                                <label className="flex items-center gap-1.5 cursor-pointer text-sm text-gray-600 dark:text-gray-400">
+                                    <Checkbox
+                                        checked={tilt3d}
+                                        onChange={(checked) => setTilt3d(checked)}
+                                    />
+                                    3D
+                                </label>
+                                {streetViewAvailable && (
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="plain"
+                                        icon={streetView ? <HiMap /> : <HiEye />}
+                                        onClick={() => setStreetView(!streetView)}
+                                    >
+                                        {streetView
+                                            ? (t('bank.mapView') || 'Carte')
+                                            : (t('bank.streetView') || 'Street View')}
+                                    </Button>
+                                )}
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="plain"
+                                    loading={recapturing}
+                                    icon={<HiRefresh />}
+                                    onClick={recapturePosition}
+                                >
+                                    {t('bank.recapturePosition') || 'Recapturer la position'}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </Card>
+
                 {/* Section 1: Property Identification */}
                 <Card bordered>
                     <SectionTitle>
@@ -412,30 +657,28 @@ function InfoBank({
                             invalid={!!errors.landlord}
                             errorMessage={errors.landlord?.message as string}
                         >
+                    
                             <Controller
                                 name="landlord"
                                 control={control}
                                 render={({ field }) => (
                                     <div className="flex items-center gap-2">
-                                        <Select
-                                            isLoading={ploading}
-                                            className="w-full"
-                                            placeholder={t('common.select')}
-                                            options={landlordsOptions}
-                                            value={
-                                                refsOptions.find(
-                                                    (option: any) =>
-                                                        option.value ==
-                                                        field.value,
-                                                ) || null
-                                            }
-                                            onChange={(option: any) =>
-                                                field.onChange(option?.value)
-                                            }
-                                        />
-                                        <AddProprioPopup
-                                            done={addNewProprio}
-                                        />
+                                        <div className="w-full">
+                                            <AsyncSelect
+                                                key={selectKey}
+                                                classNamePrefix="react-select"
+                                                placeholder={t('common.select')}
+                                                defaultOptions
+                                                cacheOptions = {false}
+                                                loadOptions={handleLoadOptions}
+                                                value={selectedLandlord}
+                                                onChange={(option: any) => {
+                                                    field.onChange(option?.value || '')
+                                                    setSelectedLandlord(option)
+                                                }}
+                                            />
+                                        </div>
+                                        <AddProprioPopup done={addNewProprio} />
                                     </div>
                                 )}
                             />
