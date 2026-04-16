@@ -167,7 +167,7 @@ const LeaseContractForm = ({
                         <strong>NYLC S.A.</strong>, société anonyme constituée en
                         vertu des lois haïtiennes, ayant son siège social au #11,
                         rue Ogé, Pétion-Ville, Delmas, Haiti. Représentée par
-                        Monsieur
+                        Monsieur/Madame
                         <InlineField className="w-auto ml-2">
                             {/* Representative name */}
                         </InlineField>
