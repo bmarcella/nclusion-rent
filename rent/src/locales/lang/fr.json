@@ -558,7 +558,8 @@
         "addBank": "Ajouter Banque",
         "thankyou": "Merci",
         "back": "Retour",
-        "previous": "Précédent"
+        "previous": "Précédent",
+        "reset": "Réinitialiser"
     },
     "upload": {
         "maxSize": "Taille maximale : 15 Mo",

@@ -69,6 +69,12 @@ import GoogleMapWithMarkers from '../GoogleMapWithMarkers'
 import ChangeLocation from '../../add/components/ChangeLocation'
 import Currency from '@/views/shared/Currency'
 import ImageSignedContract from '../../add/components/ImageSignedContract'
+import {
+    useBankFilterStore,
+    pickBucket,
+    toDate,
+    toIso,
+} from '@/store/bankFilterStore'
 
 const { Tr, Th, Td, THead, TBody } = Table
 const pageSizeOption = [
@@ -77,6 +83,8 @@ const pageSizeOption = [
     { value: 100, label: '100 / page' },
     { value: 200, label: '200 / page' },
 ]
+
+const EMPTY_FILTERS = {} as const
 
 type Option = {
     value: number
@@ -107,12 +115,21 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
     const navigate = useNavigate()
 
     const { userId, proprio, authority } = useSessionUser((state) => state.user)
-    const [regions, setRegions] = useState<number>(0)
-    const [agents, setAgents] = useState<string>()
-    const [start, setStart] = useState<Date>()
-    const [end, setEnd] = useState<Date>()
-    const [name, setName] = useState<string>()
-    const [steps, setSteps] = useState<string>()
+
+    const bucket = pickBucket(step, all)
+    const storedFilters = useBankFilterStore((s) =>
+        bucket === 'all' || bucket === 'mine' ? s[bucket] : s.byStep[bucket],
+    )
+    const filters = storedFilters ?? EMPTY_FILTERS
+    const setFilter = useBankFilterStore((s) => s.setFilter)
+    const clearFilter = useBankFilterStore((s) => s.clearFilter)
+
+    const regions = filters.regions ?? 0
+    const agents = filters.agents
+    const start = toDate(filters.start)
+    const end = toDate(filters.end)
+    const name = filters.name
+    const steps = filters.steps
     const [isMap, setMap] = useState<boolean>()
     const [mapData, setMapData] = useState<any[]>()
     const [location, setLocation] = useState<{
@@ -513,8 +530,17 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
 
     useEffect(() => {
         setCurrentPage(1) // reset first
+        setPageDocs([])
         fetchBanks(1)
-    }, [start, end, regions, agents, steps, name, pageSize])
+    }, [
+        filters.start,
+        filters.end,
+        filters.regions,
+        filters.agents,
+        filters.steps,
+        filters.name,
+        pageSize,
+    ])
 
     const onPaginationChange = async (page: number) => {
         if (page !== currentPage) {
@@ -564,25 +590,24 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
     }
 
     const onChangeRegion = async (id: number) => {
-        setRegions(id)
+        setFilter(bucket, { regions: id })
     }
 
     const onChangeAgent = async (id: string) => {
-        console.log('onChangeAgent: ', id)
-        setAgents(id)
+        setFilter(bucket, { agents: id })
     }
 
     const onChangeName = async (name: string) => {
-        setName(name)
+        setFilter(bucket, { name })
     }
 
-    const onChangeDate = async (start: Date, end: Date) => {
-        setStart(start)
-        setEnd(end)
+    const onChangeDate = async (start?: Date, end?: Date) => {
+        setFilter(bucket, { start: toIso(start), end: toIso(end) })
     }
     const onChangeStep = async (step: BankStep) => {
-        setSteps(step)
+        setFilter(bucket, { steps: step })
     }
+    const onResetFilters = () => clearFilter(bucket)
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
@@ -630,6 +655,11 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                     proprio={proprio}
                     t={t}
                     isMap={true}
+                    initialRegion={filters.regions}
+                    initialAgent={filters.agents}
+                    initialStart={start}
+                    initialEnd={end}
+                    onReset={onResetFilters}
                     onChangeRegion={onChangeRegion}
                     onChangeAgent={onChangeAgent}
                     onChangeDate={onChangeDate}
@@ -667,6 +697,11 @@ export function TableBank({ step, isAgent = false, all = false }: Props) {
                 <FilterMyBank
                     t={t}
                     all={all}
+                    initialStart={start}
+                    initialEnd={end}
+                    initialName={name}
+                    initialStep={steps}
+                    onReset={onResetFilters}
                     onChangeDate={onChangeDate}
                     onChangeStep={onChangeStep}
                     onChangeName={onChangeName}

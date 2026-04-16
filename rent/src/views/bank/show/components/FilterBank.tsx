@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DatePicker } from '@/components/ui'
+import { Button, DatePicker } from '@/components/ui'
 import Checkbox from '@/components/ui/Checkbox/Checkbox'
 import { Select } from '@/components/ui/Select'
 import { manageAuth } from '@/constants/roles.constant'
@@ -13,7 +13,7 @@ import {
     getDocs,
     orderBy,
 } from 'firebase/firestore'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 // Module-level cache so the agent list is fetched at most once per page
 // session, even if the filter component re-mounts.
@@ -67,9 +67,14 @@ interface Props {
     t: (key: string) => string
     onChangeRegion: (id: number) => void
     onChangeAgent?: (d: string) => void
-    onChangeDate?: (start: Date, end?: Date) => void
+    onChangeDate?: (start?: Date, end?: Date) => void
     onChangeMap?: (value: boolean) => void
     isMap?: boolean
+    initialRegion?: number
+    initialAgent?: string
+    initialStart?: Date
+    initialEnd?: Date
+    onReset?: () => void
 }
 
 function FilterBank({
@@ -81,14 +86,37 @@ function FilterBank({
     onChangeDate,
     isMap,
     onChangeMap = (value: any) => {},
+    initialRegion,
+    initialAgent,
+    initialStart,
+    initialEnd,
+    onReset,
 }: Props) {
     const [regions, setRegions] = useState<OptionType[]>([])
     const [allAgents, setAllAgents] = useState<Proprio[]>([])
 
-    const [selectedRegions, setSelectedRegions] = useState<number>()
-    const [selectedAgents, setSelectedAgents] = useState<string>()
-    const [start, setStart] = useState<Date>()
-    const [end, setEnd] = useState<Date>()
+    const [selectedRegions, setSelectedRegions] = useState<number | undefined>(
+        initialRegion,
+    )
+    const [selectedAgents, setSelectedAgents] = useState<string | undefined>(
+        initialAgent,
+    )
+    const [start, setStart] = useState<Date | undefined>(initialStart)
+    const [end, setEnd] = useState<Date | undefined>(initialEnd)
+
+    // Sync when store-backed initial values change (e.g. after a reset).
+    useEffect(() => {
+        setSelectedRegions(initialRegion)
+    }, [initialRegion])
+    useEffect(() => {
+        setSelectedAgents(initialAgent)
+    }, [initialAgent])
+    useEffect(() => {
+        setStart(initialStart)
+    }, [initialStart?.getTime()])
+    useEffect(() => {
+        setEnd(initialEnd)
+    }, [initialEnd?.getTime()])
 
     useEffect(() => {
         if (!authority?.length) return
@@ -105,14 +133,24 @@ function FilterBank({
         fetchData()
     }, [authority, proprio, t])
 
+    // Skip the first run so we don't clobber the store with undefined dates
+    // on mount when the parent just hydrated values from persistence.
+    const dateInit = useRef(false)
     useEffect(() => {
-        onChangeDate?.(start!, end)
+        if (!dateInit.current) {
+            dateInit.current = true
+            return
+        }
+        onChangeDate?.(start, end)
     }, [start, end])
 
-    // Was previously triggering on `setSelectedAgents` (a stable setter),
-    // so the parent never received agent updates. Track the value instead.
+    const agentInit = useRef(false)
     useEffect(() => {
-        if (selectedAgents && onChangeAgent) onChangeAgent(selectedAgents)
+        if (!agentInit.current) {
+            agentInit.current = true
+            return
+        }
+        if (onChangeAgent) onChangeAgent(selectedAgents as string)
     }, [selectedAgents])
 
     // Filter the cached agent list client-side instead of re-querying
@@ -132,6 +170,11 @@ function FilterBank({
         return opts
     }, [allAgents, selectedRegions, onChangeAgent])
 
+    const regionValue =
+        regions.find((r) => r.value === (selectedRegions ?? 0)) || null
+    const agentValue =
+        agents.find((a) => a.value === (selectedAgents as any)) || null
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded">
             {isMap && (
@@ -147,6 +190,7 @@ function FilterBank({
                 <Select
                     placeholder="Region"
                     options={regions}
+                    value={regionValue}
                     onChange={(options: OptionType) => {
                         if (!options) {
                             setSelectedRegions(0)
@@ -163,13 +207,14 @@ function FilterBank({
                 <Select
                     placeholder="Agent"
                     options={agents}
+                    value={agentValue}
                     onChange={(options: OptionType) => {
                         if (!options || options.value == undefined) {
                             setSelectedAgents(undefined)
                             onChangeAgent(undefined)
                             return
                         }
-                        setSelectedAgents(options.value)
+                        setSelectedAgents(options.value as string)
                         onChangeAgent(options.value.toString())
                     }}
                 />
@@ -179,28 +224,27 @@ function FilterBank({
                 <>
                     <DatePicker
                         placeholder="Date debut"
+                        value={start ?? null}
                         onChange={(date) => {
-                            setStart(undefined)
-                            if (!date) {
-                                setStart(undefined)
-                                return
-                            }
-                            setStart(new Date(date))
+                            setStart(date ? new Date(date) : undefined)
                         }}
                     />
 
                     <DatePicker
                         placeholder="Date fin"
+                        value={end ?? null}
                         onChange={(date) => {
-                            setEnd(undefined)
-                            if (!date) {
-                                setEnd(undefined)
-                                return
-                            }
-                            setEnd(new Date(date))
+                            setEnd(date ? new Date(date) : undefined)
                         }}
                     />
                 </>
+            )}
+            {onReset && (
+                <div>
+                    <Button size="sm" variant="plain" onClick={onReset}>
+                        {t('common.reset') || 'Reset'}
+                    </Button>
+                </div>
             )}
         </div>
     )
