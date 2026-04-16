@@ -61,8 +61,7 @@ function TaskManagerPopup() {
     const [selectedStep, setSelectedStep] = useState<any>()
     const navigate = useNavigate()
 
-    //
-
+    // For filtering dropdowns
     const [regions, setRegions] = useState<number>(0)
     const [agents, setAgents] = useState<string>()
     const [start, setStart] = useState<Date>()

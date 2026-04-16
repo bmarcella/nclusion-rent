@@ -822,9 +822,9 @@ export function TableBanks({ step, isAgent = false, all = false, id }: Props) {
                 onClose={onDialogClose}
             >
                 <div className="flex flex-col h-full bg-white dark:bg-gray-900 overflow-hidden">
-                    <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 via-white to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div className="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3 flex-wrap">
-                            <div className="h-10 w-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center">
                                 <HiHome className="text-xl" />
                             </div>
                             <div className="flex flex-col">
