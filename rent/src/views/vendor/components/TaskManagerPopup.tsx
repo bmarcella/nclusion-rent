@@ -31,6 +31,8 @@ import { fr } from 'date-fns/locale'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import UserName from '@/views/bank/show/components/UserName'
 import { useNavigate } from 'react-router-dom'
+import { HiOutlineClipboardList, HiOutlineSearch } from 'react-icons/hi'
+import { PiMinus, PiPlus } from 'react-icons/pi'
 
 const schema = z.object({
     renovStep: z.string().min(1, 'Required'),
@@ -59,8 +61,7 @@ function TaskManagerPopup() {
     const [selectedStep, setSelectedStep] = useState<any>()
     const navigate = useNavigate()
 
-    //
-
+    // For filtering dropdowns
     const [regions, setRegions] = useState<number>(0)
     const [agents, setAgents] = useState<string>()
     const [start, setStart] = useState<Date>()
@@ -224,10 +225,28 @@ function TaskManagerPopup() {
                     <span className="break-all">{message}</span>
                 </Alert>
             )}
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-6 w-full rounded p-4 ">
-                {/* Left - Form */}
-                <div className=" bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
-                    <form onSubmit={handleSubmit(onSubmitContrat)}>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
+                {/* Left - Form card */}
+                <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center">
+                                <HiOutlineClipboardList className="text-xl" />
+                            </div>
+                            <div>
+                                <p className="text-xs uppercase tracking-wider text-gray-500">
+                                    Nouveau contrat
+                                </p>
+                                <h5 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                    Détails du contrat
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                    <form
+                        onSubmit={handleSubmit(onSubmitContrat)}
+                        className="p-5"
+                    >
                         <div className="grid grid-cols-2 gap-4">
                             <FormItem
                                 label="Type Rénovation"
@@ -430,7 +449,24 @@ function TaskManagerPopup() {
                                 />
                             </FormItem>
                         </div>
-                        <div className="mt-6">
+                        <div className="mt-6 flex items-center justify-between gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div className="text-xs text-gray-500">
+                                {selectedtasks.length === 0 ? (
+                                    <span className="text-amber-600">
+                                        Sélectionnez au moins une bank
+                                    </span>
+                                ) : (
+                                    <span>
+                                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                                            {selectedtasks.length}
+                                        </span>{' '}
+                                        bank
+                                        {selectedtasks.length > 1 ? 's' : ''}{' '}
+                                        sélectionnée
+                                        {selectedtasks.length > 1 ? 's' : ''}
+                                    </span>
+                                )}
+                            </div>
                             <Button
                                 title={
                                     selectedtasks.length == 0
@@ -448,32 +484,48 @@ function TaskManagerPopup() {
                     </form>
                 </div>
 
-                {/* Right - Task List */}
+                {/* Right - Two bank panels */}
                 {renovStep && (
-                    <div className="grid grid-cols-2 md:grid-cols-2 gap-6 w-full  p-4 ">
-                        {/* Right - Task List */}
-                        <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
-                            <div className="flex justify-between items-center mb-4">
-                                <h6 className="text-md font-bold">
-                                    📋 Banks Sélectionées pour{' '}
-                                    {t('bank.' + selectedStep)}
-                                </h6>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Selected banks */}
+                        <div className="rounded-2xl bg-white dark:bg-gray-800 border border-emerald-100 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col">
+                            <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                                    <h6 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                        Sélectionnées
+                                    </h6>
+                                </div>
+                                <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full bg-emerald-500 text-white text-xs font-semibold">
+                                    {selectedtasks.length}
+                                </span>
                             </div>
-
-                            {/* Task List */}
-                            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                            <p className="px-4 pt-2 text-xs text-gray-500">
+                                Pour {t('bank.' + selectedStep)}
+                            </p>
+                            <div className="p-3 space-y-2 max-h-[420px] overflow-y-auto">
+                                {selectedtasks.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                                        <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+                                            <HiOutlineClipboardList className="text-xl" />
+                                        </div>
+                                        <p className="mt-2 text-xs text-gray-500">
+                                            Aucune bank sélectionnée
+                                        </p>
+                                    </div>
+                                )}
                                 {selectedtasks.map((bank) => (
                                     <div
                                         key={bank.id}
-                                        className="bg-white p-2 rounded-lg shadow border flex justify-between items-center"
+                                        className="group relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 hover:border-emerald-300 hover:shadow-sm transition-all"
                                     >
-                                        {/* Task content */}
-                                        <div className="flex-1">
-                                            <div className="mb-1">
-                                                <p className="font-semibold">
+                                        <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-emerald-500" />
+                                        <div className="flex items-start justify-between gap-3 pl-2">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
                                                     {bank.bankName}
                                                 </p>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-xs text-gray-500 mt-0.5">
                                                     Agent :{' '}
                                                     <UserName
                                                         userId={bank.createdBy}
@@ -486,53 +538,82 @@ function TaskManagerPopup() {
                                                         keyName="id"
                                                     />
                                                 </p>
+                                                <p className="text-xs text-gray-400 mt-1">
+                                                    Créé{' '}
+                                                    {formatRelative(
+                                                        bank.createdAt.toDate?.() ||
+                                                            bank.createdAt,
+                                                        new Date(),
+                                                        { locale: fr },
+                                                    )}
+                                                </p>
                                             </div>
-                                            {/* <p className="text-sm mb-1">{task.description}</p> */}
-                                            <p className="text-xs text-gray-500">
-                                                Crée{' '}
-                                                {formatRelative(
-                                                    bank.createdAt.toDate?.() ||
-                                                        bank.createdAt,
-                                                    new Date(),
-                                                    { locale: fr },
-                                                )}
-                                            </p>
+                                            <button
+                                                disabled={isSubmitting}
+                                                className="shrink-0 h-8 w-8 rounded-full bg-white hover:bg-red-50 text-red-500 border border-red-200 flex items-center justify-center transition-colors disabled:opacity-50"
+                                                title="Retirer"
+                                                onClick={() =>
+                                                    handleRemove(bank)
+                                                }
+                                            >
+                                                <PiMinus />
+                                            </button>
                                         </div>
-
-                                        {/* Plus Button */}
-                                        <button
-                                            disabled={isSubmitting}
-                                            className="ml-4 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
-                                            title="Add"
-                                            onClick={() => handleRemove(bank)} // Replace with your actual handler
-                                        >
-                                            -
-                                        </button>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
-                            <div className="flex justify-between items-center mb-2">
-                                <h6 className="text-md font-bold">
-                                    📋 Banks Prêt pour{' '}
-                                    {t('bank.' + selectedStep)}
-                                </h6>
-                            </div>
-                            <div className="flex justify-between items-center mb-2">
-                                <Input
-                                    type="text"
-                                    placeholder="Rechercher bank"
-                                    className="border rounded text-sm bg-white"
-                                    value={bankSearch}
-                                    onChange={(e) =>
-                                        setBankSearch(e.target.value)
+                        {/* Available banks */}
+                        <div className="rounded-2xl bg-white dark:bg-gray-800 border border-indigo-100 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col">
+                            <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                                    <h6 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                        Disponibles
+                                    </h6>
+                                </div>
+                                <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full bg-indigo-500 text-white text-xs font-semibold">
+                                    {
+                                        banks.filter((bank) =>
+                                            bank.bankName
+                                                ?.toLowerCase()
+                                                .includes(
+                                                    bankSearch.toLowerCase(),
+                                                ),
+                                        ).length
                                     }
-                                />
+                                </span>
                             </div>
-                            {/* Task List */}
-                            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                            <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                                <div className="relative">
+                                    <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <Input
+                                        type="text"
+                                        placeholder="Rechercher une bank..."
+                                        className="pl-9 text-sm"
+                                        value={bankSearch}
+                                        onChange={(e) =>
+                                            setBankSearch(e.target.value)
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <div className="p-3 space-y-2 max-h-[420px] overflow-y-auto">
+                                {banks.filter((bank) =>
+                                    bank.bankName
+                                        ?.toLowerCase()
+                                        .includes(bankSearch.toLowerCase()),
+                                ).length === 0 && (
+                                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                                        <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+                                            <HiOutlineSearch className="text-xl" />
+                                        </div>
+                                        <p className="mt-2 text-xs text-gray-500">
+                                            Aucune bank disponible
+                                        </p>
+                                    </div>
+                                )}
                                 {banks
                                     .filter((bank) =>
                                         bank.bankName
@@ -542,15 +623,15 @@ function TaskManagerPopup() {
                                     .map((bank) => (
                                         <div
                                             key={bank.id}
-                                            className="bg-white p-2 rounded-lg shadow border flex justify-between items-center"
+                                            className="group relative rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 hover:border-indigo-300 hover:shadow-sm transition-all"
                                         >
-                                            {/* Task content */}
-                                            <div className="flex-1">
-                                                <div className="mb-1">
-                                                    <h6 className="font-semibold">
+                                            <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-indigo-400" />
+                                            <div className="flex items-start justify-between gap-3 pl-2">
+                                                <div className="flex-1 min-w-0">
+                                                    <h6 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
                                                         {bank.bankName}
                                                     </h6>
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="text-xs text-gray-500 mt-0.5">
                                                         Agent :{' '}
                                                         <UserName
                                                             userId={
@@ -567,41 +648,37 @@ function TaskManagerPopup() {
                                                             keyName="id"
                                                         />
                                                     </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        Regions :{' '}
-                                                        {bank.id_region && (
-                                                            <span className="text-xs text-gray-500">
-                                                                {' '}
-                                                                {
-                                                                    getRegionsById(
-                                                                        bank.id_region,
-                                                                    )?.label
-                                                                }{' '}
-                                                            </span>
+                                                    {bank.id_region && (
+                                                        <p className="text-xs text-gray-500">
+                                                            Région :{' '}
+                                                            {
+                                                                getRegionsById(
+                                                                    bank.id_region,
+                                                                )?.label
+                                                            }
+                                                        </p>
+                                                    )}
+                                                    <p className="text-xs text-gray-400 mt-1">
+                                                        Créé{' '}
+                                                        {formatRelative(
+                                                            bank.createdAt.toDate?.() ||
+                                                                bank.createdAt,
+                                                            new Date(),
+                                                            { locale: fr },
                                                         )}
                                                     </p>
                                                 </div>
-                                                {/* <p className="text-sm mb-1">{task.description}</p> */}
-                                                <p className="text-xs text-gray-500">
-                                                    Crée{' '}
-                                                    {formatRelative(
-                                                        bank.createdAt.toDate?.() ||
-                                                            bank.createdAt,
-                                                        new Date(),
-                                                        { locale: fr },
-                                                    )}
-                                                </p>
+                                                <button
+                                                    disabled={isSubmitting}
+                                                    className="shrink-0 h-8 w-8 rounded-full bg-indigo-500 hover:bg-indigo-600 text-white flex items-center justify-center shadow-sm transition-colors disabled:opacity-50"
+                                                    title="Ajouter"
+                                                    onClick={() =>
+                                                        handleAdd(bank)
+                                                    }
+                                                >
+                                                    <PiPlus />
+                                                </button>
                                             </div>
-
-                                            {/* Plus Button */}
-                                            <button
-                                                disabled={isSubmitting}
-                                                className="ml-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
-                                                title="Add"
-                                                onClick={() => handleAdd(bank)} // Replace with your actual handler
-                                            >
-                                                +
-                                            </button>
                                         </div>
                                     ))}
                             </div>

@@ -45,11 +45,18 @@ import { PiCheck, PiEyeLight } from 'react-icons/pi'
 import YesOrNoPopup from '@/views/shared/YesOrNoPopup'
 import { useNavigate } from 'react-router-dom'
 import ShowListBankName from './ShowListBankName'
+import classNames from 'classnames'
+import { HiDocumentText } from 'react-icons/hi'
 
 const pageSizeOption = [
     { value: 100, label: '100 / page' },
     { value: 200, label: '200 / page' },
 ]
+
+type Option = {
+    value: number
+    label: string
+}
 
 function ShowContrat() {
     const [currentPage, setCurrentPage] = useState(1)
@@ -402,67 +409,190 @@ function ShowContrat() {
         }
     }
 
+    const activeCount = conts.filter((c) => !c.completed).length
+    const completedCount = conts.filter((c) => c.completed).length
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
-            <div className="w-full  mt-6  p-6 ">
-                <Table>
-                    <THead>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <Tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <Th
-                                            key={header.id}
-                                            colSpan={header.colSpan}
-                                        >
-                                            {flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext(),
-                                            )}
-                                        </Th>
-                                    )
-                                })}
-                            </Tr>
-                        ))}
-                    </THead>
-                    <TBody>
-                        {table.getRowModel().rows.map((row) => {
-                            return (
-                                <Tr key={row.id}>
-                                    {row.getVisibleCells().map((cell) => {
+        <div className="space-y-6 mt-6">
+            {/* KPI row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-green-100 dark:from-gray-800 dark:to-gray-900 border border-emerald-100 dark:border-gray-700 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-xs uppercase tracking-wider font-semibold text-emerald-700/80 dark:text-emerald-300">
+                                Total contrats
+                            </p>
+                            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 leading-none">
+                                {conts.length}
+                            </p>
+                            <p className="mt-2 text-xs text-gray-500">
+                                Contrats de rénovation
+                            </p>
+                        </div>
+                        <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/70 dark:bg-gray-700 text-emerald-600 shadow-sm">
+                            <HiDocumentText className="text-2xl" />
+                        </div>
+                    </div>
+                    <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-emerald-200/40 blur-2xl pointer-events-none" />
+                </div>
+
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-50 to-amber-100 dark:from-gray-800 dark:to-gray-900 border border-amber-100 dark:border-gray-700 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-xs uppercase tracking-wider font-semibold text-amber-700/80 dark:text-amber-300">
+                                En cours
+                            </p>
+                            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 leading-none">
+                                {activeCount}
+                            </p>
+                            <p className="mt-2 text-xs text-gray-500">
+                                Non terminés
+                            </p>
+                        </div>
+                        <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/70 dark:bg-gray-700 text-amber-600 shadow-sm">
+                            <span className="h-3 w-3 rounded-full bg-amber-500 animate-pulse" />
+                        </div>
+                    </div>
+                    <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-amber-200/40 blur-2xl pointer-events-none" />
+                </div>
+
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-800 dark:to-gray-900 border border-green-100 dark:border-gray-700 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-xs uppercase tracking-wider font-semibold text-green-700/80 dark:text-green-300">
+                                Terminés
+                            </p>
+                            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 leading-none">
+                                {completedCount}
+                            </p>
+                            <p className="mt-2 text-xs text-gray-500">
+                                Contrats clôturés
+                            </p>
+                        </div>
+                        <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-white/70 dark:bg-gray-700 text-green-600 shadow-sm">
+                            <PiCheck className="text-2xl" />
+                        </div>
+                    </div>
+                    <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-green-200/40 blur-2xl pointer-events-none" />
+                </div>
+            </div>
+
+            {/* Table card */}
+            <div className="w-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <Table className="min-w-full">
+                        <THead className="bg-gray-50 dark:bg-gray-900/60 sticky top-0 z-10">
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <Tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => {
                                         return (
-                                            <Td key={cell.id}>
+                                            <Th
+                                                key={header.id}
+                                                colSpan={header.colSpan}
+                                                className="text-xs uppercase tracking-wider font-semibold text-gray-600 dark:text-gray-300 py-3 px-4"
+                                            >
                                                 {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext(),
+                                                    header.column.columnDef
+                                                        .header,
+                                                    header.getContext(),
                                                 )}
-                                            </Td>
+                                            </Th>
                                         )
                                     })}
                                 </Tr>
-                            )
-                        })}
-                    </TBody>
-                </Table>
-                <div className="flex items-center justify-between mt-4">
-                    <Pagination
-                        pageSize={table.getState().pagination.pageSize}
-                        currentPage={table.getState().pagination.pageIndex + 1}
-                        total={totalData}
-                        onChange={onPaginationChange}
-                    />
-                    <div style={{ minWidth: 130 }}>
-                        <Select<Option>
-                            size="sm"
-                            isSearchable={false}
-                            value={pageSizeOption.filter(
-                                (option) =>
-                                    option.value ===
-                                    table.getState().pagination.pageSize,
+                            ))}
+                        </THead>
+                        <TBody>
+                            {table.getRowModel().rows.length === 0 && (
+                                <Tr>
+                                    <Td
+                                        colSpan={columns.length}
+                                        className="text-center py-16"
+                                    >
+                                        <div className="flex flex-col items-center gap-3 text-gray-400">
+                                            <div className="h-14 w-14 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-2xl">
+                                                <HiDocumentText />
+                                            </div>
+                                            <p className="text-sm font-medium text-gray-500">
+                                                Aucun contrat trouvé
+                                            </p>
+                                            <p className="text-xs text-gray-400">
+                                                Les contrats apparaîtront ici
+                                            </p>
+                                        </div>
+                                    </Td>
+                                </Tr>
                             )}
-                            options={pageSizeOption}
-                            onChange={(option) => onSelectChange(option?.value)}
+                            {table.getRowModel().rows.map((row, idx) => {
+                                return (
+                                    <Tr
+                                        key={row.id}
+                                        className={classNames(
+                                            'transition-colors',
+                                            idx % 2 === 1
+                                                ? 'bg-gray-50/40 dark:bg-gray-900/20'
+                                                : '',
+                                            'hover:bg-emerald-50/60 dark:hover:bg-emerald-900/20',
+                                        )}
+                                    >
+                                        {row.getVisibleCells().map((cell) => {
+                                            return (
+                                                <Td
+                                                    key={cell.id}
+                                                    className="py-3 px-4 align-middle"
+                                                >
+                                                    {flexRender(
+                                                        cell.column.columnDef
+                                                            .cell,
+                                                        cell.getContext(),
+                                                    )}
+                                                </Td>
+                                            )
+                                        })}
+                                    </Tr>
+                                )
+                            })}
+                        </TBody>
+                    </Table>
+                </div>
+
+                {/* Pagination bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40">
+                    <div className="text-xs text-gray-500">
+                        Page{' '}
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                            {table.getState().pagination.pageIndex + 1}
+                        </span>{' '}
+                        —{' '}
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                            {conts.length}
+                        </span>{' '}
+                        résultat{conts.length > 1 ? 's' : ''}
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Pagination
+                            pageSize={table.getState().pagination.pageSize}
+                            currentPage={
+                                table.getState().pagination.pageIndex + 1
+                            }
+                            total={totalData}
+                            onChange={onPaginationChange}
                         />
+                        <div style={{ minWidth: 130 }}>
+                            <Select<Option>
+                                size="sm"
+                                isSearchable={false}
+                                value={pageSizeOption.filter(
+                                    (option) =>
+                                        option.value ===
+                                        table.getState().pagination.pageSize,
+                                )}
+                                options={pageSizeOption}
+                                onChange={(option) =>
+                                    onSelectChange(option?.value)
+                                }
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

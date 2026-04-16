@@ -1,7 +1,8 @@
 import React from 'react'
-import { Bank } from '@/views/Entity'
+import { Bank, BankFormVersion } from '@/views/Entity'
 import { useTranslation } from 'react-i18next'
 import UserName from './UserName'
+import BankInfoV2 from './BankInfoV2'
 import { formatRelative } from 'date-fns/formatRelative'
 import { fr } from 'date-fns/locale/fr'
 import {
@@ -29,6 +30,10 @@ const BankInfo: React.FC<BankInfoProps> = ({ bank }) => {
                 {t('bank_not_found') || 'Banque non trouvée'}
             </h4>
         )
+    }
+
+    if (bank.version === BankFormVersion.V2) {
+        return <BankInfoV2 bank={bank} />
     }
 
     const getText = (value?: string | number | null) =>

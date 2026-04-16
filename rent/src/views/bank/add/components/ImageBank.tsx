@@ -114,6 +114,11 @@ const UploadImgBank = ({ bankId, isEdit = false, nextStep, userId }: Props) => {
 
     return (
         <div>
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                    {t('bank.imageInstruction') || 'Veuillez ajouter au moins 4 photos de la banque (façade, intérieur, environs, entrée).'}
+                </p>
+            </div>
             <div className="w-full bg-gray-50 dark:bg-gray-700 rounded p-4 shadow">
                 <Upload
                     multiple
