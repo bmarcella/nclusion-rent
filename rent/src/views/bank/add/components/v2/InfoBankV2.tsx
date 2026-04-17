@@ -155,12 +155,19 @@ function InfoBankV2({
     }
 
     useEffect(() => {
-        getPrecisePosition().then((position) => {
-            const { latitude, longitude } = position.coords
-            setLocation({ lat: latitude, lng: longitude })
-        }).catch((err) => {
-            onError(`Error: ${err.message}`)
-        })
+        if (isEdit && defaultValues?.location) {
+            setLocation({
+                lat: defaultValues.location.lat,
+                lng: defaultValues.location.lng,
+            })
+        } else {
+            getPrecisePosition().then((position) => {
+                const { latitude, longitude } = position.coords
+                setLocation({ lat: latitude, lng: longitude })
+            }).catch((err) => {
+                onError(`Error: ${err.message}`)
+            })
+        }
 
 
         const landlordId = isEdit
@@ -323,68 +330,70 @@ function InfoBankV2({
     return (
         <Form onSubmit={handleSubmit(onSubmitInfo) as any}>
             <div className="flex flex-col gap-6">
-                {/* GPS Location Map */}
-                <Card bordered>
-                    <div
-                        className="flex items-center justify-between cursor-pointer"
-                        onClick={() => setMapOpen(!mapOpen)}
-                    >
-                        <h6  className="text-gray-900 dark:text-gray-100">
-                            {t('bank.location')} {'*'} {location ? `(${location.lat.toFixed(5)}, ${location.lng.toFixed(5)})` : ''}
-                        </h6>
-                        <motion.span
-                            animate={{ rotate: mapOpen ? 180 : 0 }}
-                            transition={{ duration: 0.2 }}
+                {/* GPS Location Map — hidden in edit mode */}
+                {!isEdit && (
+                    <Card bordered>
+                        <div
+                            className="flex items-center justify-between cursor-pointer"
+                            onClick={() => setMapOpen(!mapOpen)}
                         >
-                            <HiChevronDown className="text-lg" />
-                        </motion.span>
-                    </div>
-                    {mapOpen && (
-                        <div className="mt-4">
-                            {location ? (
-                                <GoogleMapApp position={location} streetView={streetView} tilt3d={tilt3d} />
-                            ) : (
-                                <div className="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-700 rounded">
-                                    <span className="text-gray-400">
-                                        {t('bank.capturingPosition') || 'Capturing position...'}
-                                    </span>
-                                </div>
-                            )}
-                            <div className="flex items-center justify-end gap-3 mt-3">
-                                <label className="flex items-center gap-1.5 cursor-pointer text-sm text-gray-600 dark:text-gray-400">
-                                    <Checkbox
-                                        checked={tilt3d}
-                                        onChange={(checked) => setTilt3d(checked)}
-                                    />
-                                    3D
-                                </label>
-                                {streetViewAvailable && (
+                            <h6  className="text-gray-900 dark:text-gray-100">
+                                {t('bank.location')} {'*'} {location ? `(${location.lat.toFixed(5)}, ${location.lng.toFixed(5)})` : ''}
+                            </h6>
+                            <motion.span
+                                animate={{ rotate: mapOpen ? 180 : 0 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <HiChevronDown className="text-lg" />
+                            </motion.span>
+                        </div>
+                        {mapOpen && (
+                            <div className="mt-4">
+                                {location ? (
+                                    <GoogleMapApp position={location} streetView={streetView} tilt3d={tilt3d} />
+                                ) : (
+                                    <div className="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-700 rounded">
+                                        <span className="text-gray-400">
+                                            {t('bank.capturingPosition') || 'Capturing position...'}
+                                        </span>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-end gap-3 mt-3">
+                                    <label className="flex items-center gap-1.5 cursor-pointer text-sm text-gray-600 dark:text-gray-400">
+                                        <Checkbox
+                                            checked={tilt3d}
+                                            onChange={(checked) => setTilt3d(checked)}
+                                        />
+                                        3D
+                                    </label>
+                                    {streetViewAvailable && (
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="plain"
+                                            icon={streetView ? <HiMap /> : <HiEye />}
+                                            onClick={() => setStreetView(!streetView)}
+                                        >
+                                            {streetView
+                                                ? (t('bank.mapView') || 'Carte')
+                                                : (t('bank.streetView') || 'Street View')}
+                                        </Button>
+                                    )}
                                     <Button
                                         type="button"
                                         size="sm"
                                         variant="plain"
-                                        icon={streetView ? <HiMap /> : <HiEye />}
-                                        onClick={() => setStreetView(!streetView)}
+                                        loading={recapturing}
+                                        icon={<HiRefresh />}
+                                        onClick={recapturePosition}
                                     >
-                                        {streetView
-                                            ? (t('bank.mapView') || 'Carte')
-                                            : (t('bank.streetView') || 'Street View')}
+                                        {t('bank.recapturePosition') || 'Recapturer la position'}
                                     </Button>
-                                )}
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="plain"
-                                    loading={recapturing}
-                                    icon={<HiRefresh />}
-                                    onClick={recapturePosition}
-                                >
-                                    {t('bank.recapturePosition') || 'Recapturer la position'}
-                                </Button>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </Card>
+                        )}
+                    </Card>
+                )}
 
                 {/* Location Name */}
                 <Card bordered>

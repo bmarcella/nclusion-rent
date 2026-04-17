@@ -23,6 +23,9 @@ import StepHistory from './components/StepHistory'
 import GoogleMapApp from './Map'
 import PrintableMap from './PrintableMap'
 import GoogleMapAppV2 from './MapV2'
+import DatePicker from '@/components/ui/DatePicker'
+import { updateBankById } from '@/services/firebase/BankService'
+import { Notification, toast } from '@/components/ui'
 
 interface Props {
     bankId: string
@@ -36,6 +39,7 @@ interface Props {
     genTasks?: () => void
     bank?: Bank
     userId: string
+    onBankUpdate?: (patch: Partial<Bank>) => void
 }
 
 const SubmissionReview = ({
@@ -50,6 +54,7 @@ const SubmissionReview = ({
     onContratOk,
     bank,
     userId,
+    onBankUpdate,
 }: Props) => {
     const contentRef = useRef<HTMLDivElement>(null)
     const reactToPrintFn = useReactToPrint({ contentRef })
@@ -158,6 +163,68 @@ const SubmissionReview = ({
         }
         return false
     }
+    const canEditContractTerms =
+        bank?.step === 'bankSteps.needContract' &&
+        (role === 'assist_coordonator' ||
+            role === 'coordonator' ||
+            role === 'admin')
+
+    const [editedFinalRent, setEditedFinalRent] = useState<string>('')
+    const [editedDate, setEditedDate] = useState<Date | null>(null)
+    const [savingTerms, setSavingTerms] = useState(false)
+
+    useEffect(() => {
+        if (bank) {
+            setEditedFinalRent(
+                bank.final_rentCost != null ? String(bank.final_rentCost) : '',
+            )
+            setEditedDate(bank.date ? new Date(bank.date) : null)
+        }
+    }, [bank?.id, bank?.final_rentCost, bank?.date])
+
+    const saveContractTerms = async () => {
+        if (!bank?.id) return
+        const parsedRent = Number(editedFinalRent)
+        if (!editedFinalRent || Number.isNaN(parsedRent) || parsedRent < 0) {
+            toast.push(
+                <Notification type="danger" title="Valeur invalide">
+                    Le montant final doit être un nombre positif.
+                </Notification>,
+            )
+            return
+        }
+        if (!editedDate) {
+            toast.push(
+                <Notification type="danger" title="Date requise">
+                    Veuillez choisir une date.
+                </Notification>,
+            )
+            return
+        }
+        const patch: Partial<Bank> = {
+            final_rentCost: parsedRent,
+            date: editedDate.toISOString(),
+        }
+        setSavingTerms(true)
+        try {
+            await updateBankById(bank.id, patch)
+            onBankUpdate?.(patch)
+            toast.push(
+                <Notification type="success" title="Enregistré">
+                    Les termes du contrat ont été mis à jour.
+                </Notification>,
+            )
+        } catch (err: any) {
+            toast.push(
+                <Notification type="danger" title="Erreur">
+                    {err?.message || 'Impossible de sauvegarder.'}
+                </Notification>,
+            )
+        } finally {
+            setSavingTerms(false)
+        }
+    }
+
     const canSignedContract = () => {
         if (
             bank &&
@@ -325,6 +392,52 @@ const SubmissionReview = ({
             )}
 
             <div ref={contentRef} className="p-6 space-y-6">
+
+                {canEditContractTerms && !pdf && (
+                    <div className="rounded-2xl bg-white border border-pink-200 p-5 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4">
+                            <h3 className="text-lg font-bold text-pink-600">
+                                Termes du contrat
+                            </h3>
+                            <span className="text-xs text-gray-500">
+                                (modifiables à l'étape {t('bank.bankSteps.needContract')})
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Loyer final (HTG)
+                                </label>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={editedFinalRent}
+                                    onChange={(e: any) =>
+                                        setEditedFinalRent(e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Date
+                                </label>
+                                <DatePicker
+                                    value={editedDate}
+                                    onChange={(d) => setEditedDate(d)}
+                                />
+                            </div>
+                            <div>
+                                <Button
+                                    variant="solid"
+                                    loading={savingTerms}
+                                    onClick={saveContractTerms}
+                                >
+                                    Enregistrer
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {bank && (contrat || bank.step == 'bankSteps.needContract') && (
                     <LeaseContractForm
