@@ -4,6 +4,7 @@ import { getBankImages, getLordImages } from '@/services/firebase/BankService'
 import { useSessionUser } from '@/store/authStore'
 import CommentsBank from '@/views/bank/add/components/CommentsBank'
 import BankInfo from '@/views/bank/show/components/BankInfo'
+import RentCostHistory from '@/views/bank/show/components/RentCostHistory'
 import ImageGallery, { BankImage } from '@/views/bank/show/components/ImageGallery'
 import ImageLordComp, { LordImage } from '@/views/bank/show/components/ImageLord'
 import StepHistory from '@/views/bank/show/components/StepHistory'
@@ -161,6 +162,15 @@ function BankReqView({ bank }: Props) {
                             </div>
                             <div className="p-4">
                                 {bank && <BankInfo bank={bank} />}
+                                {bank?.rentCostHistory &&
+                                    bank.rentCostHistory.length > 0 && (
+                                        <div className="mt-6 pt-5 border-t border-gray-200">
+                                            <RentCostHistory
+                                                history={bank.rentCostHistory}
+                                                compact
+                                            />
+                                        </div>
+                                    )}
                             </div>
                         </div>
                     </div>
