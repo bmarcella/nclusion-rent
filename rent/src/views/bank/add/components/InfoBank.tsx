@@ -112,31 +112,122 @@ export const loadSingleLandlord = async (landlordId: string) => {
 }
 
 
+// crypto.getRandomValues is limited to 65536 bytes per call — fill in chunks.
+const fillRandom = (buf: Uint8Array): Uint8Array => {
+    const MAX = 65536
+    for (let i = 0; i < buf.length; i += MAX) {
+        crypto.getRandomValues(buf.subarray(i, Math.min(i + MAX, buf.length)))
+    }
+    return buf
+}
+
+const round2 = (n: number) => Math.round(n * 100) / 100
+
 export const runSpeedTest = async (
     onProgress?: (phase: 'download' | 'upload') => void,
 ): Promise<{ download: number; upload: number }> => {
-    // Download test: fetch 5MB from Cloudflare
+    const DL_WINDOW_MS = 5000
+    const DL_PARALLEL = 4
+    const DL_CHUNK_BYTES = 50_000_000 // request is large; we abort early via time window
+    const UL_WINDOW_MS = 4000
+    const UL_PARALLEL = 2
+    const UL_CHUNK_BYTES = 2_000_000 // each POST body; we POST repeatedly until the window closes
+
+    // ---------------- Download ----------------
     onProgress?.('download')
-    const downloadBytes = 5_000_000
+
+    // Warmup so TLS/TCP slow-start doesn't pollute the measurement.
+    try {
+        const warm = await fetch(
+            `https://speed.cloudflare.com/__down?bytes=1000000&cachebust=${Date.now()}`,
+        )
+        await warm.arrayBuffer()
+    } catch {
+        /* ignore */
+    }
+
+    const dlAbort = new AbortController()
     const dlStart = performance.now()
-    const dlResponse = await fetch(
-        `https://speed.cloudflare.com/__down?bytes=${downloadBytes}&cachebust=${Date.now()}`,
-    )
-    await dlResponse.arrayBuffer()
-    const dlTime = (performance.now() - dlStart) / 1000
-    const downloadMbps = Math.round(((downloadBytes * 8) / dlTime / 1_000_000) * 100) / 100
-    // Upload test: send 2MB to Cloudflare
-    onProgress?.('upload')
-    const uploadBytes = 2_000_000
-    const uploadData = new ArrayBuffer(uploadBytes)
-    const ulStart = performance.now()
-    await fetch('https://speed.cloudflare.com/__up', {
-        method: 'POST',
-        body: uploadData,
+    let dlBytes = 0
+
+    const dlWorkers = Array.from({ length: DL_PARALLEL }, async () => {
+        try {
+            const res = await fetch(
+                `https://speed.cloudflare.com/__down?bytes=${DL_CHUNK_BYTES}&cachebust=${Date.now()}-${Math.random()}`,
+                { signal: dlAbort.signal },
+            )
+            const reader = res.body?.getReader()
+            if (!reader) {
+                // Streaming not available — fall back to full-buffer read.
+                const buf = await res.arrayBuffer()
+                dlBytes += buf.byteLength
+                return
+            }
+            while (performance.now() - dlStart < DL_WINDOW_MS) {
+                const { value, done } = await reader.read()
+                if (done) break
+                if (value) dlBytes += value.byteLength
+            }
+            try {
+                await reader.cancel()
+            } catch {
+                /* ignore */
+            }
+        } catch {
+            /* aborted or network error */
+        }
     })
-    const ulTime = (performance.now() - ulStart) / 1000
-    const uploadMbps = Math.round(((uploadBytes * 8) / ulTime / 1_000_000) * 100) / 100
-    return { download: downloadMbps, upload: uploadMbps };
+
+    const dlTimer = setTimeout(() => dlAbort.abort(), DL_WINDOW_MS + 300)
+    await Promise.all(dlWorkers)
+    clearTimeout(dlTimer)
+
+    const dlSeconds = Math.max((performance.now() - dlStart) / 1000, 0.001)
+    const downloadMbps = round2((dlBytes * 8) / dlSeconds / 1_000_000)
+
+    // ---------------- Upload ----------------
+    onProgress?.('upload')
+
+    // Fill with random bytes so the path can't compress zeros on the wire.
+    const payload = fillRandom(new Uint8Array(UL_CHUNK_BYTES))
+
+    // Warmup the upload path too.
+    try {
+        await fetch('https://speed.cloudflare.com/__up', {
+            method: 'POST',
+            body: fillRandom(new Uint8Array(500_000)) as BodyInit,
+        })
+    } catch {
+        /* ignore */
+    }
+
+    const ulAbort = new AbortController()
+    const ulStart = performance.now()
+    let ulBytes = 0
+
+    const ulWorkers = Array.from({ length: UL_PARALLEL }, async () => {
+        while (performance.now() - ulStart < UL_WINDOW_MS) {
+            try {
+                await fetch('https://speed.cloudflare.com/__up', {
+                    method: 'POST',
+                    body: payload as BodyInit,
+                    signal: ulAbort.signal,
+                })
+                ulBytes += payload.byteLength
+            } catch {
+                break
+            }
+        }
+    })
+
+    const ulTimer = setTimeout(() => ulAbort.abort(), UL_WINDOW_MS + 500)
+    await Promise.all(ulWorkers)
+    clearTimeout(ulTimer)
+
+    const ulSeconds = Math.max((performance.now() - ulStart) / 1000, 0.001)
+    const uploadMbps = round2((ulBytes * 8) / ulSeconds / 1_000_000)
+
+    return { download: downloadMbps, upload: uploadMbps }
 }
 
 export const getPrecisePosition = (
