@@ -8,7 +8,7 @@ import ImageGallery, { BankImage } from './components/ImageGallery'
 import ImageLordComp, { LordImage } from './components/ImageLord'
 import BankInfo from './components/BankInfo'
 import Rejected from './reject/Rejected'
-import { Bank, ListBankStepsDetails } from '@/views/Entity'
+import { Bank, ListBankStepsDetails, RentCostChange } from '@/views/Entity'
 import { useReactToPrint } from 'react-to-print'
 import Input from '@/components/ui/Input'
 import Checkbox from '@/components/ui/Checkbox'
@@ -26,6 +26,7 @@ import GoogleMapAppV2 from './MapV2'
 import DatePicker from '@/components/ui/DatePicker'
 import { updateBankById } from '@/services/firebase/BankService'
 import { Notification, toast } from '@/components/ui'
+import RentCostHistory from './components/RentCostHistory'
 
 interface Props {
     bankId: string
@@ -201,10 +202,42 @@ const SubmissionReview = ({
             )
             return
         }
+        const newDateIso = editedDate.toISOString()
+        const prevRent =
+            bank.final_rentCost != null ? Number(bank.final_rentCost) : undefined
+        const prevDate = bank.date
+        const rentChanged = prevRent !== parsedRent
+        const dateChanged = prevDate !== newDateIso
+
+        if (!rentChanged && !dateChanged) {
+            toast.push(
+                <Notification type="info" title="Rien à changer">
+                    Aucune modification détectée.
+                </Notification>,
+            )
+            return
+        }
+
         const patch: Partial<Bank> = {
             final_rentCost: parsedRent,
-            date: editedDate.toISOString(),
+            date: newDateIso,
         }
+
+        if (rentChanged) {
+            const entry: RentCostChange = {
+                from: prevRent,
+                to: parsedRent,
+                dateFrom: prevDate,
+                dateTo: newDateIso,
+                by: userId,
+                at: new Date(),
+            }
+            const prevHistory = Array.isArray(bank.rentCostHistory)
+                ? bank.rentCostHistory
+                : []
+            patch.rentCostHistory = [entry, ...prevHistory]
+        }
+
         setSavingTerms(true)
         try {
             await updateBankById(bank.id, patch)
@@ -436,6 +469,8 @@ const SubmissionReview = ({
                                 </Button>
                             </div>
                         </div>
+
+                        <RentCostHistory history={bank?.rentCostHistory} />
                     </div>
                 )}
 
