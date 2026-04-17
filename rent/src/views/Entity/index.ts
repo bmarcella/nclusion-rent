@@ -444,6 +444,15 @@ export interface SupervisorReview {
     reviewedAt?: Date
 }
 
+export interface RentCostChange {
+    from?: number | string
+    to: number | string
+    dateFrom?: string
+    dateTo?: string
+    by: string
+    at: Date | any
+}
+
 export interface Bank {
     version?: BankFormVersion
     id?: string
@@ -495,6 +504,7 @@ export interface Bank {
         status?: FinalDecisionStatus
         reason_why?: string
     }
+    rentCostHistory?: RentCostChange[]
     // ── V1 fields ──
     rentDetails?: {
         paymentMethod?: PaymentMethod[]
