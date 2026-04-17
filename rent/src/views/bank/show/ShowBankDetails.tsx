@@ -268,6 +268,11 @@ export const ShowBankDetailsBase = () => {
                     onChangeState={(comp, name) => {
                         openDialog(comp, name)
                     }}
+                    onBankUpdate={(patch) =>
+                        setBank((prev) =>
+                            prev ? ({ ...prev, ...patch } as Bank) : prev,
+                        )
+                    }
                 />
             )}
 

@@ -542,6 +542,7 @@ export function TableBanks({ step, isAgent = false, all = false, id }: Props) {
         table.setPageSize(Number(value))
         setPageSize(Number(value))
     }
+
     const onChangeBank = (payload: any, step: number) => {
         if (step != 1) {
             setCBank((prev: any) => {
@@ -596,6 +597,7 @@ export function TableBanks({ step, isAgent = false, all = false, id }: Props) {
         setStart(start)
         setEnd(end)
     }
+    
     const onChangeStep = async (step: BankStep) => {
         setSteps(step)
     }
