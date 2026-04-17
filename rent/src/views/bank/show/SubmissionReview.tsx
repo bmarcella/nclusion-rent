@@ -394,7 +394,7 @@ const SubmissionReview = ({
             <div ref={contentRef} className="p-6 space-y-6">
 
                 {canEditContractTerms && !pdf && (
-                    <div className="rounded-2xl bg-white border border-pink-200 p-5 shadow-sm">
+                    <div className="rounded-2xl bg-white p-5">
                         <div className="flex items-center gap-2 mb-4">
                             <h3 className="text-lg font-bold text-pink-600">
                                 Termes du contrat
